@@ -1,0 +1,74 @@
+1. Read - Chapter 5 of Robert and Casella
+ We will only cover stochastic gradient methods on a light level. 
+Simulated Annealing we will return to later 
+Note a typo on page 158 in the formula for theta_1 hat.  The +x_4 should be in the numerator of the first curly braces, not the denominator.
+
+1a - Explore
+Here are the Java applets on optimization methods.  Security wasn't quite as tight on my office computer and after unblocking the plug-in, I just got another confirmation window before it worked.
+
+http://web.engr.illinois.edu/~heath/iem/optimization/GoldenSection/
+
+http://web.engr.illinois.edu/~heath/iem/optimization/SuccessiveParabolic/
+
+http://web.engr.illinois.edu/~heath/iem/optimization/Newton_Opt/
+
+
+2. Preview - EM Algorithm
+ Take a look at the Expectation-Maximization Algorithm.  You can check it out in your book, but I found the first set of notes below to be a bit clearer. 
+
+http://www.stat.ucla.edu/~yuille/courses/stat153/emtutorial.pdf 
+
+http://escholarship.org/uc/item/1rb70972#page-4 
+
+Here is a mixture-models applet - give it a try.   And see if you can get it to fail (I did). 
+http://www.cs.cmu.edu/~alad/em/
+
+4. Review - Module 5 R Code
+Notes5JustR.R  
+
+
+<<Likelihood>>=
+like=function(counts,p)
+{
+  ndays=dim(counts)[1]
+  ntimes=dim(counts)[2]
+slotlik=matrix(nrow=ndays,ncol=ntimes,data=rep(1,ndays*ntimes))
+for(i in 1:ndays)
+{for(j in 1:ntimes){if(!is.na(counts[i,j,1]))
+  slotlik[i,j]=log(100000*dmultinom(counts[i,j,],sum(counts[i,j,]),p))}}
+return(exp(sum(as.vector(slotlik))))
+}
+
+##Expectation
+## given a p, fill in the missing counts
+estep=function(obscounts,p)
+{
+  completecounts=obscounts
+  ndays=dim(obscounts)[1]
+  ntimes=dim(obscounts)[2]
+  ntemp=matrix(nrow=ndays, ncol=ntimes)
+  ##find the expected n and fill in the missing individual counts using multinomial
+  for(i in 1:ndays){for(j in 1:ntimes){ 
+    missing=is.na(obscounts[i,j,])
+    if(sum(missing)<8){ntemp[i,j]=round(sum(obscounts[i,j,],na.rm=T)/sum(p[!missing]),0)
+  z=rmultinom(1,ntemp[i,j]-sum(obscounts[i,j,],na.rm=T),p[missing])
+  completecounts[i,j,]=replace(completecounts[i,j,],missing,z)}
+  }}
+  return(completecounts)
+}
+
+mstep=function(completecounts)
+{
+  p=vector(length=dim(completecounts)[3])
+  for(k in 1:length(p)){p[k]=sum(completecounts[,,k],na.rm=T)}
+  return(p/sum(p))
+}
+
+obscounts=countarray
+p=pinit
+firstit=estep(countarray,pinit)
+firstp=mstep(firstit)
+secondit=estep(countarray,firstp)
+secondp=mstep(secondit)
+like(firstit[3:4,,],firstp)
+like(secondit[3:4,,],secondp)
