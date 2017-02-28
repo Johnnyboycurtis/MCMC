@@ -1,1 +1,2 @@
 # MCMC 
+Notes for MCMC
