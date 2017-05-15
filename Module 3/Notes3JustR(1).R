@@ -108,8 +108,10 @@ lines(cumsum(y>v)/1:Nsim, type="l", col=3)
 
 ## Resampling
 Nsim=10^4
-x=rexp(Nsim)*(2*rbinom(Nsim,1,.5)-1)
-w=dnorm(x,0,2)/(.5*dexp(abs(x)))
+x=rexp(Nsim)*(2*rbinom(Nsim,1,.5)-1) ## getting 1s and -1s needed to make exponential a double exponential
+## dexp(abs(x)) is the density of the abs(x) which is density of exp doubled, so you multiply it by 1/2
+## f = normal, g = double exponential, w = f/g
+w=dnorm(x,0,2)/(.5*dexp(abs(x)))  
 y=sample(x,Nsim, prob=w, replace=T)
 plot(density(x),lwd=3)
 lines(density(x, weights=w/sum(w)),col=2,lwd=3)
@@ -119,14 +121,14 @@ lines(density(y),col=3,lwd=3)
 f=function(x){(1+x^2/2)^(-1.5)*exp(-.5*(1-x)^2)}
 curve(f(x),-2,4)
 Nsim=10^4
-x=rt(Nsim,2)+.4
-w=f(x)/dt(x-.4,2)
-w=w/sum(w)
-plot(density(x),xlim=c(-4,4),ylim=c(0,.75))
-lines(density(x,weights=w),col=2)
+x=rt(Nsim,2)+.4 ## to generate from shifted t-distribution 
+w=f(x)/dt(x-.4,2) ## weight with target in numerator, shifted t in denominator
+w=w/sum(w) ## normalize the weights; f(x) is not a density so need to normalize weights
+plot(density(x),xlim=c(-4,4),ylim=c(0,2) ## shifted t vals)
+lines(density(x,weights=w),col=2) ## weighted to look like a Normal dist
 myseq=seq(-10,10,by=.1)
-lines(myseq,f(myseq),col=3)
-postmean=sum(x*w)
+lines(myseq,f(myseq),col=3) ## f(x) evaluated at a sequence of vals
+postmean=sum(x*w) ## expected value of x (x = theta)
 postmean
 
 ## Importance Sampling for normal/t Bayes model
@@ -149,5 +151,6 @@ Nsim=10^6
 x=rnorm(Nsim)
 w=dcauchy(x)/dnorm(x)
 boxplot(w/sum(w))
-plot(cumsum(w*x)/cumsum(w),type="l")
+#plot(cumsum(w*x)/cumsum(w),type="l")
+plot(cumsum(w * (x > 0) ) / cumsum(w), type = "l")
 abline(a=0,b=0,col=2)

@@ -1,0 +1,129 @@
+---
+title: "Intro"
+author: "Jonathan Navarrete"
+date: "April 15, 2017"
+output: pdf_document
+---
+
+## Introduction to Monte Carlo
+
+Monte Carlo methods are methods for generating random variables directly or indirectly from target distributions. We generate random variables to estimate p-values or parameters.
+
+Applications of monte carlo methods are in financial engineering and Bayesian computation.
+
+
+
+## An example of simulation: Gambler's ruin
+
+Consider two gamblers, persons A and B, who start to gamble in a zero-sum game with stakes \$x and \$b-x, respectively.
+At each round, each gambler puts up a stake of \$h. The probability that A wins a round is *p*, while the probability that B wins a round is *q = 1 - p*. We wish to compute the probability that A ultimately wins the game. Let us define $v(x,t)$ to the probability that A ultimately wins the game starting with capital \$x on or before the *t*th round. Similarly, $u(x,t)$ is the probability that B wins the game with their stake of $b-x$ on or before the *t*th round. 
+
+Each of three variables v,u, and w is bounded below by zero and above by 1. Moreover, u and v are nondecreasing in t. w is nonincreasing in t. Thus we can take limits of each of these as t goes to infinity. We shall call these limits v(x), u(x), and w(x), respectively.
+
+
+Gambler's ruin (fallacy) is the belief that a certain event is $more$ likely to occur given the past history. In an experiment where there is a coin toss with probability of seeing heads as 0.5. Each flip of a coin has the same probability of landing on heads regardless of what the previous lands were. 
+
+Imagine a gambler on a roulete table. Say the gambler starts with \$10. In this game, the gambler "wins" when they earn a total of \$20 (that is they must play the game until they've earned $10 on top of their starting \$10). For each game, there is a probability of winning, p = 0.473. Then, can we  see how many turns until he/she wins (or loses)?
+
+
+
+```{r}
+N = 200
+income = 10
+games = 2*(runif(N)<0.473) - 1 ## generate 1s and -1s
+out = cumsum(games) + income
+
+plot(1:N, out, type = "l", xlab = "games", ylab = "income")
+abline(h = 0, col = "red")
+
+
+
+
+
+
+GamblersRuin = function(i){
+  income = 10
+  n = 0
+  while(!(income %in% c(0,20))){
+    n = n + 1 ## number of runs till ruin or success
+    x = runif(1)
+    if(x <= 0.473){
+      income = income + 1
+    } else{
+      income = income - 1
+    }
+  }
+  return(c(n,income))
+}
+
+GamblersRuin()
+
+out = lapply(X = 1:100, FUN = GamblersRuin)
+out = do.call(rbind, out)
+
+## percentage of success
+sum(out[,2] == 20 )
+
+
+
+```
+
+
+
+
+
+## Bayesian Example
+Here is an example taken from $Bayesian\ Ideas\ and\ Data\ Analysis$ by Christensen et al.
+
+$$
+y | \theta \sim Bin(2430, \theta)
+\
+and 
+\
+\theta \sim Beta(12.05, 116.06)
+\
+$$
+This is a beta-binomial problem. There is a beta prior distribution on $\theta$. Beta is conjugate to the binomial distribution (see: <https://en.wikipedia.org/wiki/Conjugate_prior#Discrete_distributions>). Bayesian anaysis uses prior information combined with observed data to update a probability distribution, posterior distribution, from which we can obtain a probability value. The new probability distribution, posterior, describes knowledge about the unkown parameter $\theta$ from historical beliefs (e.g. previous experiments, reports, etc.) and current observed data.
+
+$$
+y | \theta \sim Bin(n, \theta)
+\
+and
+\
+\theta \sim Beta(a, b)
+$$ 
+
+The resulting posterior distribution is then
+$$
+\theta | y \sim Beta(y + a, n -y + b)
+$$
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We can now simulate the posterior distribution
+
+```{r cars, fig.height=4, fig.width=5, fig.align='center'}
+N = 10^4
+set.seed(123)
+x = rbeta(n = N, shape1 = 219 + 12.05, shape2 = 2430 - 219 + 116.06)
+d = density(x)
+hist(x = x, probability = TRUE, 
+      main = "Beta Posterior Distribution",
+     xlab = "x (posterior values)", ylab = "Density",
+     ylim = c(0,80))
+lines(x = d$x , y = d$y, type = "l", col = 2)
+
+print("Median: ")
+print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))
+
+
+```
+
+## Conclusion
+
+We can tell the VP that the true probability lies between 7.9% and 10.2%, with median probability of 9%.
