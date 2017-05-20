@@ -1,0 +1,65 @@
+---
+title: "EM Algorithm"
+author: "Jonathan Navarrete"
+date: "May 19, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## EM Algorithm is difficult to understand
+
+
+
+
+```{r cars}
+
+set.seed(123)
+## set the parameters 
+N = 100
+alpha = 36
+beta = 304
+M = 10 ## initial missing count
+
+## generate some failure times and sort them
+s = sort(rexp(n = N, rate = 1)) ## arbitrary rate
+
+s = s[1:(N - M)] ## remove (M) missing records
+
+k = 50
+posteriorTheta = numeric(100)
+T_matrix = matrix(data = 0, nrow = (N-M), ncol = k)
+for(i in 1:100){
+  ## 1. sample from posterior
+  theta = rgamma(n = 1, shape = alpha + sum(s), rate = beta + N )
+  
+  for(j in 1:k){
+    temp <- rexp(n = 1000, rate = theta)
+    
+    T_matrix[,j] <- temp[temp > max(s)][(N-M)] ## note the condition in #2
+    m = colMeans(T_matrix, na.rm = TRUE)
+    T_hat = mean(m)
+  }
+  betaStar = beta + T_hat
+  alphaStar = alpha + N
+  
+  posteriorTheta[i] <- rgamma(n = 1, shape = alphaStar, rate = betaStar )
+  
+}
+
+
+hist(posteriorTheta)
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

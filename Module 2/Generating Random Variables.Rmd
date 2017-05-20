@@ -3,8 +3,8 @@ title: "Generating Random Variables"
 author: "Jonathan Navarrete"
 date: "April 15, 2017"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -131,6 +131,14 @@ qqline(outSamples, distribution = qexp,
 ```
 
 
+
+
+
+
+
+
+
+
 ## Inverse Transform Discrete scenario
 For a given an ordered discrete random sample $... < x_{i-1} < x_{i} < x_{i+1} < ...$ from a distribution $f(X)$, with CDF $F(x)$. Then, the inverse transformation $F_X^{-1}(u) = x_i$, where $F_X(x_{i-1}) < u \leq F_X(x_i)$. Then for each random variable desired,
 
@@ -174,17 +182,90 @@ hist(results, probability = TRUE)
 
 
 
-## Including Plots
+### Example: Generate X ~  Rayleigh
 
-You can also embed plots, for example:
+First attempt the Inverse Transform Method and see why it won't work.
 
-```{r pressure, echo=FALSE}
-#plot(pressure)
+For information on the Rayleigh distribution follow the link: [Rayleigh Distribution][2]
+
+PDF: $f(x | \sigma) = \frac{x}{\sigma^2} exp(\frac{-x^2}{2\sigma^2})$ for $x \geq 0, \ \sigma > 0$ 
+CDF: $F(X \leq x) = 1 - exp(\frac{-x^2}{2\sigma^2})$
+
+#### Inverse Transform:
+Set $F(x) = U$, where $U \sim Unif(0,1)$.
+
+1. 
+$$
+1 - exp(\frac{-x^2}{2\sigma^2}) = U \\
+$$
+
+2. 
+$$
+exp(\frac{-x^2}{2\sigma^2}) = 1 - U
+$$
+
+
+3. 
+$$
+log(exp(\frac{-x^2}{2\sigma^2})) = log(1 - U)
+$$
+4. 
+$$
+\frac{-x^2}{2\sigma^2} = log(1 - U)
+$$
+
+5. 
+$$
+-x^2 = 2\sigma^2 \times log(1 - U)
+$$
+
+6. 
+$$
+x = \sqrt{ - 2\sigma^2 \times log(1 - U) }
+$$
+
+From the last equation, we see that we'd be taking the square root of negative values which would be problematic. Therefore, we need an alternative algorithm. 
+
+From information on the Rayleigh distribution, we know that given two i.i.d. random variables $Z_1, Z_2 \sim N(0, \sigma)$ then $R = \sqrt{ Z_1^2 + Z_2^2 } \sim Rayleigh(\sigma)$. Therefore, in order to simulate 1 random variable from $Rayleigh(\sigma)$, we first generate 2 random variables from a Normal distribution with mean 0 and standard deviation $\sigma$.
+
+To generate $N$ Rayleigh random variables, our algorithm would be:
+
+1. Generate $2 \times N$ random variables $Z_i \sim N(0,\sigma)$ for $i \in (0, 2N)$
+2. For each pair of $Z_i \sim N(0,\sigma)$ use the transformation $R = \sqrt{ Z_1^2 + Z_2^2 }$ to obtain $N$ random variables from $Rayleigh(\sigma)$.
+
+
+```{r}
+
+N = 1000
+
+Z = rnorm(n = 2*N, mean = 0, sd = 1)
+Z = matrix(data = Z, nrow = N, ncol = 2)
+
+transfromation <- function(vec){
+  R = sqrt(sum(vec^2))
+  #R = sqrt(vec[1]^2 + vec[2]^2)
+  return(R)
+}
+
+
+R_Out = apply(X = Z, MARGIN = 1, FUN = transfromation)
+
+hist(R_Out)
+
+## compare with Rayleigh {VGAM}	
+
+sqrt(pi/2) ## theoretical mean
+mean(R_Out) ## calculated mean
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
 
 
 
 
 [1]: https://stats.stackexchange.com/questions/184325/how-does-the-inverse-transform-method-work
+[2]: http://www.math.uah.edu/stat/special/Rayleigh.html
