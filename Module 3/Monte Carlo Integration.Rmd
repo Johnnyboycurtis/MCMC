@@ -1,0 +1,39 @@
+---
+title: "Monte Carlo Integration"
+author: "Jonathan Navarrete"
+date: "May 20, 2017"
+output: pdf_document
+---
+
+
+## Introduction
+
+Beyond being able to generate random variables, we should also be able to apply these simulation methods to solve more complex problems. We'll begin with Monte Carlo Integration methods.
+
+Topics to be covered:
+
+1. Classic Monte Carlo Integration
+
+2. Importance Sampling
+
+3. Importance Sampling Resampling
+
+
+
+
+## Monte Carlo Integration
+
+Given a function $g(x)$ for which we wish to integrate over [a,b], $\int_a^b g(x) dx$, we can treat this deterministic problem as a stochastic one to find the solution. Treat X as if a random variable with density $f(x)$, then the mathimatical expecation of the random variable $Y = g(X)$ is 
+$$
+E[g(X)] = \int_{- \infty}^{\infty} g(x) f(x) dx
+$$
+
+If a random sample $X_1, ..., X_n$ is generated from $f(x)$, an unbiased estimator of $E[g(X)]$ is the sample mean.
+
+
+
+
+
+
+
+
