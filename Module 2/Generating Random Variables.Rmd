@@ -16,6 +16,23 @@ knitr::opts_chunk$set(echo = TRUE)
 One of the fundamental tools required in monte carlo methods is the ability to generate pseudo-random variables from a specified probability distribution. We explore some of these methods starting with the Inverse Transform Method. One of the most fundamental number generation is the uniform random generation. Pseudo random number genrators rely on the assumption that computational methods can consistently generate uniform random numbers. Though, these notes do not dive deep into the mechanics of random number generation, they do provide an overview of some topics. After having the ability to generate simple random numbers transformations are used to simulate other random processes.
 
 
+In this section we'll cover the following methods for generating random numbers from a target distribution.
+
+1. Inverse Transform Method
+
+2. Accept-Reject Method
+
+3. Transformation Method
+
+4. Sums and Mixture distributions
+
+5. Stochastic Processes
+
+
+\newpage
+\clearpage
+
+
 
 ## Generation uniform samples
 
@@ -48,19 +65,6 @@ acf(u) ## autocorrelation of random number generation
 
 
 
-## Generating Random Variables
-
-In this section we'll cover the following methods for generating random numbers from a target distribution.
-
-1. Inverse Transform Method
-
-2. Accept-Reject Method
-
-3. Transformation Method
-
-4. Sums and Mixture distributions
-
-5. Stochastic Processes
 
 
 
@@ -69,7 +73,7 @@ In this section we'll cover the following methods for generating random numbers 
 
 General idea: only using a uniform distribution, generate random values and use an inverse CDF of the target distribution for which you wish to simulate. See the following link for further discussion: [How does the inverse transform method work?][1]
 
-## Theorem (Probability Integral Transformation): 
+### Theorem (Probability Integral Transformation): 
 If X is a continuous random variable with CDF $F_X(X)$, then $U = F_X(X) \sim Uniform(0,1)$. If $U \sim Uniform(0,1)$, then for all $x \in \mathbb R$
 
 $$
@@ -89,7 +93,7 @@ Steps:
 3. Plug in $u$ observed values in $F^{-1}(U)$ to obtain N $x$ values for which $X \sim f(x)$
 
 
-### Example
+### Example: Exponential distribution
 
 Suppose we are interested in generating 10,000 random values from an Exponential distribution 
 
@@ -133,13 +137,62 @@ qqline(outSamples, distribution = qexp,
 
 
 
+### Example: Pareto Distribution
+
+For information on the Pareto distribution, please see: [Pareto Distribution][3]
+
+The $Pareto(a,b)$ distribution has CDF $F(X \leq x) = 1 - (\frac{b}{x})^a$ for $x \geq b > 0, \ a > 0$
+
+
+1. First set $F(x) = U$, where $U \sim Unif(0,1)$
+$$
+1 - (\frac{b}{x})^2 = 0
+$$
+
+2. Solve for X
+$$
+(\frac{b}{x})^a = 1 - U
+$$
+3. 
+$$
+\frac{b}{x} = (1 - U)^{1/a}
+$$
+
+4. 
+$$
+x = b \times (1 - U)^{-1/a}
+$$
+
+
+
+```{r}
+
+n = 1000
+
+U =runif(n)
+
+a = 3
+b = 2
+
+X = b*(1-U)^(-1/a)
+
+hist(X, probability = TRUE, breaks = 25, xlim =c(0, 45),main = "Inverse Transform: Pareto(3,2)")
+
+pareto = function(x){(a*(b^a)/x^(a+1))}
+curve(pareto(x), from = 0, to = 40, add = TRUE, col = "blue")
+
+plot(density(X), main = "Density Plot of Inverse Transform: Pareto(3, 2)")
+curve(pareto(x), from = 0, to = 40, add = TRUE, col = "blue")
+
+
+```
 
 
 
 
 
 
-## Inverse Transform Discrete scenario
+### Inverse Transform Discrete scenario
 For a given an ordered discrete random sample $... < x_{i-1} < x_{i} < x_{i+1} < ...$ from a distribution $f(X)$, with CDF $F(x)$. Then, the inverse transformation $F_X^{-1}(u) = x_i$, where $F_X(x_{i-1}) < u \leq F_X(x_i)$. Then for each random variable desired,
 
 1. Generate a random variable $u \sim Unif(0,1)$
@@ -181,17 +234,43 @@ hist(results, probability = TRUE)
 ```
 
 
+\newpage
+\clearpage
 
-### Example: Generate X ~  Rayleigh
+## Transformation Methods
+
+Now we look at transformation methods for generating random variables. Distributions sometimes share relationships, and if the relationship is relatively simple, we can exploit this to generate random variables from a "simple to simulate" distribution and transform those random variables to generate samples from a "harder to simulate" distribution. I'll give some examples below. First, see the following Wikipedia page for some relationships: [Relationships among probability distributions][4]
+
+Now that we've covered how to simulate random variables from an $Exp(\theta)$ distribution ("simple to simulate"), I'll cover how to generate some random variables from "harder to simulate" distributions.
+
+We'll cover the following:
+
+1. $Y = \sum^N_{i=1} X$ where $Y \sim Chi\ Square(2N)$ ($2N$ degress of freedom)
+
+See: [Chi-Square distribution][5]
+
+2. $Y = \beta \sum^\alpha_{i = 1} X$ where $Y \sim Gamma(\alpha, \beta)$
+
+See: [Gamma distribution][6]
+
+3. $Y = \frac{\sum^a_{i = 1} X}{\sum^{a + b}_{i = 1} X}$ where $Y \sim Beta(a, b)$
+
+See: [Beta distribution][7]
+
+
+
+### Example: Generate R ~  Rayleigh
 
 First attempt the Inverse Transform Method and see why it won't work.
 
 For information on the Rayleigh distribution follow the link: [Rayleigh Distribution][2]
 
 PDF: $f(x | \sigma) = \frac{x}{\sigma^2} exp(\frac{-x^2}{2\sigma^2})$ for $x \geq 0, \ \sigma > 0$ 
+
 CDF: $F(X \leq x) = 1 - exp(\frac{-x^2}{2\sigma^2})$
 
-#### Inverse Transform:
+
+Inverse Transform:
 Set $F(x) = U$, where $U \sim Unif(0,1)$.
 
 1. 
@@ -269,3 +348,9 @@ mean(R_Out) ## calculated mean
 
 [1]: https://stats.stackexchange.com/questions/184325/how-does-the-inverse-transform-method-work
 [2]: http://www.math.uah.edu/stat/special/Rayleigh.html
+[3]: http://www.math.uah.edu/stat/special/Pareto.html
+[4]: https://en.wikipedia.org/wiki/Relationships_among_probability_distributions
+[5]: http://www.math.uah.edu/stat/special/ChiSquare.html
+[6]: http://www.math.uah.edu/stat/special/Gamma.html
+[7]: http://www.math.uah.edu/stat/special/Beta.html
+
