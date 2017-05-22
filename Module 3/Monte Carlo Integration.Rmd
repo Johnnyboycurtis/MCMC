@@ -62,10 +62,29 @@ print(v) ## approximately 8
 
 ```
 
+Now, some of you may ask, "why is it that we can use the empirical average to create an estimate?" Well, that's because the discrete expected value of $g(x)$ is $E[g(x)]$ = $g(x_1) P(X=x_1) + ... + g(x_1) P(X=x_n)$ where $P(X=x_i) = \frac{1}{n}$ since $x_i \sim Unif(0,2)$.
 
 
 
 
+Now, to generalize the method above. Given a function $g(x)$ whose integral is well defined, for which we wish to evaluate at interval $a$ to $b$. Then
+
+$$
+\begin{aligned}
+\ & \int_a^b g(x) dx \\
+\ &= (b - a) \int_a^b g(x) \frac{1}{b - a} dx \\
+\ &= (b - a) \int_a^b g(x) f(x) dx \\
+\end{aligned}
+$$
+where $f(x) = \frac{1}{b - a}$ is $Unif(a,b)$, and $x \sim Unif(a,b)$. 
+
+The algorithm is as follows:
+
+1. Find a density $f(x)$ from which we can sample $x$ from.
+
+2. Generate $x_1, ..., x_n \sim f(x)$
+
+3. Compute $(b - a) \times \bar{g_n}$, where $\bar{g_n} = \frac{1}{n} \sum_{i = 1}^n g(x_i)$
 
 
 
