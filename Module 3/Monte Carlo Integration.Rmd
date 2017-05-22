@@ -201,7 +201,54 @@ $$
 as $n \to \infty$. See: [Central Limit Theorem](http://www.math.uah.edu/stat/sample/CLT.html)
 
 
+### Example: Normal p-value estimate for unbounded region
 
+$$
+\Phi(x) = P(X \leq x) = \int_{-\infty}^{x} \frac{1}{\sqrt{2 \pi} \sigma}\ e^{(t - \mu)^2/ 2 \sigma} dx
+$$
+
+Now, suppose that $\mu = 1$ and $\sigma = 1$, such that we are only dealing with the standard Normal CDF. We are interested in calculating a Monte Carlo estimate for $\Phi(x)$
+
+$$
+\Phi(x) = P(X \leq x) = \int_{-\infty}^{x} \frac{1}{\sqrt{2 \pi}}\ e^{t^2/ 2} dx
+$$
+
+Our first problem is dealing with bounds $(-\infty, x)$. We cannot direcly apply our MC integration algorithm directly, but we can break this into sections $(-\infty, 0)$ and $[0, x]$. First, we'll tackle the upper bound where $x > 0$, and handle the lower bound where $x \leq  0$ by $1 - \Phi(-x)$ 
+
+
+For example, if $x = 2$, then we would calculate a MC estimate for $\Phi(X \leq 2)$.
+
+```{r}
+x <- seq(from = -10, to = 10, by = 0.1)
+
+out = dnorm(x)
+out[x > 2] = 0
+
+plot(x, dnorm(x), type = "l")
+polygon(x, out, col = "blue")
+
+```
+
+However, if $x = -1$, then we would use the symmetry property of the Normal distribution to calculate $\Phi(-1)$ by $1 - \Phi(-(-1)) = 1 - \Phi(1)$
+
+
+```{r}
+x <- seq(from = -10, to = 10, by = 0.1)
+
+out = dnorm(x)
+out[x > -1] = 0
+
+plot(x, dnorm(x), type = "l", main = "Phi(X)")
+polygon(x, out, col = "blue")
+
+
+out = dnorm(x)
+out[x < 1] = 0
+
+plot(x, dnorm(x), type = "l", main = "1 - Phi(-X)")
+polygon(x, out, col = "red")
+
+```
 
 
 
