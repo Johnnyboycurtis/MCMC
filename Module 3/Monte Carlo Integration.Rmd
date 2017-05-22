@@ -28,7 +28,7 @@ $$
 E[g(X)] = \int_{\mathcal{X}} g(x) f(x) dx = \theta
 $$
 
-If a random sample $X_1, ..., X_n$ is generated from $f(x)$, an unbiased estimator of $E[g(X)]$ is the sample mean.
+If a random sample $X_1, ..., X_n$ is generated from $f(x)$, an unbiased estimator of $E[g(X)]$ is the sample mean. Review: [Sample mean][1]
 
 $$
 \bar{g_n} = \frac{1}{n} \displaystyle\sum_{i=1}^{n} g(x_i)
@@ -161,14 +161,50 @@ lines(x = 1:N, y = thetas - 1.96*SE, col = "red") ## CI
 
 
 
+```{r}
+## final estimate
+thetaHat = mean(g_values)
+se <- sd(x = g_values)/sqrt(N)
+ci <- thetaHat + 1.96*c(-1,1) * se
+
+print("Theta estimate: ")
+print(thetaHat)
+print("Confidence Intervals")
+print(ci)
+
+```
+
+
+
+The principle of the Monte Carlo method for approximating $E_f[g(X)] = \int_{\mathcal{X}} g(x) f(x) dx$ is to generate a sample $\bf{X} = (x_1, ..., x_n)$ from pdf $f(x)$ and using the empirical average of $g(x)$ as an approximation. This Monte Carlo estimate **almost surely** converges to $E_f[g(X)]$ by the Strong Law of Large Numbers. 
+
+### Strong Law of Large Numbers
+
+The SLLN says that for a given random sample $X_1, ..., X_n$ the empirical mean, $\bar{X}$, can be used as an estimator for $E[x] = \mu$, and given a **sufficiently** large sample, this estimate approximates the true expectation $\mu$ almost certainly with a probability value of 1. Or more formally, 
+
+$$
+P(\lim_{n \to \infty} \bar{X} \to E[X]) = 1 
+$$
+
+
+See reference: [Strong Law of Large Numbers][2]
+
+
+
+### Central Limit Theorem
+
+The CLT implies that for our Monte Carlo estimator $\hat{\theta}$,
+
+$$
+\frac{\hat{\theta} - E[\hat{\theta}]}{\sqrt{Var(\hat{\theta})}} \sim N(0,1)
+$$
+as $n \to \infty$. See: [Central Limit Theorem](http://www.math.uah.edu/stat/sample/CLT.html)
 
 
 
 
 
 
-
-
-
-
-
+[1]: http://www.math.uah.edu/stat/sample/Mean.html
+[2]: http://www.math.uah.edu/stat/sample/LLN.html
+[3]: http://www.math.uah.edu/stat/sample/CLT.html
