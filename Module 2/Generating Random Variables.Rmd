@@ -64,6 +64,25 @@ acf(u) ## autocorrelation of random number generation
 ```
 
 
+Now, say we could only simulate $u \sim Unif(0,1)$. How could we simulate $v \sim Unif(0,10)$? Well, we could simply include a multiplicative constant such that $v = 10 \times u$.
+
+
+```{r}
+v = 10 * runif(1000, 0, 1) ## v ~ unif(0, 10)
+hist(v)
+
+w = runif(1000, 0, 10) ## unif(0, 10)
+hist(w)
+
+
+## z = unif(0,8) + 8
+z = runif(1000, 0, 8) + 2 ## v ~ unif(2, 10)
+hist(z)
+```
+
+\newpage
+\clearpage
+
 
 
 

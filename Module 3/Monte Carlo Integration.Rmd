@@ -25,7 +25,7 @@ Topics to be covered:
 
 Given a function $g(x)$ for which we wish to integrate over [a,b], $\int_a^b g(x) dx$, we can treat this deterministic problem as a stochastic one to find the solution. Treat $X$ as if a random variable with density $f(x)$, then the mathimatical expecation of the random variable $Y = g(X)$ is
 $$
-E[g(X)] = \int_{\mathcal{X}} g(x) f(x) dx
+E[g(X)] = \int_{\mathcal{X}} g(x) f(x) dx = \theta
 $$
 
 If a random sample $X_1, ..., X_n$ is generated from $f(x)$, an unbiased estimator of $E[g(X)]$ is the sample mean.
@@ -38,11 +38,12 @@ $$
 As an example, suppose we have a function $g(x) = 3x^2$ for which we wish to integrate over the interval 0 to 2. We could apply deterministic numerical approximation methods (see R's `integrate`) or we could treat $x$ as a random variable from a $Unif(0,2)$ whose pdf is simply $f(x) = \frac{1}{2-0} = \frac{1}{2}$. If we now generate some $N =$ 1,000 random values from $f(x)$ and evaluate them at $g(x)$, then take the mean, we'd be calculating the expected value of $g(x)$, 
 $$
 \begin{aligned}
-\ v &= \int_0^2 g(x) dx \\
+\ \theta &= \int_0^2 g(x) dx \\
 \ &= (\frac{2 - 0}{2 - 0}) \times \int_0^2 g(x) dx \\
 \ &= 2 \times \int_0^2 g(x) \frac{1}{2} dx \\
 \ &= 2 \times E[g(X)] = 2 \times \int_{- \infty}^{\infty} g(x) f(x) dx \\
-\ &\approx  2 \times \frac{1}{n} \displaystyle\sum_{i=1}^{n} g(x_i) \approx v
+\ &\approx  2 \times \frac{1}{n} \displaystyle\sum_{i=1}^{n} g(x_i)  \\
+\ &= \hat{\theta} \approx \theta
 \end{aligned}
 $$
 
@@ -71,14 +72,14 @@ Now, to generalize the method above. Given a function $g(x)$ whose integral is w
 
 $$
 \begin{aligned}
-\ & \int_a^b g(x) dx \\
+\ \theta &= \int_a^b g(x) dx \\
 \ &= (b - a) \int_a^b g(x) \frac{1}{b - a} dx \\
 \ &= (b - a) \int_a^b g(x) f(x) dx \\
 \end{aligned}
 $$
 where $f(x) = \frac{1}{b - a}$ is $Unif(a,b)$, and $x \sim Unif(a,b)$. 
 
-The algorithm is as follows:
+The algorithm to calculate $\hat{\theta}$ is as follows:
 
 1. Find a density $f(x)$ from which we can sample $x$ from.
 
@@ -88,7 +89,35 @@ The algorithm is as follows:
 
 
 
+Now that we can calculate an estimate of statistic $\theta$, $\hat{\theta}$, we should also be able to calculate the standard error in order to build confidence intervals (CIs).
 
+The variance can be written as 
+$$
+Var(x) = \frac{1}{n} \displaystyle\sum_{i=1}^{n} (x_i - \mu)^2
+$$
+
+We will use this form to calculate the variance of $\hat{\theta}$
+
+$$
+\begin{aligned}
+\ &Var(g(x_i)) \\
+\ &= \frac{1}{n} \displaystyle\sum_{i=1}^{n} (g(x_i) - \hat{\theta})^2 \\
+\ &= \sigma^2
+\end{aligned}
+$$
+And 
+$$
+ \begin{aligned}
+\ & \frac{\sigma^2}{n} = \frac{1}{n^2} \displaystyle\sum_{i=1}^{n} (g(x_i) - \hat{\theta})^2 \\
+\end{aligned}
+$$
+
+So, the standard error estimate is
+$$
+ \begin{aligned}
+\ & \frac{\sigma}{\sqrt{n}} = \frac{1}{n} \displaystyle \sqrt{ \sum_{i=1}^{n} (g(x_i) - \hat{\theta})^2 } \\
+\end{aligned}
+$$
 
 
 
