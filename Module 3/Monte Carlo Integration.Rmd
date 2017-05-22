@@ -213,8 +213,9 @@ $$
 \Phi(x) = P(X \leq x) = \int_{-\infty}^{x} \frac{1}{\sqrt{2 \pi}}\ e^{t^2/ 2} dx
 $$
 
-Our first problem is dealing with bounds $(-\infty, x)$. We cannot direcly apply our MC integration algorithm directly, but we can break this into sections $(-\infty, 0)$ and $[0, x]$. First, we'll tackle the upper bound where $x > 0$, and handle the lower bound where $x \leq  0$ by $1 - \Phi(-x)$ 
+Our first problem is dealing with bounds $(-\infty, x)$. We cannot direcly apply our MC integration algorithm directly because we do not know if x will be positive or negative, but a way around this issue is by breaking this problem into two scenarios. First, if $x > 0$, then we use the Monte Carlo estimator as is. However, if $x <  0$, then we esimate $\Phi(x)$ by $1 - \Phi(-x)$ 
 
+I'll illustrate how this will be done.
 
 For example, if $x = 2$, then we would calculate a MC estimate for $\Phi(X \leq 2)$.
 
