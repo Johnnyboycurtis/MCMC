@@ -1,0 +1,176 @@
+---
+title: "700 - Data Analysis - HW2"
+author: "Jonathan Navarrete and Thiago Karashima"
+date: "September 16, 2015"
+output: html_document
+---
+
+## 1. Let $X_1$, $X_2$,...,$X_n$ be independent normal random variables with means $\mu_i$ and variances $\sigma_i^2$. Let $Y = \sum_{i=1}^{n} \alpha_i X_i$, where $\alpha_i$ are constants. Use moment generating functions to show that $Y$ is normally distributed and find its mean and variance.
+Recall, the moment generating function (mgf) of a normal random variable X with mean $\mu$ and variance $\sigma^2$ is
+
+$$
+M_X (t) = e^{\mu t + \frac{\sigma^2 t^2}{2}}.
+$$
+
+We know the following theorem about the mgf of the sum of iid random variables:
+
+*Theorem:* If $X_1$, $X_2$,...,$X_n$ are iid random variables, each with mgf $M_{X_i}(t) = E\{e^{t X_i}\}$, for $i = 1, \, 2, \dots , \, n$, then the mgf of the linear combination $Y = \sum_{i=1}^{n} \alpha_i X_i$ is
+
+$$
+M_Y(t) = \prod_{i=1}^{n} M_{X_i}(\alpha_i t).
+$$
+
+In our case, we have the sum of iid normal random variables. Thus,
+
+$$
+\begin{aligned}
+\ M_Y(t) &= \prod_{i=1}^{n} e^{\mu_i(\alpha_i t) + \frac{\sigma_i^2 (\alpha_i t)^2}{2}} \\
+\ &= \prod_{i=1}^{n} e^{\mu_i(\alpha_i t)} \, e^{\frac{\sigma_i^2 (\alpha_i t)^2}{2}} \\
+\ &= e^{\mu_1(\alpha_1 t)} \, e^{\mu_2(\alpha_2 t)} \, \dots \, e^{\mu_n(\alpha_n t)} \, e^{\frac{\sigma_1^2 (\alpha_1 t)^2}{2}} \, e^{\frac{\sigma_2^2 (\alpha_2 t)^2}{2}} \, \dots \, e^{\frac{\sigma_n^2 (\alpha_n t)^2}{2}} \\
+\ &= e^{\mu_1(\alpha_1 t) + \mu_2(\alpha_2 t) + \dots + \mu_n(\alpha_n t)} \, e^{\frac{\sigma_1^2 (\alpha_1 t)^2}{2} + \frac{\sigma_2^2 (\alpha_2 t)^2}{2} + \dots \frac{\sigma_n^2 (\alpha_n t)^2}{2}}\\
+\ &= e^{t \sum_{i=1}^{n} (\mu_i \alpha_i)} \, e^{t^2 \sum_{i=1}^{n} \frac{(\sigma_i^2 \alpha_i^2)}{2}} \\
+\ M_Y(t) &= \exp{\left[t \sum_{i=1}^{n} (\alpha_i \mu_i) \, + \, \frac{t^2}{2} \sum_{i=1}^{n} (\alpha_i^2 \sigma_i^2) \right]} \\
+\end{aligned}
+$$
+
+We conclude recognizing that the last expression is the mgf of a normal distribution, with mean $\sum_{i=1}^{n} (\mu_i \alpha_i)$ and variance $\sum_{i=1}^{n} (\sigma_i^2 \alpha_i^2)$. Thus,
+
+$$
+Y \sim N \left( \sum_{i=1}^{n} (\alpha_i \mu_i) \, , \, \sum_{i=1}^{n} (\alpha_i^2 \sigma_i^2) \right)
+$$
+
+***
+
+\newpage
+
+## 2. An economist is interested in the relationship between the demand for housing (as measured by housing starts), price, and national disposable income.
+
+It is available off the class web page:
+http://www.rohan.sdsu.edu/~babailey/stat700/housing.dat
+
+Let $Y$ be the housing demand in appropriate units, AP be a variable representing average price, and DI be a variable representing disposable income. There are $n = 7$ observations. We will consider the model, $\mathbf{Y} = \mathbf{X} \boldsymbol{\beta} + \boldsymbol{\epsilon}$, where $\boldsymbol{\beta} = (\beta_0 \; \beta_1 \; \beta_2)'$.
+Assume that the $\epsilon_i$ are independent N(0, $\sigma^2$) random variables.
+
+### (a) In R, use matrix and vector operations to find the least estimate $\boldsymbol{\hat{\beta}}$. Note: You can check your answer with the results from the R function `lm()`.
+
+```{r, cache = T}
+housing <- read.table(file = "http://www.rohan.sdsu.edu/~babailey/stat700/housing.dat",
+                      header = TRUE)
+fit <- lm(Y ~ AP + DI, data = housing)
+summary(fit)
+
+X <- model.matrix(fit)  ## design matrix
+n <- nrow(X)  ## observations
+p_prime <- ncol(X)
+Y <- matrix(housing$Y, nrow = n, dimnames = list(c(1:n), c("Y")))
+
+beta_hat <- solve(t(X) %*% X) %*% t(X) %*% Y  ## beta_hat vector
+beta_hat
+```
+
+We see that the estimates for the parameters from the `lm` and from the matrix form match.
+
+
+### (b) Fill the ANOVA table using the results from the R function `lm()`.
+
+The summary of the linear model is given in the previous exercise.
+
+```{r, cache = TRUE}
+fit.an <- anova(fit)
+fit.an
+```
+
+```{r, cache = TRUE}
+SS.reg <- sum(fit.an$"Sum Sq"[1:2]) ## SSR
+SS.res <- fit.an$"Sum Sq"[3] ## SSE
+SS.tot.corr <- SS.reg + SS.res
+df.reg <- sum(fit.an$"Df"[1:2]) ## SSR df
+df.res <- fit.an$"Df"[3] ## SSE df
+df.tot <- df.reg + df.res
+reg.f <- (SS.reg/df.reg) / (SS.res/df.res)
+
+SS.table <- c(SS.reg, SS.res, SS.tot.corr, df.reg, df.res, df.tot)
+names(SS.table) <- c("SS.reg", "SS.res", "SS.tot.corr", "df.reg", "df.res",
+                     "df.tot")
+SS.table
+```
+
+
+|                   |    Sum of Squares   |  Degrees of Freedom |    Mean Squares   |     F     |
+|------------------:|:-------------------:|:-------------------:|:-----------------:|:---------:|
+| Regression        |      `r SS.reg`     |      `r df.reg`     | `r SS.reg/df.reg` | `r reg.f` |
+| Residuals         |      `r SS.res`     |      `r df.res`     | `r SS.res/df.res` |           |
+| Total (corrected) | `r SS.reg + SS.res` | `r df.tot` |                   |           |
+
+### (c) Test if the regression is significant at the $\alpha = 0.1$ level. Be sure to state the null and alternative hypotheses. State your conclusion.
+
+The test statistic is $F=MS_{reg}/MS_{res}$. Under the null hypothesis, this statistic follows a Snedecor's F distribution, with $p'-1$ numerator degrees of freedom and $n-p'$ denominator degrees of freedom. The hypotheses of the test are:
+
+$$
+\begin{aligned}
+\ &H_0: \; \beta_1 = \beta_2 = 0 \\
+\ &H_A: \; \text{At least one of the parameters not equal to zero.}\\
+\end{aligned}
+$$
+
+In matrices form, we have:
+
+$$
+\begin{aligned}
+\ H_0: \; &\mathbf{k'} \boldsymbol{\beta} = \mathbf{m} \\
+\ H_A: \; &\mathbf{k'} \boldsymbol{\beta} \ne \mathbf{m} \\
+\end{aligned}
+$$
+
+where
+$\mathbf{k'} = \bigl(\begin{smallmatrix}
+0&1&0 \\ 0&0&1
+\end{smallmatrix} \bigr)$
+ and $\mathbf{m} = \mathbf{0}$, in this particular case.
+
+```{r}
+reg.p_val <- pf(q = reg.f, 2, 4, lower.tail = FALSE)
+reg.p_val
+```
+
+Since $P-value > \alpha$, we do not reject $H_0$, concluding that the parameter estimates are not significant at the 90% level of significance.
+
+### (d) Using R matrix and vector operations you should be able to fill in the above table. Your goal is to us R to compute the final F ratio in the last column. Make sure to give the R commands that you use.
+
+Design matrix $\mathbf{X}$, and vectors $\mathbf{Y}$ and $\boldsymbol{\hat{\beta}}$ were defined in part a).
+
+
+```{r, cache = T}
+Y_hat <- X %*% beta_hat ## Y hat
+
+## Sum of Squares, df, and Mean Squares
+        ## Correction
+SS.corr <- n * (mean(Y))^2
+        ## Residuals
+SS.res.matrix <- t(Y) %*% Y - t(beta_hat) %*% t(X) %*% Y
+df.res.matrix <- n - p_prime
+MS.res.matrix <- SS.res.matrix / df.res.matrix
+
+        ## Regression
+SS.reg.matrix <- t(Y_hat) %*% Y_hat - SS.corr
+df.reg.matrix <- p_prime - 1
+MS.reg.matrix <- SS.reg.matrix / df.reg.matrix
+
+        ## Total Corrected
+SS.totCor.matrix <- t(Y) %*% Y - SS.corr
+df.totCor.matrix <- n - 1
+
+## F statistic
+reg.f.matrix <- MS.reg.matrix / MS.res.matrix
+
+SS.table.matrix <- c(SS.reg.matrix, SS.res.matrix, SS.totCor.matrix, df.reg.matrix,
+              df.res.matrix, df.totCor.matrix, MS.reg.matrix, MS.res.matrix, reg.f.matrix)
+
+names(SS.table.matrix) <- c("SS.reg.matrix", "SS.res.matrix", 
+                     "SS.totCor.matrix", "df.reg.matrix", "df.res.matrix",
+                      "df.totCor.matrix", "MS.reg.matrix", "MS.res.matrix", "reg.f.matrix")
+
+SS.table.matrix
+```
+
+As demonstrated, we've successfully obtained the same results as in part b). The F statistic is the same as using `lm()` and `summary()`, as well as using `anova()`.

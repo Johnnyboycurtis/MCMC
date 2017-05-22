@@ -37,11 +37,13 @@ $$
 
 As an example, suppose we have a function $g(x) = 3x^2$ for which we wish to integrate over the interval 0 to 2. We could apply deterministic numerical approximation methods (see R's `integrate`) or we could treat $x$ as a random variable from a $Unif(0,2)$ whose pdf is simply $f(x) = \frac{1}{2-0} = \frac{1}{2}$. If we now generate some $N =$ 1,000 random values from $f(x)$ and evaluate them at $g(x)$, then take the mean, we'd be calculating the expected value of $g(x)$, 
 $$
-\mathcal{v} =  \int_0^2 g(x) dx \\
-\\= (\frac{2 - 0}{2 - 0}) \times \int_0^2 g(x) dx \\
-\\= 2 \times \int_0^2 g(x) \frac{1}{2} dx \\
-\\= 2 \times E[g(X)] = 2 \times \int_{- \infty}^{\infty} g(x) f(x) dx \\
-\\ \approx  2 \times \frac{1}{n} \displaystyle\sum_{i=1}^{n} g(x_i) \approx v
+\begin{aligned}
+\ v &= \int_0^2 g(x) dx \\
+\ &= (\frac{2 - 0}{2 - 0}) \times \int_0^2 g(x) dx \\
+\ &= 2 \times \int_0^2 g(x) \frac{1}{2} dx \\
+\ &= 2 \times E[g(X)] = 2 \times \int_{- \infty}^{\infty} g(x) f(x) dx \\
+\ &\approx  2 \times \frac{1}{n} \displaystyle\sum_{i=1}^{n} g(x_i) \approx v
+\end{aligned}
 $$
 
 If we now simulate this, we will see we approximate the true solution $\int_0^2g(x) dx = 8$
