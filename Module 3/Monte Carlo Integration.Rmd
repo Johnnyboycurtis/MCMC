@@ -248,14 +248,14 @@ x <- seq(from = -10, to = 10, by = 0.1)
 out = dnorm(x)
 out[x > -1] = 0
 
-plot(x, dnorm(x), type = "l", main = "Phi(X)")
+plot(x, dnorm(x), type = "l", main = "Phi(X) (this is the area we want)")
 polygon(x, out, col = "blue")
 
 
 out = dnorm(x)
 out[x < 1] = 0
 
-plot(x, dnorm(x), type = "l", main = "1 - Phi(-X)")
+plot(x, dnorm(x), type = "l", main = "Phi(X) = 1 - Phi(-X) (this is how we're estimating it)")
 polygon(x, out, col = "red")
 
 ```
