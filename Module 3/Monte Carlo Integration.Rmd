@@ -158,6 +158,8 @@ lines(x = 1:N, y = thetas - 1.96*SE, col = "red") ## CI
 
 ```
 
+The plot shows how our parameter estimate (and CI) converges closer to the true value as N (sample size) increases. If we were to have had a small sample size, say, 100, our parameter esimate would have performed poorly. But at $N = 10,000$, our estimate $\hat{\theta}$ performs well.
+
 
 
 
