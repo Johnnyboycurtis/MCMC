@@ -213,9 +213,18 @@ $$
 \Phi(x) = P(X \leq x) = \int_{-\infty}^{x} \frac{1}{\sqrt{2 \pi}}\ e^{t^2/ 2} dx
 $$
 
-Our first problem is dealing with bounds $(-\infty, x)$. We cannot direcly apply our MC integration algorithm directly because we do not know if x will be positive or negative, but a way around this issue is by breaking this problem into two scenarios. First, if $x > 0$, then we use the Monte Carlo estimator as is. However, if $x <  0$, then we esimate $\Phi(x)$ by $1 - \Phi(-x)$ 
+Our first problem is dealing with bounds $(-\infty, x)$. We cannot direcly apply our MC integration algorithm directly because the integral range $(-\infty, x)$, but a way around this issue is by breaking this problem into two sections exploiting the Normal distribution's symmetry around $\mu$. The two sections will be $(-\infty, 0)$ and $(0, x)$. With the given symmetry property, we know that any random variable from $N(\mu, \sigma)$ will have an equal probability of being on the positive end or negative. Thus, let's set $P(X < 0) = 1/2$. Now, all we need to concern ourselves with is the region $(0, x)$. 
 
-I'll illustrate how this will be done.
+Now, assuming $x > 0$, then we use the Monte Carlo estimator as is 
+$$
+\begin{aligned}
+\Phi(x) &= P(X \leq x) \\
+\ & = P(X < 0) + \int_{0}^{x} \frac{1}{\sqrt{2 \pi}}\ e^{t^2/ 2} dx \\
+\ & = \frac{1}{2} + \int_{0}^{x} \frac{1}{\sqrt{2 \pi}}\ e^{t^2/ 2} dx \\
+\end{aligned}
+$$
+
+However, what if $x <  0$? Well, then, again exploiting the symmetry property of $N(\mu, \sigma)$, we esimate $\Phi(X \leq x)$ by $1 - \Phi(-x)$. I'll illustrate how this will be done.
 
 For example, if $x = 2$, then we would calculate a MC estimate for $\Phi(X \leq 2)$.
 
