@@ -347,16 +347,84 @@ while(sum(is.na(X))){
 }
 
 
-hist(X, xlab = "X", main = "Beta(2,2) from Accept-Reject algorithm")
-#beta <- function(x) 6*x*(1-x)
-#curve(expr = beta, from = 0, to = 1)
+hist(X, xlab = "X", main = "Beta(2,2) from Accept-Reject algorithm", 
+     probability = TRUE)
+beta <- function(x) 6*x*(1-x)
+curve(expr = beta, from = 0, to = 1, add = TRUE)
 
 ```
 
 
 
+
+```{r}
+
+par(mfrow=c(1,2))
+curve(expr = beta, from = 0, to = 1, 
+      xlim = c(-0.5, 1.5), ylim = c(0,2),
+      main = "Beta(2,2) Density with Unif(0,1)",
+      xlab = "x", ylab = "density")
+
+x = seq(from = -1, to = 2, by = 0.01)
+Unif1 = function(x){ ifelse(x >= 0 & x <= 1, 1, 0) }
+polygon(x, Unif1(x), lty = 9)
+
+
+curve(expr = beta, from = 0, to = 1, 
+      xlim = c(-0.2, 1.2), ylim = c(0,2),
+      main = "Beta(2,2) with M*Unif(0,1)",
+      xlab = "x", ylab = "density")
+
+Unif2 = function(x){ ifelse(x >= 0 & x <= 1, 1*M, 0) }
+polygon(x, Unif2(x), lty = 2)
+
+#abline(h = 1.5, col = "red")
+par(mfrow=c(1,1))
+
+
+```
+
+
+
+
+```{r}
+N = 10000
+U = runif(N)
+Y = runif(N)
+M = 1.5
+
+f <- function(x){ 6*x*(1 - x)} ## pdf of Beta(2,2)
+g <- function(x){ 1 } ## pdf of Unif(0,1) is just 1
+
+accept <- U*M < f(Y)/(g(Y))
+
+mean(accept) ## acceptance rate
+print(1/M) ## probability of acceptance
+
+plot(Y, U*M, col = as.numeric(accept)+3, 
+     xlim = c(-0.2, 1.2), ylim = c(0,2),
+     main = "Accept-Reject with M = 1.5")
+
+
+
+curve(expr = beta, from = 0, to = 1, 
+      xlim = c(-0.5, 1.5), ylim = c(0,2),
+      main = "Beta(2,2) with M*Unif(0,1)",
+      xlab = "x", ylab = "density", add = TRUE,
+      lwd = 4)
+
+Unif2 = function(x){ ifelse(x >= 0 & x <= 1, 1*M, 0) }
+polygon(x, Unif2(x), lty = 2, lwd = 2)
+
+```
+
+
+
+
 \newpage
 \clearpage
+
+
 
 ## Transformation Methods
 
