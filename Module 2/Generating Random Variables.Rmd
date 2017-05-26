@@ -96,9 +96,12 @@ General idea: only using a uniform distribution, generate random values and use 
 If X is a continuous random variable with CDF $F_X(X)$, then $U = F_X(X) \sim Uniform(0,1)$. If $U \sim Uniform(0,1)$, then for all $x \in \mathbb R$
 
 $$
-P(F_X^{-1}(U) \leq x) = P(\inf\{t: F_X(t) = U\} \leq x)\\
-\\= P(U \leq F_X(x))\\
-\\=F_U(F_X(x)) = F_X(x)
+\begin{aligned}
+P(F_X^{-1}(U) \leq x) & = P(\inf\{t: F_X(t) = U\} \leq x)\\
+\\ & = P(U \leq F_X(x))\\
+\\ & =F_U(F_X(x)) \\
+\\ & = F_X(x)
+\end{aligned}
 $$
 and therefore $F_X^{-1}(U)$ has the same distribution as $X$.
 
