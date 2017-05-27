@@ -264,6 +264,126 @@ polygon(x, out, col = "red")
 
 
 
+
+
+
+
+
+
+\newpage
+\clearpage
+
+
+
+## Importance Sampling
+
+Our Monte Carlo integration algorithm looks like
+$$
+\begin{aligned}
+E[h(x)] & = \int_{\mathcal{X}} h(x) f(x) dx = \theta
+\end{aligned}
+$$
+Where $f$ is generally a uniform density. However, this can be costly if we need to calculate the tail probabilities. For example, say $Z \sim N(0,1)$ and we wish to calculate $P(Z > 4.5)$. In order to obtain a stable result using a uniform distribution for $f$ we would need to simulate many, many samples. This can be time and computationally costly, and this process can be improved. Suppose that we wish to weight samples $x$ by density $g$ such that this would improve results for tail probabilities. 
+
+We can rewrite our previous result as 
+$$
+\begin{aligned}
+E[h(x)] & = \int_{\mathcal{X}} h(x) f(x) dx \\
+\ & = \int_{\mathcal{X}} h(x) \frac{f(x)}{g(x)} g(x) dx \\
+\ & \displaystyle E[\frac{h(x) f(x)}{g(x)}] \\
+\ & = \theta
+\end{aligned}
+$$
+
+
+
+### Example: Calculating tail probabilities
+
+
+Given $x \sim N(0,1)$ with a sample of size $N$, the approximation of 
+$$
+\begin{aligned}
+\Phi(x) = \displaystyle \int^{\infty}_x \frac{1}{\sqrt{2 \pi}} e^{-t^2/2}  dt
+\end{aligned}
+$$
+By Monte Carlo integration we approximate $P(X \leq x)$ by 
+$$
+\begin{aligned}
+\Phi(x) = \displaystyle \frac{1}{N} \sum_{i = 1}^N I_{\{t_i \geq x\}}
+\end{aligned}
+$$
+
+
+```{r}
+set.seed(9124555)
+N = 10000
+x = 4
+t = rnorm(N) >= x ## looking at the lower tail
+p_val = sum(t)/N
+print(sum(t)) ## only 1 sample greater or equal to 4
+print(p_val)
+
+## compare this with
+RPval = pnorm(q = 4, lower.tail = FALSE) ## lower tail
+print(RPval)
+```
+
+In the above example, with $N = 10,000$ samples, we saw only 1 observation with $x \geq 4$. To have a stable answer (and variance), we will need to see more samples at this tail. Thus, we turn to importance sampling.
+
+For an instrumental importance density, we will need to use a density with a long and heavy tail. Some examples of heavy-tailed distributions are Student's t, Chi-squared and exponential density. We will use the latter for its simplicity and memoryless property.
+
+To continue with the above example, we'll first define our functions $h$, $f$, and $g$ to be 1, $N(0,1)$ and $Exp(1)$ truncated at 4. Our instrumental importance function $g$ will be of the form $p(x)/p(x \geq 4)$,
+$$
+\begin{aligned}
+\ g(x) & =  \displaystyle \frac{e^{-x} }{\int_4^{\infty} e^{-x} dx} \\
+\ & = e^{-x} \frac{1}{-e^{-\infty} + e^{-4}} \\
+\ & = e^{-x} \frac{1}{e^{-4}} \\
+\ & = e^{-x} e^{4} \\
+\ & = e^{-x+4}\\
+\ & = e^{-(x-4)}\\
+\end{aligned}
+$$
+
+
+
+
+$$
+\begin{aligned}
+\ \frac{h(x_i) f(x_i)}{g(x_i)} & = \frac{1}{\sqrt{2 \pi}} e^{-x_i^2 / 2} \times e^{-(x_i - 4)} \\
+\ & = \frac{1}{\sqrt{2 \pi}} e^{-x_i^2 / 2 \ -\ (x_i - 4)} \\
+\ & = \frac{1}{\sqrt{2 \pi}} e^{-( x_i^2 / 2 \ + \ x_i - 4)} \\
+\end{aligned}
+$$
+
+Finally, we can now begin to generate samples from $g$, and use the arithmetic mean to calculate our p-value.
+
+$$
+\begin{aligned}
+\displaystyle E[\frac{h(x) f(x)}{g(x)}] & = \frac{1}{N} \times \frac{1}{\sqrt{2 \pi}} \sum_{i = 1}^N e^{-( x_i^2 / 2 \ + \ x_i - 4)} \\
+\end{aligned}
+$$
+
+
+```{r}
+
+N = 10^6
+t = 4
+X = rexp(N) + t
+w = dnorm(X)/dexp(X - t) ## importance sampling weights normal/exp(x-4)
+
+plot(cumsum(w) / 1:N, type = "l")
+abline(a = pnorm(t, lower.tail = FALSE), b = 0, col = "blue")
+
+print(pnorm(t, lower.tail = FALSE))
+print(mean(w)) ## close results!
+
+
+```
+
+
+
+
+
 [1]: http://www.math.uah.edu/stat/sample/Mean.html
 [2]: http://www.math.uah.edu/stat/sample/LLN.html
 [3]: http://www.math.uah.edu/stat/sample/CLT.html
