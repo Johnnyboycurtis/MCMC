@@ -422,6 +422,9 @@ polygon(x, Unif2(x), lty = 2, lwd = 2)
 ```
 
 
+It should be noted that the probability of acceptance is given by $\frac{1}{M}$. So, in order to make an efficient accept-reject algorithm, we should set $M$ to be as high as needed, but no larger! As $M$ increases, the probability of acceptance decreases, and this results in an increase in draws where we do not obtain samples from our target distribution $f$. This increases the computational cost. 
+
+
 
 
 \newpage
@@ -448,6 +451,29 @@ See: [Gamma distribution][6]
 3. $Y = \frac{\sum^a_{i = 1} X}{\sum^{a + b}_{i = 1} X}$ where $Y \sim Beta(a, b)$
 
 See: [Beta distribution][7]
+
+4. $Y = \sum_{i = 0}^{N} X_i$ where $X ~ Bernoulli(p)$ such that $Y \sim Bin(n,p)$
+
+
+### Example: Binomial trials:
+
+```{r}
+## let's simulate 10,000 samples from bin(n=10, p = 0.3)
+N = 10000
+n = 10
+p = 0.3
+x = as.numeric(runif(n = (n*N)) <= p) ## convert bools to 1 and 0
+m = matrix(data = x, nrow = N, ncol = n)
+Binom_samples = rowSums(m) 
+
+par(mfrow = c(1,2))
+hist(Binom_samples, probability = TRUE, main = "Binom(10,0.3) from Unif(0,1)")
+hist(rbinom(n = N, size = n, prob = p), probability = TRUE, main = "rbinom(10,0.3)")
+par(mfrow=c(1,1))
+
+
+
+```
 
 
 
