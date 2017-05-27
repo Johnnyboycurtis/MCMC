@@ -467,8 +467,10 @@ m = matrix(data = x, nrow = N, ncol = n)
 Binom_samples = rowSums(m) 
 
 par(mfrow = c(1,2))
-hist(Binom_samples, probability = TRUE, main = "Binom(10,0.3) from Unif(0,1)")
-hist(rbinom(n = N, size = n, prob = p), probability = TRUE, main = "rbinom(10,0.3)")
+hist(Binom_samples, probability = TRUE, main = "Binom(10,0.3) from Unif(0,1)", 
+     col = "blue")
+hist(rbinom(n = N, size = n, prob = p), probability = TRUE, main = "rbinom(10,0.3)",
+     col = "cyan")
 par(mfrow=c(1,1))
 
 
