@@ -486,6 +486,57 @@ A random variable $X$ drawn with the SIR algorithm has a distribution that conve
 
 
 
+### Example Beta(a,b) posterior
+
+Suppose we have $x_i \sim Beta(a,b)$ with priors on both *a* and *b*. There exists a family of conjugate priors of the form
+$$
+\pi(a,b) \propto \{ \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \}^\lambda x_0^a y_0^b
+$$
+where $\lambda, x_0, y_0$ are hyperparameters; See: [Does the beta distribution have a conjugate prior?](https://stats.stackexchange.com/questions/67443/does-the-beta-distribution-have-a-conjugate-prior) . The posterior is then equal to
+$$
+\pi(a,b | x) \propto \{ \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \}^{\lambda+1} [xx_0]^a [(1 - x)y_0]^b
+$$
+
+
+
+This family of distributions is intractable if only because of the difficulty of dealing with the gamma functions. Simulating directly from $\pi(a,b | x)$ is therefore impossible. We thus need to use a subsitute distribution $g(a,b)$, and we can get a preliminary idea by looking at an image representation of $\pi(a,b | x)$. If we take $\lambda = 1$, $x_0 = 0.5$, $y_0 = 0.5$, and $x = 0.6$.
+
+$$
+\begin{aligned}
+\pi(a,b | x) & \propto \{ \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \}^{2} [0.6 \times 0.5]^a [(1 - 0.6) \times 0.5]^b \\
+\ & \propto \{ \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \}^{2} [0.3]^a [0.2]^b \\
+\end{aligned}
+$$
+Now, for computational purposes, we will use a log-transform then exponential transform.
+
+$$
+\begin{aligned}
+\ & \propto \{ \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \}^{2} [0.3]^a [0.2]^b \\
+\ & \propto exp\{ \{ 2 \times ( \Gamma(a+b) - \Gamma(a) - \Gamma(b) ) + (a \times 0.3) +  (b \times 0.2)  \}\\
+\end{aligned}
+$$
+
+
+
+```{r}
+
+posterior = function(a,b){
+  x = exp(2*(lgamma(a+b) - lgamma(a) - lgamma(b)) + 
+            a*log(0.3) + b* log(0.2))
+  return(x)
+}
+
+a = 1:150
+b = 1:100
+post = outer(a,b,posterior)
+image(a, b, post,
+      xlab = expression(alpha), ylab = expression(beta),
+      main = paste("Controur plot of the ", expression(Pi), "(a,b|x)", sep = ""))
+contour(a, b, post, add = TRUE)
+
+
+
+```
 
 
 
