@@ -466,11 +466,21 @@ Sampling Importance Resampling (SIR) simulates random variables approximately fr
 For the target density $f$, the weights used to correct sampling probabilities are called the *standardized importance weights*. Since the initial weights $w_i = f(x_i)/g(x_i)$ to not sum to 1, we have to normalize them and thus we obtain
 $$
 \begin{aligned}
-\displaystyle w^*_i & = \frac{w_i}{\sum_{i = 1}^N w_i} \\
-\ \displaystyle & = \frac{f(x_i)/g(x_i)}{\sum_{i = 1}^N f(x_i)/g(x_i)} \\
+\displaystyle w^*_i & = \frac{w_i}{\sum_{i = 1}^n w_i} \\
+\ \displaystyle & = \frac{f(x_i)/g(x_i)}{\sum_{i = 1}^n f(x_i)/g(x_i)} \\
 \end{aligned}
 $$
+for a sample of random variables $x_1, ..., x_n \sim g(x)$.  
 
+We may view importance sampling as approximating $f$ by the discrete distribution having mass $w_i$ on each observed sample point $x_i$. The SIR algorithm can be described as follows
+
+1. Sample $x_1, ..., x_n \sim g(x)$
+
+2. Calculate the standardized importance weights $w^*_i = \displaystyle \frac{f(x_i)/g(x_i)}{\sum_{i = 1}^n f(x_i)/g(x_i)}$
+
+3. Resample $y_1, ..., y_n$ with replacement with probability $w_i$ (or $w^*_i$).
+
+A random variable $X$ drawn with the SIR algorithm has a distribution that converges to $f$ as $m \to \infty$. 
 
 
 
