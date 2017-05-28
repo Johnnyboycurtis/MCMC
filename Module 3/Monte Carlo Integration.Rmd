@@ -23,58 +23,58 @@ Topics to be covered:
 
 ## Monte Carlo Integration
 
-Given a function $g(x)$ for which we wish to integrate over [a,b], $\int_a^b g(x) dx$, we can treat this deterministic problem as a stochastic one to find the solution. Treat $X$ as if a random variable with density $f(x)$, then the mathimatical expecation of the random variable $Y = g(X)$ is
+Given a function $h(x)$ for which we wish to integrate over [a,b], $\int_a^b h(x) dx$, we can treat this deterministic problem as a stochastic one to find the solution. Treat $X$ as if a random variable with density $f(x)$, then the mathimatical expecation of the random variable $Y = h(X)$ is
 $$
-E[g(X)] = \int_{\mathcal{X}} g(x) f(x) dx = \theta
-$$
-
-If a random sample $X_1, ..., X_n$ is generated from $f(x)$, an unbiased estimator of $E[g(X)]$ is the sample mean. Review: [Sample mean][1]
-
-$$
-\bar{g_n} = \frac{1}{n} \displaystyle\sum_{i=1}^{n} g(x_i)
+E[h(X)] = \int_{\mathcal{X}} h(x) f(x) dx = \theta
 $$
 
+If a random sample $X_1, ..., X_n$ is generated from $f(x)$, an unbiased estimator of $E[h(X)]$ is the sample mean. Review: [Sample mean][1]
 
-As an example, suppose we have a function $g(x) = 3x^2$ for which we wish to integrate over the interval 0 to 2. We could apply deterministic numerical approximation methods (see R's `integrate`) or we could treat $x$ as a random variable from a $Unif(0,2)$ whose pdf is simply $f(x) = \frac{1}{2-0} = \frac{1}{2}$. If we now generate some $N =$ 1,000 random values from $f(x)$ and evaluate them at $g(x)$, then take the mean, we'd be calculating the expected value of $g(x)$, 
+$$
+\displaystyle \bar{h_n} = \frac{1}{n} \displaystyle\sum_{i=1}^{n} h(x_i)
+$$
+
+
+As an example, suppose we have a function $h(x) = 3x^2$ for which we wish to integrate over the interval 0 to 2. We could apply deterministic numerical approximation methods (see R's `integrate`) or we could treat $x$ as a random variable from a $Unif(0,2)$ whose pdf is simply $f(x) = \frac{1}{2-0} = \frac{1}{2}$. If we now generate some $N =$ 1,000 random values from $f(x)$ and evaluate them at $h(x)$, then take the mean, we'd be calculating the expected value of $h(x)$, 
 $$
 \begin{aligned}
-\ \theta &= \int_0^2 g(x) dx \\
-\ &= (\frac{2 - 0}{2 - 0}) \times \int_0^2 g(x) dx \\
-\ &= 2 \times \int_0^2 g(x) \frac{1}{2} dx \\
-\ &= 2 \times E[g(X)] = 2 \times \int_{- \infty}^{\infty} g(x) f(x) dx \\
-\ &\approx  2 \times \frac{1}{n} \displaystyle\sum_{i=1}^{n} g(x_i)  \\
+\ \theta &= \int_0^2 h(x) dx \\
+\ &= (\frac{2 - 0}{2 - 0}) \times \int_0^2 h(x) dx \\
+\ &= 2 \times \int_0^2 h(x) \frac{1}{2} dx \\
+\ &= 2 \times E[h(X)] = 2 \times \int_{- \infty}^{\infty} h(x) f(x) dx \\
+\ &\approx  2 \times \frac{1}{n} \displaystyle\sum_{i=1}^{n} h(x_i)  \\
 \ &= \hat{\theta} \approx \theta
 \end{aligned}
 $$
 
-If we now simulate this, we will see we approximate the true solution $\int_0^2g(x) dx = 8$
+If we now simulate this, we will see we approximate the true solution $\int_0^2h(x) dx = 8$
 
 ```{r}
 N = 10000 ## sample size
 
-g <- function(x) { 3*x^2 } ## function of interest, g(x)
+h <- function(x) { 3*x^2 } ## function of interest, h(x)
 
 X <- runif(n = N, min = 0, max = 2)  ## samples from f(x)
 
-v = 2 * mean(g(X)) ## 2 * E[g(x)]
+v = 2 * mean(h(X)) ## 2 * E[h(x)]
 
 print(v) ## approximately 8
 
 
 ```
 
-Now, some of you may ask, "why is it that we can use the empirical average to create an estimate?" Well, that's because the discrete expected value of $g(x)$ is $E[g(x)]$ = $g(x_1) P(X=x_1) + ... + g(x_1) P(X=x_n)$ where $P(X=x_i) = \frac{1}{n}$ since $x_i \sim Unif(0,2)$.
+Now, some of you may ask, "why is it that we can use the empirical average to create an estimate?" Well, that's because the discrete expected value of $h(x)$ is $E[h(x)]$ = $h(x_1) P(X=x_1) + ... + h(x_1) P(X=x_n)$ where $P(X=x_i) = \frac{1}{n}$ since $x_i \sim Unif(0,2)$.
 
 
 
 
-Now, to generalize the method above. Given a function $g(x)$ whose integral is well defined, for which we wish to evaluate at interval $a$ to $b$. Then
+Now, to generalize the method above. Given a function $h(x)$ whose integral is well defined, for which we wish to evaluate at interval $a$ to $b$. Then
 
 $$
 \begin{aligned}
-\ \theta &= \int_a^b g(x) dx \\
-\ &= (b - a) \int_a^b g(x) \frac{1}{b - a} dx \\
-\ &= (b - a) \int_a^b g(x) f(x) dx \\
+\ \theta &= \int_a^b h(x) dx \\
+\ &= (b - a) \int_a^b h(x) \frac{1}{b - a} dx \\
+\ &= (b - a) \int_a^b h(x) f(x) dx \\
 \end{aligned}
 $$
 where $f(x) = \frac{1}{b - a}$ is $Unif(a,b)$, and $x \sim Unif(a,b)$. 
@@ -85,7 +85,7 @@ The algorithm to calculate $\hat{\theta}$ is as follows:
 
 2. Generate $x_1, ..., x_n \sim f(x)$
 
-3. Compute $(b - a) \times \bar{g_n}$, where $\bar{g_n} = \frac{1}{n} \sum_{i = 1}^n g(x_i)$
+3. Compute $(b - a) \times \bar{g_n}$, where $\bar{g_n} = \frac{1}{n} \sum_{i = 1}^n h(x_i)$
 
 
 
@@ -100,22 +100,22 @@ We will use this form to calculate the variance of $\hat{\theta}$
 
 $$
 \begin{aligned}
-\ &Var(g(x_i)) \\
-\ &= \frac{1}{n} \displaystyle\sum_{i=1}^{n} (g(x_i) - \hat{\theta})^2 \\
-\ &= \sigma^2
+\ & Var(h(x_i)) \\
+\ & = \frac{1}{n} \displaystyle\sum_{i=1}^{n} (g(x_i) - \hat{\theta})^2 \\
+\ & = \sigma^2
 \end{aligned}
 $$
 And 
 $$
  \begin{aligned}
-\ & \frac{\sigma^2}{n} = \frac{1}{n^2} \displaystyle\sum_{i=1}^{n} (g(x_i) - \hat{\theta})^2 \\
+\ & \frac{\sigma^2}{n} = \frac{1}{n^2} \displaystyle\sum_{i=1}^{n} (h(x_i) - \hat{\theta})^2 \\
 \end{aligned}
 $$
 
 So, the standard error estimate is
 $$
  \begin{aligned}
-\ & \frac{\sigma}{\sqrt{n}} = \frac{1}{n} \displaystyle \sqrt{ \sum_{i=1}^{n} (g(x_i) - \hat{\theta})^2 } \\
+\ & \frac{\sigma}{\sqrt{n}} = \frac{1}{n} \displaystyle \sqrt{ \sum_{i=1}^{n} (h(x_i) - \hat{\theta})^2 } \\
 \end{aligned}
 $$
 
@@ -126,10 +126,10 @@ We can now calculate the standard error for the former example.
 ```{r}
 N = 10000 ## sample size
 
-g <- function(x) { 3*x^2 } ## function of interest, g(x)
+h <- function(x) { 3*x^2 } ## function of interest, h(x)
 
 X <- runif(n = N, min = 0, max = 2)  ## samples from f(x)
-g_values <- 2 * g(X)
+h_values <- 2 * h(X)
 
 cumMean <- function(x, n){
   num = cumsum(x)
@@ -147,8 +147,8 @@ cumSE <- function(x, n){
   return(result)
 }
 
-thetas = cumMean(g_values, N)
-SE = cumSE(g_values, N)
+thetas = cumMean(h_values, N)
+SE = cumSE(h_values, N)
 
 plot(x = 1:N, y = thetas, type = "l", ylim = c(2, 10), xlab = "Number of Samples",
      ylab = "Estimate of theta",
@@ -165,8 +165,8 @@ The plot shows how our parameter estimate (and CI) converges closer to the true 
 
 ```{r}
 ## final estimate
-thetaHat = mean(g_values)
-se <- sd(x = g_values)/sqrt(N)
+thetaHat = mean(h_values)
+se <- sd(x = h_values)/sqrt(N)
 ci <- thetaHat + 1.96*c(-1,1) * se
 
 print("Theta estimate: ")
@@ -178,7 +178,7 @@ print(ci)
 
 
 
-The principle of the Monte Carlo method for approximating $E_f[g(X)] = \int_{\mathcal{X}} g(x) f(x) dx$ is to generate a sample $\bf{X} = (x_1, ..., x_n)$ from pdf $f(x)$ and using the empirical average of $g(x)$ as an approximation. This Monte Carlo estimate **almost surely** converges to $E_f[g(X)]$ by the Strong Law of Large Numbers. 
+The principle of the Monte Carlo method for approximating $E_f[h(X)] = \int_{\mathcal{X}} h(x) f(x) dx$ is to generate a sample $\bf{X} = (x_1, ..., x_n)$ from pdf $f(x)$ and using the empirical average of $h(x)$ as an approximation. This Monte Carlo estimate **almost surely** converges to $E_f[h(X)]$ by the Strong Law of Large Numbers. 
 
 ### Strong Law of Large Numbers
 
@@ -203,7 +203,16 @@ $$
 as $n \to \infty$. See: [Central Limit Theorem](http://www.math.uah.edu/stat/sample/CLT.html)
 
 
+
+
+
+
+
+
 ### Example: Normal p-value estimate for unbounded region
+
+
+We will next explore how to generate $Normal(\mu, \sigma)$ p-values using a $Unif(0,x)$ distribution. 
 
 $$
 \Phi(x) = P(X \leq x) = \int_{-\infty}^{x} \frac{1}{\sqrt{2 \pi} \sigma}\ e^{(t - \mu)^2/ 2 \sigma} dx
@@ -234,14 +243,46 @@ For example, if $x = 2$, then we would calculate a MC estimate for $\Phi(X \leq 
 x <- seq(from = -10, to = 10, by = 0.1)
 
 out = dnorm(x)
-out[x > 2] = 0
+out[x >= 2] = 0
 
-plot(x, dnorm(x), type = "l")
+plot(x, dnorm(x), type = "l", main = "P(X<=2.5)", 
+     xlab = "X", ylab = "p(x)")
 polygon(x, out, col = "blue")
 
 ```
 
-However, if $x = -1$, then we would use the symmetry property of the Normal distribution to calculate $\Phi(-1)$ by $1 - \Phi(-(-1)) = 1 - \Phi(1)$
+Suppose we'd like to calculate $\Phi(2.5) = P(X \leq 2.5)$
+
+```{r}
+N = 10000
+x = 2.5
+t = runif(N, 0, 2.5)
+p = 0.5 + 1/sqrt(2*pi) * mean(x * exp(-t^2 / 2))
+
+print(p)
+print(x = pnorm(q = 2.5, lower.tail = TRUE))
+
+```
+
+In the above example, we simulated from a $Unif(0,2.5)$ distribution. But if we'd like to maintain a general algorithm from which we are interested in generating all samples from $Unif(0,1)$ distribution, then we'd make a slight variable change. In order to calculate $P(X \leq x) = \theta$,
+$$
+\begin{aligned}
+\theta & = \displaystyle \int_{-\infty}^{x} \frac{1}{\sqrt{2 \pi}} e^{-t^2/2} dt \\ 
+\ & = \displaystyle \frac{1}{2} + \int_{0}^{x} \frac{1}{\sqrt{2 \pi}} e^{-t^2/2} \times \frac{x}{x} \times dt \\ 
+\ & = \displaystyle \frac{1}{2} + \int_{0}^{1} x \frac{1}{\sqrt{2 \pi}} e^{-t^2/2} \frac{1}{x}dt \\ 
+\end{aligned}
+$$
+and let $Y = t/x \to t = xY$ such that
+$$
+\begin{aligned}
+\ & = \displaystyle \frac{1}{2} + \frac{1}{\sqrt{2 \pi}} \int_{0}^{1} x e^{-(x \times Y)^2/2} \frac{1}{x} dy \\
+\ & \approx \displaystyle \frac{1}{2} + \frac{1}{\sqrt{2 \pi}} \frac{1}{N} \sum_{i=1}^{N} x_i  e^{-(x_i \times Y)^2/2} \\
+\ & = \hat{\theta}
+\end{aligned}
+$$
+for $x > 0$ and $x_i \sim Unif(0,1)$.
+
+However, if $x < 0$ such as $x = -1$, then we would use the symmetry property of the Normal distribution to calculate $\Phi(-1)$ by $1 - \Phi(-(-1)) = 1 - \Phi(1)$
 
 
 ```{r}
@@ -262,6 +303,23 @@ polygon(x, out, col = "red")
 
 ```
 
+
+
+### Calculating N(0,1) tail probabilities
+
+Suppose $Z \sim N(0,1)$, then $\Phi(x) = P(Z \leq x) = E[I_{Z \leq x}] \approx \frac{1}{N}\sum_{i=1}^N I_{z_i \leq x}$ where $I$ is an indicator function returning 1 if the condition is satisfied, else 0.
+
+```{r}
+N = 10000
+x = 3.2
+Z = rnorm(N)
+p_val = mean(Z <= x)
+print(p_val)
+print(sum(Z > x)) ## few samples with Z > x
+
+
+
+```
 
 
 
@@ -332,7 +390,7 @@ In the above example, with $N = 10,000$ samples, we saw only 1 observation with 
 
 For an instrumental importance density, we will need to use a density with a long and heavy tail. Some examples of heavy-tailed distributions are Student's t, Chi-squared and exponential density. We will use the latter for its simplicity and memoryless property.
 
-To continue with the above example, we'll first define our functions $h$, $f$, and $g$ to be 1, $N(0,1)$ and $Exp(1)$ truncated at 4. Our instrumental importance function $g$ will be of the form $p(x)/p(x \geq 4)$,
+To continue with the above example, we'll first define our functions $h$, $f$, and $g$ to be 1, $N(0,1)$ and $Exp(1)$ truncated at 4. Our instrumental importance function $g$ will be of the form $p(x | x \geq 4 ) = p(x)/p(x \geq 4) = p(x-4)$. See below a workout of the math, and this link for more information of the [memoryless property](http://pages.cs.wisc.edu/~dsmyers/cs547/lecture_9_memoryless_property.pdf)
 $$
 \begin{aligned}
 \ g(x) & =  \displaystyle \frac{e^{-x} }{\int_4^{\infty} e^{-x} dx} \\
@@ -366,19 +424,59 @@ $$
 
 ```{r}
 
-N = 10^6
+N = 10^4
 t = 4
 X = rexp(N) + t
-w = dnorm(X)/dexp(X - t) ## importance sampling weights normal/exp(x-4)
+w = dnorm(X)/dexp(X - t) ## importance sampling weights dnorm/dexp(x-4)
 
-plot(cumsum(w) / 1:N, type = "l")
+theta = mean(w)
+cumTheta = cumsum(w) / 1:N
+
+plot(cumTheta, type = "l", main = "N(0,1) tail probabilities",
+     xlab = "Number of samples", ylab = "p(X>=4)",
+     ylim = c(2.5 * 10^(-5), 4 * 10^(-5)))
 abline(a = pnorm(t, lower.tail = FALSE), b = 0, col = "blue")
 
 print(pnorm(t, lower.tail = FALSE))
-print(mean(w)) ## close results!
+print(theta) ## close results!
 
+plot(density(X, weights=w/sum(w)), main = "Density of samples * weights",
+     xlab = "X", ylab = "Density",
+     xlim = c(0,16)) ## plot density of samples from Exp(x - 4) * weights
 
 ```
+
+
+
+
+
+
+
+
+\newpage
+\clearpage
+
+
+## Importance Sampling Resampling
+
+
+Sampling Importance Resampling (SIR) simulates random variables approximately from target distribution. SIR is based upon the notion of importance sampling and nonparametric bootstrapping. Briefly, importance sampling proceeds by sampling from an importance sampling distribution $g$. $g$ will here be our envelope or instrumental importance function. Each point in the sample is weighted to correct the sampling porbabilities so that the weighted sample can be related to the target density $f$. As seen previously, the weighted sample can be used to estimate expectations under $f$.
+
+
+For the target density $f$, the weights used to correct sampling probabilities are called the *standardized importance weights*. Since the initial weights $w_i = f(x_i)/g(x_i)$ to not sum to 1, we have to normalize them and thus we obtain
+$$
+\begin{aligned}
+\displaystyle w^*_i & = \frac{w_i}{\sum_{i = 1}^N w_i} \\
+\ \displaystyle & = \frac{f(x_i)/g(x_i)}{\sum_{i = 1}^N f(x_i)/g(x_i)} \\
+\end{aligned}
+$$
+
+
+
+
+
+
+
 
 
 
