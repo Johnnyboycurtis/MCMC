@@ -530,6 +530,37 @@ print(theta)
 
 
 
+Now to compare this using samples generated from an $Exp(1)$ distribution. We generate a double exponential from an exponential distribution by generating $N$ random variables from $Exp(1)$ then splitting up the distribution (randomly) between the left and right sides of $\mu = 0$. Our importance weights in this case would just be $w_i = 1$
+
+```{r}
+N = 10^4
+f <- function(x){
+  out = (1/2) * exp(x = -1 * abs(x))
+  return(out)
+}
+pos_neg <- sample(x = c(-1,1), size = N, replace = TRUE)
+x = rexp(n = N)
+double_exp = pos_neg * x 
+
+hist(double_exp, probability = TRUE, ylim = c(0,0.7),
+     main = "Double Exponential from Exp(1)",
+     xlab = "Double Exponential", ylab = "Density")
+lines(density(double_exp))
+curve(expr = f, from = -4, to = 4, add = TRUE, col = 4, lty = 4)
+
+
+theta = mean(double_exp^2)
+print(theta)
+
+```
+
+
+
+
+
+
+
+
 \newpage
 \clearpage
 
