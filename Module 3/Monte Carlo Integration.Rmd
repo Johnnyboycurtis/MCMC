@@ -530,7 +530,7 @@ print(theta)
 
 
 
-Now to compare this using samples generated from an $Exp(1)$ distribution. We generate a double exponential from an exponential distribution by generating $N$ random variables from $Exp(1)$ then splitting up the distribution (randomly) between the left and right sides of $\mu = 0$. Our importance weights in this case would just be $w_i = 1$
+Now to compare this using samples generated from an $Exp(1)$ distribution. We generate a double exponential from an exponential distribution by generating $N$ random variables from $Exp(1)$ then splitting up the distribution (randomly & evenly in approximately half) between the left and right sides of $\mu = 0$. Our importance weights in this case would just be $w_i = 1$. See reference [Double Exponential](http://www.itl.nist.gov/div898/handbook/eda/section3/eda366c.htm)
 
 ```{r}
 N = 10^4
