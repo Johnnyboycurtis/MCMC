@@ -453,6 +453,83 @@ plot(density(X, weights=w/sum(w)), main = "Density of samples * weights",
 
 
 
+### Example: Calculating Expectation of Laplace Distribution
+
+Suppose we have a random variable $X \sim f(x | \mu, b)$, which is the Laplace or Double Exponential distribution.
+$$
+f(x) = \frac{1}{2b} exp\{ - \ \frac{| x - a| }{b} \}, \ x \in (0, \infty)
+$$
+
+If we let $a = 0$ and $b = 1$, then $f(x) = \frac{1}{2} e^{-| x |}$ .If we would want to calculate $E[X^2]$, then we would need to solve the integral. 
+
+$$
+\begin{aligned}
+E[X^2] & = \displaystyle \int_{-\infty}^{\infty} x^2 f(x) dx \\
+\ & = \int_{-\infty}^{\infty} x^2 \frac{1}{2b} e^{ - | x| } dx \\
+\end{aligned}
+$$
+
+
+Suppose (for whatever reason) we are unable to generate samples from an exponential distribution. But (for whatever reason) we are able to generate samples $x_i \sim N(0,\sigma)$. Then, we could use $N(0,\sigma)$ as our instrumental density to sample from and use the importance weights $w_i = f(x_i)/g(x_i)$ to improve the convergence to $f$. Let's try $\sigma = 4$
+
+
+```{r}
+f <- function(x){
+  out = (1/2) * exp(x = -1 * abs(x))
+  return(out)
+}
+
+curve(expr = f, from = -10, to = 10, type = "l",
+      main = "Laplace Distribution")
+
+curve(expr = dnorm(x, sd = 1), from = -10, to = 10, type = "l",
+      lty = 2, col = 2,
+      add = TRUE)
+
+curve(expr = dnorm(x, sd = 2), from = -10, to = 10, type = "l",
+      lty = 3, col = 3,
+      add = TRUE)
+
+
+curve(expr = dnorm(x, sd = 4), from = -10, to = 10, type = "l",
+      lty = 4, col = 4,
+      add = TRUE)
+
+
+```
+
+Since we need to have samples that cover the entire domain of the Laplace distribution, it makes sense to set $\sigma$ higher than 1. Otherwise, we would need  many, many samples to obtain a stable answer.
+
+```{r}
+N = 10000
+x = rnorm(N)
+w = f(x)/dnorm(x) 
+theta <- mean(x = x^2 * w)
+print(theta)
+
+
+N = 10000
+x = rnorm(N, sd = 2)
+w = f(x)/dnorm(x) 
+theta <- mean(x = x^2 * w)
+print(theta)
+
+
+
+N = 10000
+x = rnorm(N, sd = 4)
+w = f(x)/dnorm(x, sd = 4)
+theta <- mean(x = x^2 * w)
+print(theta)
+
+
+
+```
+
+
+
+
+
 \newpage
 \clearpage
 
