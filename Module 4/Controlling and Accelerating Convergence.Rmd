@@ -1,0 +1,65 @@
+---
+title: "Controlling and Accelerating Convergence"
+author: "Jonathan Navarrete"
+date: "May 29, 2017"
+output: pdf_document
+---
+
+
+
+Topics to be covered:
+
+1. Monitoring Convergence
+
+2. Antithetic Variables
+
+
+
+
+## Antithetic Variables
+
+In previous experiments, when we've worked to generate pseudo-random samples from distributions, we've worked with *iid* (independent and identically distributed) peuso-random samples from an instrumental distribution. Generally, *iid* samples are always preferable, but not always cost efficient. As problems become more complicated, generating random samples from a target distribution will become more cumbersome and time/resource consuming. Therefore, in this section we will present methods in which we can double down on our generated samples to speed up convergence and utilize more of our available resources.
+
+
+The method of antithetic variables is based on the idea that higher efficiency can be obtained through correlation. Given who samples $X = (x_1, ..., X_n)^T$ and $Y = (y_1, ..., y_n)^T$ from the distribution $f$ used in monte carlo integration.  
+
+The monte carlo integration estimator
+$$
+\begin{aligned}
+\theta & = \displaystyle \int_{- \infty}^{\infty} h(x) f(x) dx \\
+\end{aligned}
+$$
+If $X$ and $Y$ are negatively correlated, then the estimator $\hat{\theta}$ of $\theta$
+$$
+\begin{aligned}
+\hat{\theta} & = \displaystyle \frac{1}{2n} \sum_{i = 1}^{n} [h(x_i) + h(y_i)] \\
+\end{aligned}
+$$
+is more efficient than the estimator $\displaystyle \hat{\theta} = \frac{1}{2n} \sum_{i = 1}^{2n} h(x_i)$. The random variables $X$ and $Y$ are then called *antithetic variables*. 
+
+Albeit useful, this method is not always possible. For arbitrary transformations $h(.)$, it is not always possible to generate negatively correlations $X$ and $Y$.
+
+As covered in the introduction, we can generate negatively correlated samples from a uniform distribution.
+
+```{r}
+U1 = runif(1000)
+U2 = (1 - U1)
+
+par(mfrow = c(1,2))
+hist(U1, probability = TRUE)
+hist(U2, probability = TRUE)
+par(mfrow = (c(1,1)))
+
+print(cor(U1, U2))
+```
+
+
+
+
+
+
+
+
+
+
+
