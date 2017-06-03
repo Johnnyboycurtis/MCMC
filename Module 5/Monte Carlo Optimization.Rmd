@@ -1,0 +1,93 @@
+---
+title: "Monte Carlo Optimization"
+author: "Jonathan Navarrete"
+date: "June 3, 2017"
+output: pdf_document
+---
+
+
+## Introduction
+
+
+This section will cover topics to optimization problems, and solutions Monte Carlo methods provide. Topics covered include
+
+1. Stochastic Search and Simulated Annealing
+
+2. EM Algorithm and MC EM
+
+
+## Light bulb example
+
+This exercise is taken from Flury and Zoppe, 2000, see [Exercises in EM][1].
+
+Below is the setup for the first exercise.
+
+#The First Exercise
+
+Suppose there are two light bulb survival experiments. In the first, there are $N$ bulbs whose exact lifetimes $y_i$ for $i \in \{1,...,N\}$ are recorded. The lifetimes have an exponential distribution, such that $y_i \sim Exp(\theta).$ In the second experiment, there are $M$ bulbs. After some time *t* > 0, a researcher walks into the room and only records how many lightbulbs are still burning out of $M$ bulbs. Depending on whether the lightbulbs are still burning or out, the results from the second experiment are right- or -left-censored. There are indicators $E_1, ..., E_M$ for each of the bulbs in the second experiment. If the bulb is still burning, $E_i = 1$, else $E_i = 0$.
+
+Given this information, our task is to solve for an MLE estimator for $\theta$.
+
+Our first step in solving this is finding the joint likelihood for the observed and unobserved data (i.e. complete-data likelihood).
+
+Let $X_1, ... , X_M$ be the (unobserved) lifetimes for the second experiment, and let $Z = \sum_{i=1}^ME_i$ be the number of light bulbs still burning. Thus, the observed data from both the experiments combined is $\mathcal{Y} = (Y_1, ..., Y_N, E_1,...,E_M)$ and the unobserserved data is $\mathcal{X} = (X_1, ..., X_M).$
+
+> The complete data log-likelihood is obtained by
+
+$$
+\begin{aligned}
+\displaystyle L(\theta| X,Y) & = \prod^N_{i=1} \frac{1}{\theta} e^{y_i/\theta} \times \prod^M_{i=1} \frac{1}{\theta} e^{x_i/\theta}   \\
+\ & = \displaystyle \theta^{-N} e^{N \bar{y} / \theta} \times \theta^{-M} e^{\sum^M_{i=1} x_i / \theta }  \\
+\end{aligned}
+$$
+
+And log-likelihood is obtained by
+
+$$
+\begin{aligned}
+log(L(\theta)) & = \displaystyle N \times log(\theta) + N \bar{y}/\theta + M \times log(\theta) + \sum^M_{i=1} x_i / \theta  \\
+\ & = \displaystyle N ( log(\theta) + \bar{y}/\theta ) + M \times log(\theta) + \sum^M_{i=1} x_i / \theta  \\
+\end{aligned}
+$$
+
+
+(1)
+$$
+log^c(L(\theta|\mathcal{Y,X})) = -N(log(\theta) + \bar{Y}/\theta) - \sum_{i=1}^M(log(\theta) + X_i/\theta ) 
+$$ 
+
+> which is linear for unobserved $X_i$. But
+
+(2)
+$$
+E[X_i | \mathcal{Y}] = E[X_i | E_i] = 
+\begin{cases}
+    t + \theta       & \quad \text{if } E_i = 1\\
+    \theta - t \frac{e^{-t/\theta}}{1 - e^{-t/\theta}}  & \quad \text{if } E_i = 0\\
+  \end{cases} 
+$$ 
+
+> and therefore the $j$th step consists of replacing $X_i$ in (1) by its expected value (2), using the current numerical parameter value $\theta^{(j-1)}$. The result is
+
+(3)
+$$
+\log(L(\theta)) = -(N + M) log(\theta) - \frac{1}{\theta} [N \bar{Y} + Z ( t + \theta^{(j-1)}) + (M - Z) (\theta^{(j-1)} - t p^{(j-1)})]
+$$
+
+
+> where 
+
+$$
+p^{(j)} = \frac{e^{-t/\theta^{(j)}}}{1 - e^{-t/\theta^{(j)}}}
+$$
+
+There is more (not shown here) in the paper, but my main concern is how $p^{(j)}$ is obtained.
+
+
+
+
+  [1]: http://www.webpages.uidaho.edu/~stevel/565/literature/Exercise%20in%20EM.pdf
+ 
+
+
+
