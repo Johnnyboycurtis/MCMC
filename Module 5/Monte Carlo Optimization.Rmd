@@ -126,7 +126,8 @@ $$
 \end{aligned}
 $$
 
-If we plug in the conditional expected values
+In order to calculate EM esimates for $\theta$, we will plug in the expected values 
+
 $$
 E[X_i | \mathcal{Y}] = E[X_i | E_i] = 
 \begin{cases}
@@ -134,7 +135,7 @@ E[X_i | \mathcal{Y}] = E[X_i | E_i] =
     \theta - t \frac{e^{-t/\theta}}{1 - e^{-t/\theta}}  & \quad \text{if } E_i = 0\\
   \end{cases} 
 $$
-into the log-likelihood, we will obtain
+into the log-likelihood
 
 $$
 \begin{aligned}
@@ -142,12 +143,20 @@ $$
 \ & = \displaystyle -N \times log(\theta) - N \bar{y}/\theta  - M \times log(\theta) + \sum^M_{i=1} x_i / \theta  \\
 \ & = \displaystyle -( N + M)  \times log(\theta) - N \bar{y}/\theta + \sum^M_{i=1} x_i / \theta  \\
 \ & = \displaystyle -( N + M)  \times log(\theta) - \frac{1}{\theta} (N \bar{y} + \sum^M_{i=1} x_i )  \\
-\ & = -(N + M) log(\theta) - \frac{1}{\theta} [N \bar{Y} + Z ( t + \theta) + (M - Z) (\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}})] \\
+\ & = -(N + M) log(\theta) - \frac{1}{\theta} \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big] \\
 \end{aligned}
 $$
 
+As we iterate through estimates of $\theta$, we will use conditioned estimates of $\theta$ given previous estimates of $\theta$. Such that the $j$th step consists of replacing $X_i$ in (1) by its expected value (2), using the current numerical parameter value $\theta^{(j-1)}$. The resulting MLE is
 
-> and therefore the $j$th step consists of replacing $X_i$ in (1) by its expected value (2), using the current numerical parameter value $\theta^{(j-1)}$. The result is
+$$
+\begin{aligned}
+\frac{\mathrm d}{\mathrm d x} ln(L(\theta)) & = 0 \\
+\ \displaystyle 0 & = -\frac{(N + M)}{\theta} + \frac{1}{\theta^2} \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big]  \\
+\ \displaystyle \frac{(N + M)}{\theta} & =  \frac{1}{\theta^2} \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big] \\
+\ \displaystyle \theta & =  \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big] \ / \ (N+M) \\
+\end{aligned}
+$$
 
 (3)
 $$
