@@ -147,16 +147,7 @@ $$
 \end{aligned}
 $$
 
-As we iterate through estimates of $\theta$, we will use conditioned estimates of $\theta$ given previous estimates of $\theta$. Such that the $j$th step consists of replacing $X_i$ in (1) by its expected value (2), using the current numerical parameter value $\theta^{(j-1)}$. The resulting MLE is
-
-$$
-\begin{aligned}
-\frac{\mathrm d}{\mathrm d x} ln(L(\theta)) & = 0 \\
-\ \displaystyle 0 & = -\frac{(N + M)}{\theta} + \frac{1}{\theta^2} \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big]  \\
-\ \displaystyle \frac{(N + M)}{\theta} & =  \frac{1}{\theta^2} \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big] \\
-\ \displaystyle \theta & =  \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big] \ / \ (N+M) \\
-\end{aligned}
-$$
+As we iterate through estimates of $\theta$, we will use conditioned estimates of $\theta$ given previous estimates of $\theta$. Such that the $j$th step consists of replacing $X_i$ in (1) by its expected value (2), using the current numerical parameter value $\theta^{(j-1)}$. 
 
 (3)
 $$
@@ -169,6 +160,29 @@ $$
 $$
 p^{(j)} = \frac{e^{-t/\theta^{(j)}}}{1 - e^{-t/\theta^{(j)}}}
 $$
+
+
+Once we take the derivative of the log-likelihood and set it to zero, we will come up with an estimate for $\theta$
+
+$$
+\begin{aligned}
+\frac{\mathrm d}{\mathrm d x} ln(L(\theta)) & = 0 \\
+\ \displaystyle 0 & = -\frac{(N + M)}{\theta} + \frac{1}{\theta^2} \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big]  \\
+\ \displaystyle \frac{(N + M)}{\theta} & =  \frac{1}{\theta^2} \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big] \\
+\ \displaystyle \theta & =  \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big] \ / \ (N+M) \\
+\end{aligned}
+$$
+
+
+Thus, for each *j*th M-step, we will calculate
+
+$$
+\begin{aligned}
+\theta^{(j)} & = f(\theta^{(j-1)}) \\
+\ \displaystyle \theta & =  \big[N \bar{Y} + Z ( t + \theta^{(j-1)}) + (M - Z) \big(\theta^{(j-1)} - t \times \frac{e^{- t / \theta^{(j-1)}}}{1 - e^{-t/\theta^{(j-1)}}} \big)\big] \ / \ (N+M) \\
+\end{aligned}
+$$
+
 
 
 ```{r}
