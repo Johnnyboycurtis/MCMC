@@ -161,7 +161,43 @@ $$
 p^{(j)} = \frac{e^{-t/\theta^{(j)}}}{1 - e^{-t/\theta^{(j)}}}
 $$
 
-There is more (not shown here) in the paper, but my main concern is how $p^{(j)}$ is obtained.
+
+```{r}
+set.seed(5678)
+theta = 5
+rate = 1/theta
+
+t = 5
+N = 100
+M = 50
+y = rexp(n = N, rate = rate)
+x = rexp(n = M, rate = rate)
+x = sort(x)
+E = as.integer(x > t)
+
+N.ybar = sum(y)
+Z = sum(E)
+t = 5
+
+theta.j = 0.1
+theta.jp1 = 0.5
+for(i in 1:10){
+  theta.j = theta.jp1
+  p = (exp(-t/theta.j)/(1-exp(-t/theta.j)))
+  theta.jp1 = (N.ybar + Z*( t + theta.j) + (M-Z)*(theta.j - t*p) ) / (N+M)
+  print(theta.jp1)
+}
+
+
+
+## compare against MLE from observed data
+mean(y)
+
+## note, results will vary if you remove seed
+
+```
+
+
 
 
 
