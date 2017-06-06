@@ -224,6 +224,84 @@ mean(y)
 
 
 
+### Censored Exponential Data
+
+The following is an example from *Computational Statistics* by Givens and Hoeting. Example 4.7.
+
+
+```{r}
+
+set.seed(4567)
+N = 500
+theta = 2
+c = 0.5
+y = sort(rexp(n = N, rate = theta))
+bigC = sum(y> c)
+
+
+y[y> c] = c
+
+
+
+theta.tp1 = 0.1
+for(i in 1:2000){
+  theta.t = theta.tp1
+  theta.tp1 = N / (sum(y) + (bigC/theta.t))
+  #print(theta.tp1)
+}
+
+print(theta.tp1)
+
+```
+
+
+
+
+
+
+
+
+```{r}
+
+set.seed(4567)
+N = 50
+theta = 2
+c = 0.5
+y = sort(rexp(n = N, rate = theta))
+bigC = sum(y> c)
+print(sum(y> c))
+
+print("MLE:")
+print(1/mean(y))
+indices = which(y>c) ## which indices show where the data is to be censored?
+
+
+
+y_MC = y
+y_MC[indices] = NA
+theta.tp1 = 0.1
+MCEMout = numeric(20)
+for(i in 1:2000){
+  theta.t = theta.tp1 ## update the conditional parameter
+  temp = rexp(n = bigC, rate = theta.t )
+  y_MC[indices] = temp
+  #theta.tp1 = 1/mean(y_MC, na.rm = TRUE) ## doesn't work! 
+  theta.tp1 = N / (sum(y_MC) + (bigC/theta.t))
+  MCEMout[i] = theta.tp1 
+  #print(theta.tp1)
+}
+
+print(mean(MCEMout))
+
+
+```
+
+
+
+
+
+
+
 
   [1]: http://www.webpages.uidaho.edu/~stevel/565/literature/Exercise%20in%20EM.pdf
  
