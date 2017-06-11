@@ -303,6 +303,171 @@ print(mean(MCEMout))
 
 
 
+
+
+## Another Exponential Distribution problem
+
+Suppose $x_1, ..., x_n \sim Exp(\theta)$ where $x_1, ..., x_n$ are ordered (sorted). After time $t$, the data has become censored; *m* observations are censored. Only *r* are observed such that *n - m = r*. Let $y = (x_1, .., x_r)^T$ be the observed data and $z = (x_i, ..., x_m)^T$ be unobserved (censored) data.
+
+Our likelihood function is then 
+
+$$
+\begin{aligned}
+\displaystyle L(\theta| Y, Z) & = \prod^r_{i=1} \frac{1}{\theta} e^{y_i/\theta} \times \prod^m_{i=1} \frac{1}{\theta} e^{z_i/\theta}   \\
+\ & = \displaystyle \theta^{-r} e^{-r \bar{y} / \theta} \times \theta^{-m} e^{-\sum^m_{i=1} z_i / \theta }  \\
+\end{aligned}
+$$
+
+The log-likelihood is
+
+$$
+\begin{aligned}
+\displaystyle ln(L(\theta| Y, Z)) & = -r \times ln(\theta) - r \bar{y} / \theta \times m \times ln(\theta) -\sum^m_{i=1} z_i / \theta  \\
+\ & = Q(\theta)
+\end{aligned}
+$$
+
+We find the conditional expectation of $z_i$ given the observed data, knowing that $z_i \sim Exp(\theta - t)$, so by the memoryless property,
+$$
+E[z_i | y] = E[x_i | x_i > t] = \theta + t
+$$
+
+We substitute the conditional expectation into the log-likelihood and obtain,
+$$
+\begin{aligned}
+\displaystyle Q(\theta_{j+1}) & = -r \times ln(\theta) - r \bar{y} / \theta \times m \times ln(\theta) -\sum^m_{i=1} E[z_i | y] / \theta  \\
+\ & = -r \times ln(\theta) - r \bar{y} / \theta \times m \times ln(\theta) -\sum^m_{i=1} (\theta_j + t) / \theta  \\
+\end{aligned}
+$$
+
+We find the conditional MLE
+$$
+\begin{aligned}
+\displaystyle \hat{\theta}_{j+1} & = \frac{1}{n} (r \bar{y} - m (\theta_j + t))
+\end{aligned}
+$$
+
+
+Our simple algorithm to solve this is then,
+
+```{r}
+## Traditional EM for censored exponential
+## Generate Data
+set.seed(456)
+truetheta=10
+t=9 ##censoring time
+n=200
+x=rexp(n,1/truetheta) #R uses rate
+
+## Determine observed vs. missing data
+y=replace(x = x, list = x>t, values = t) ## replace x > t, with t
+y=sort(y)
+r=sum(x<t) ## observed data
+yc=y[1:r] ## observed data
+ycbar=mean(yc) ## mean of the observed data
+m = n-r
+
+
+### EM
+thetahat = ycbar ## MLE using observed data
+cur = ycbar ## current estimate of theta for EM loop
+diff=1 ## set difference variable for while-loop
+while(diff>10^-4)
+{   
+    i = length(thetahat)
+    new_estimate = (r*ycbar+ m*(t + thetahat[i]))/n
+    thetahat=c(thetahat, new_estimate) ## grow the vector of estimates
+    diff=abs(thetahat[length(thetahat)]-thetahat[length(thetahat)-1])
+}
+
+
+```
+
+
+
+
+```{r}
+plot(thetahat, type="l")
+thetaMLE=ycbar+(n-r)*t/r
+abline(h=thetaMLE, col=2)
+
+
+```
+
+
+The true MLE estimate of $\theta$ is obtained by the following:
+
+$$
+\begin{aligned}
+P(X > t) & = \displaystyle \int_t^{\infty} f(x) dx \\ 
+\ & = \displaystyle \int_t^{\infty} \frac{1}{\theta} e^{x/ \theta} dx \\
+\ & = e^{- \infty} - ( - e^{t/ \theta}) \\
+\ & = e^{t/ \theta} \\
+\end{aligned}
+$$
+Therefore, the complete data likelihood is
+
+$$
+\begin{aligned}
+\displaystyle L(\theta) & = \prod^r_{i=1} \frac{1}{\theta} e^{y_i/\theta} \times \prod^m_{i=1} \frac{1}{\theta} e^{t/\theta}   \\
+\ & = \displaystyle \theta^{-r} e^{-r \bar{y} / \theta} \times e^{-\sum^m_{i=1} t / \theta }  \\
+\ & = \displaystyle \theta^{-r} e^{-r \bar{y} / \theta} \times e^{-m t / \theta }  \\
+\end{aligned}
+$$
+
+And the log-likelihood is
+
+$$
+\begin{aligned}
+\displaystyle ln(L(\theta)) & = -r \times ln(\theta) - r \bar{y} /  - m t / \theta  \\
+\ & = Q(\theta)
+\end{aligned}
+$$
+
+
+Whose derivative is 
+$$
+\begin{aligned}
+\displaystyle \frac{d}{d\theta}ln(L(\theta)) & = \frac{-r}{\theta} + r \bar{y} / \theta^2 + m t / \theta^2  \\
+\ & = 0 \\
+\ & \to \hat{\theta}_{MLE} = \bar{y} + \frac{(n-r) \times t}{r}
+\end{aligned}
+$$
+
+
+
+
+```{r}
+
+## Monte Carlo EM for censored exponential
+set.seed(456)
+thetahat = ycbar
+cur = ycbar
+M = 100
+diff=1
+while(diff > 10^-4){
+  iter=length(thetahat)
+  z = t + rexp(M*m,1/thetahat[iter])
+  Z = matrix(nrow=m, ncol=M, data = z)
+  YC = matrix(nrow=r, ncol=M, data = rep(yc,M))
+  simcomplete = rbind(Z, YC)
+  thetahat=c(thetahat,mean(apply(simcomplete,2,mean)))
+  diff=abs(thetahat[iter+1]-thetahat[iter])
+}
+
+
+
+plot(thetahat, type="l")
+thetaMLE=ycbar+(n-r)*t/r
+abline(h=thetaMLE, col=2)
+
+```
+
+
+
+
+
+
   [1]: http://www.webpages.uidaho.edu/~stevel/565/literature/Exercise%20in%20EM.pdf
  
 
