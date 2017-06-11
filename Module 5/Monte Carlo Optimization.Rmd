@@ -231,28 +231,84 @@ The following is an example from *Computational Statistics* by Givens and Hoetin
 
 ```{r}
 
-set.seed(4567)
-N = 500
-theta = 2
-c = 0.5
-y = sort(rexp(n = N, rate = theta))
-bigC = sum(y> c)
+set.seed(456789)
+truetheta=10
+t = 0.2 ##censoring time
+n = 100
+x = round(rexp(n, truetheta), 4) #R uses rate
+hist(x)
+abline(v = t)
+
+## Determine observed vs. missing data
+y = x[x < t]
+y=sort(y)
+r=sum(x < t) ## observed data
+m = n-r
 
 
-y[y> c] = c
 
-
-
-theta.tp1 = 0.1
-for(i in 1:2000){
-  theta.t = theta.tp1
-  theta.tp1 = N / (sum(y) + (bigC/theta.t))
-  #print(theta.tp1)
+N = 100 ## number of iterations
+M = 20
+new_theta = n/sum(y)
+diff = 1
+results = numeric(N)
+for(i in 1:N){
+  results[i] = new_theta
+  old_theta = new_theta
+  #print(old_theta)
+  Y = matrix(data = rep(x = y, M), nrow = length(y), ncol = M)
+  Z = t + rexp(n = M * m, rate = old_theta)
+  Z = matrix(data = Z, nrow = m, ncol = M)
+  X = rbind(Y,Z)
+  new_theta = n/mean(apply(X,2, sum))
+  #new_theta = n/mean(colSums(X))
+  M = M + 1
+  #print(new_theta)
 }
 
-print(theta.tp1)
+
+plot(results, main = "EM Estimates of theta", 
+     type = "l", col = "blue", ylim = c(5, 20),
+     xlab = "samples", ylab = "theta estimate")
+abline(h = truetheta, col = "green")
+abline(h = n/sum(y), col = "red") ## MLE estimate of observed data
+
+#thetaMLE= 1/(mean(y[y < t]) + (n-r)*t/r)
 
 ```
+
+
+MCEM implementation
+
+```{r}
+
+M = 20
+y_observed = y[y < t]
+new_est = mean(y_observed)
+results = numeric(200)
+for(i in 1:200){
+  old_est = new_est
+  samples = rexp(n = m * M, rate = t + old_est)
+  Y = matrix(data = rep(y_observed, M), nrow = length(y_observed), ncol = M)
+  Z = matrix(data = samples, nrow = m, ncol = M)
+  complete = rbind(Y,Z)
+  new_est = 1/mean(colMeans(complete))
+  #print(new_est)
+  results[i] = new_est
+  M = M + 5
+}
+
+print("tail sample:")
+print(tail(results))
+
+plot(results, main = "EM Estimates of theta", type = "l",
+     xlab = "samples", ylab = "theta estimate",
+     ylim = c(0, 3))
+abline(h = theta, col = "red")
+
+
+```
+
 
 
 
@@ -377,7 +433,7 @@ while(diff>10^-4)
     i = length(thetahat)
     new_estimate = (r*ycbar+ m*(t + thetahat[i]))/n
     thetahat=c(thetahat, new_estimate) ## grow the vector of estimates
-    diff=abs(thetahat[length(thetahat)]-thetahat[length(thetahat)-1])
+    diff = abs(thetahat[i+1]-thetahat[i])
 }
 
 
@@ -387,9 +443,10 @@ while(diff>10^-4)
 
 
 ```{r}
-plot(thetahat, type="l")
+plot(thetahat, type="l", ylim = c(2, 15))
 thetaMLE=ycbar+(n-r)*t/r
-abline(h=thetaMLE, col=2)
+abline(h=thetaMLE, col = "green") ## MLE estimate
+abline(h = truetheta, col = "red") ## true theta
 
 
 ```
@@ -443,23 +500,30 @@ $$
 set.seed(456)
 thetahat = ycbar
 cur = ycbar
-M = 100
+M = 20
 diff=1
 while(diff > 10^-4){
-  iter=length(thetahat)
-  z = t + rexp(M*m,1/thetahat[iter])
+  i = length(thetahat)
+  z = t + rexp(M*m,1/thetahat[i])
   Z = matrix(nrow=m, ncol=M, data = z)
   YC = matrix(nrow=r, ncol=M, data = rep(yc,M))
   simcomplete = rbind(Z, YC)
-  thetahat=c(thetahat,mean(apply(simcomplete,2,mean)))
-  diff=abs(thetahat[iter+1]-thetahat[iter])
+  new_estimate = mean(apply(simcomplete,2,mean))
+  thetahat=c(thetahat, new_estimate)
+  diff=abs(thetahat[i+1]-thetahat[i])
+  M = M + 1
 }
 
 
 
-plot(thetahat, type="l")
+plot(thetahat, type="l",
+     main = "MCEM estimates for theta",
+     xlab = "iterations", ylab = "theta estimate",
+     ylim = c(0, 11))
 thetaMLE=ycbar+(n-r)*t/r
-abline(h=thetaMLE, col=2)
+abline(h=thetaMLE, col = "green") ## MLE estimate
+abline(h = truetheta, col = "red") ## true theta
+
 
 ```
 
