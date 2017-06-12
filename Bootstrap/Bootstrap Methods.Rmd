@@ -1,0 +1,184 @@
+---
+title: "Bootstrap Methods"
+author: "Jonathan Navarrete"
+date: "June 11, 2017"
+output: pdf_document
+---
+
+
+## Introduction
+
+Bootstrap methods in simple terms are methods of *resampling* observed data to estimate the empirical CDF from which the observed data is supposed to have originate from. Suppose we observe *independent* samples $x_1, ..., x_n$ from pdf/pmf $f$, and whose CDF $F$ is unobservable (directly). Well, given that $X = (x_1, ..., x_n)^T$ originates from $F$, we can use $X$ to generate $F_n$ which is itself an estimate of $F$. If we sample (with replacement) another set of $n$ observations from $F_n$, we will have $X^* = (x_1^*, ..., x_n^*)^T$. This new sample $X^*$ can then generate a CDF, $F^*_n$ which is another estimate of $F_n$. That is, $F^*_n$ is a bootstrap estimator of $F$. We can continue this process of resampling with replacement to obtain samples $X^*_1,X^*_2, ..., X^*_B$ and $F^*_{n,1}, F^*_{n,2}, ..., F^*_{n,B}$.
+
+In addition to estimating $F$, there may be a statistic of interest $\theta$ (e.g. mean). We can use bootstrap methods to calculate an empirical distribution of $\theta$. From our original sample $X$ we can calculate estimate $\hat{\theta}$. Our bootstrap sample can also be used to calcualte an estimate, $\hat{\theta}^*_1, ..., \hat{\theta}^*_B$.
+
+
+A simple bootstrap algorithm for *independent* samples $X$ is:
+
+To generate *B* bootstrap samples, for *b* in 1, .., *B* do
+
+> 1. Sample $x_1, ..., x_n$ with replacement; each sample has a probability of *1/n* of being in the new sample.
+
+> 2. Calculate $\hat{\theta}^*_b$
+
+We will then observe the empirical distribution of $\hat{\theta}$, $F_{\hat{\theta}}$.
+
+
+We will use the `mtcars` data set to illustrate a simple implementation. 
+
+```{r}
+data("mtcars")
+mpg = mtcars$mpg
+n = length(mpg)
+hist(x = mpg, probability = TRUE, xlab = "MPG", main = "Histogram of MPG")
+
+B = 1000
+results = numeric(B)
+for(b in 1:B){
+  i = sample(x = 1:n, size = n, replace = TRUE)
+  bootSample = mpg[i]
+  thetaHat = mean(bootSample)
+  results[b] = thetaHat
+}
+
+hist(x = results, probability = TRUE, 
+     main = "Bootstrapped Samples of Mean_mpg",
+     xlab = "theta estimates")
+
+
+
+print(table(i)/n)
+
+
+```
+
+
+As a precaution and note on proper use of bootstrap methods, before enbarking on resampling we must ask what variables are *iid* in order to determine a correct bootstrapping approach. Bootstrap methods are *not* a method of generating new data for, say, a regression setting when observed samples are low. In the above example, it is assumed that each observation in the `mpg` data set is indpendent and identically distributed from an unknown distribution $f$. However, if there were to have existed some autocorrelation structure (as exist in time-series data) then we would need to adjust our resampling methodology. When dealing with time-series data, we will use a method called *block bootsrap*.
+
+
+## Paired Bootstrapping
+
+Let's continue to work with the `mtcars` data set. Say we wanted to make inferences about the linear regression parameters.
+
+```{r}
+library(ggplot2)
+
+mtcars$am <- as.factor(mtcars$am)
+
+fit = lm(formula = mpg ~ wt + am, data = mtcars)
+
+qplot(x = as.factor(am), y = mpg, data = mtcars, geom = "boxplot",
+      main = "Boxplot: MPG ~ AM", ylab = "MPG", xlab = "AM",
+      colour = am)
+
+
+qplot(x = wt, y = mpg, data = mtcars,
+      main = "Boxplot: MPG ~ Weight", ylab = "MPG", xlab = "Weight",
+      colour = am)
+
+## see summary of model
+summary(fit)
+
+## see coefficients
+beta_int = coefficients(fit)[1]
+beta_wt = coefficients(fit)[2]
+beta_am = coefficients(fit)[3]
+
+```
+
+
+
+
+
+
+```{r}
+n = dim(mtcars)[1]
+B = 1000
+
+results = matrix(data = NA, nrow = B, ncol = 3, 
+                 dimnames = list(NULL, c("Intercept", "wt", "am")))
+for(b in 1:B){
+  i = sample(x = 1:n, size = n, replace = TRUE)
+  temp = mtcars[i,]
+  temp_model =  lm(formula = mpg ~ wt + am, data = temp)
+  coeff = matrix(data = coefficients(temp_model), ncol = 3)
+  if(sum(is.na(coeff)) > 0){
+    break
+  }
+  results[b,] = coeff
+}
+
+results <- data.frame(results, check.names = FALSE)
+
+head(results)
+tail(results)
+
+boot_int = results[,"Intercept"]
+boot_wt = results[,"wt"]
+boot_am = results[,"am"]
+
+
+par(mfrow = c(2,2))
+hist(boot_int, main = "Bootstrapped Coefficients for Intercept",
+     xlab = "Coefficients for Intercept", probability = TRUE)
+abline(v = coefficients(fit)[1], col = "black")
+
+
+hist(boot_wt, main = "Bootstrapped Coefficients for Weight",
+     xlab = "Coefficients for Weight", probability = TRUE)
+abline(v = coefficients(fit)[2], col = "blue")
+
+
+hist(boot_am, main = "Bootstrapped Coefficients for AM = 1",
+     xlab = "Coefficients for Automatic Transmission", probability = TRUE)
+abline(v = coefficients(fit)[3], col = "green")
+
+
+
+```
+
+
+Now we can estimate bias
+
+```{r}
+
+bias_int = mean(boot_int - beta_int)
+print(bias_int)
+
+bias_wt = mean(boot_wt - beta_wt)
+print(bias_wt)
+
+bias_am = mean(boot_am - beta_am)
+print(bias_am)
+
+
+## incorportate our bias into the coefficients
+## we now have bias corrected coefficients
+
+intercept = beta_int + bias_int
+print(intercept)
+
+
+wt = beta_wt + bias_wt
+print(wt)
+
+
+am = beta_am + bias_am
+print(am)
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
