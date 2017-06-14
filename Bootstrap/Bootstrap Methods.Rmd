@@ -155,15 +155,15 @@ print(bias_am)
 ## incorportate our bias into the coefficients
 ## we now have bias corrected coefficients
 
-intercept = beta_int + bias_int
+intercept = beta_int - bias_int
 print(intercept)
 
 
-wt = beta_wt + bias_wt
+wt = beta_wt - bias_wt
 print(wt)
 
 
-am = beta_am + bias_am
+am = beta_am - bias_am
 print(am)
 
 
@@ -171,8 +171,7 @@ print(am)
 ```
 
 
-
-
+Define Bias as $Bias(\theta) = E[\theta^*] - \theta$, where in our scenario we have $Bias(\hat\theta) = E[\hat\theta^*] - \hat\theta$. Our bootstrap bias corrected estimates are then $\hat\theta_{BC} = \hat\theta - Bias(\hat\theta)$.
 
 
 
