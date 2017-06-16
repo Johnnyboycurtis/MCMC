@@ -530,6 +530,80 @@ abline(h = truetheta, col = "red") ## true theta
 
 
 
+### EM Normal Example
+
+
+```{r}
+
+set.seed(123)
+n = 100
+mu = 4
+sd = 3
+x = rnorm(n, mu, sd)
+c = 7
+
+w = x[x<c]
+wbar = mean(w)
+m = sum(x>c)
+
+
+N = 200
+mu_new = wbar
+results = numeric(N)
+for(i in 1:N){
+    results[i] = mu_new
+    mu_old = mu_new
+    mu_new = r*wbar/n + (n - r)*mu_old/n + (1/n)*sd*(dnorm(c - mu_old))/(1 - pnorm(c - mu_old)) 
+    #print(mu_new)
+}
+
+
+print(tail(results))
+plot(results, type = "l", main = "em estimates for mu", ylim = c(3,5))
+
+
+```
+
+
+
+
+```{r}
+
+set.seed(123)
+n = 100
+mu = 4
+sd = 3
+x = rnorm(n, mu, sd)
+c = 7
+
+w = x[x < c]
+r = sum(x < c)
+wbar = mean(w)
+m = sum(x>c)
+
+M = 10
+N = 200
+mu_new = wbar
+results = numeric(N)
+for(i in 1:N){
+    results[i] = mu_new
+    mu_old = mu_new
+    #Y = matrix(data = rep(y, M), nrow = r, ncol = M)
+    Z = c + matrix(data = rnorm(n = m*M, mean = mu_old, sd = 1), nrow = m, ncol = M)
+    #X = rbind(Y,Z)
+    mu_new = r*wbar/n + ( m*mean(colMeans(Z))/n ) 
+    M = M + 1
+}
+
+
+print(tail(results))
+plot(results, type = "l", main = "em estimates for mu")
+
+```
+
+
+
+
 
 
   [1]: http://www.webpages.uidaho.edu/~stevel/565/literature/Exercise%20in%20EM.pdf
