@@ -535,16 +535,16 @@ abline(h = truetheta, col = "red") ## true theta
 
 ```{r}
 
-set.seed(123)
+set.seed(2345)
 n = 100
 mu = 4
-sd = 3
+sd = 1
 x = rnorm(n, mu, sd)
-c = 7
-
-w = x[x<c]
+c = 5
+w = x[x < c]
+m = sum(x < c)
 wbar = mean(w)
-m = sum(x>c)
+r = n - m
 
 
 N = 200
@@ -553,13 +553,14 @@ results = numeric(N)
 for(i in 1:N){
     results[i] = mu_new
     mu_old = mu_new
-    mu_new = r*wbar/n + (n - r)*mu_old/n + (1/n)*sd*(dnorm(c - mu_old))/(1 - pnorm(c - mu_old)) 
+    mu_new = m*wbar/n + (r*mu_old/n) + 
+      (1/n)*sd*(dnorm(c - mu_old))/(1 - pnorm(c - mu_old)) 
     #print(mu_new)
 }
 
 
 print(tail(results))
-plot(results, type = "l", main = "em estimates for mu", ylim = c(3,5))
+plot(results, type = "l", main = "em estimates for mu", ylim = c(3.5, 4))
 
 
 ```
@@ -569,35 +570,35 @@ plot(results, type = "l", main = "em estimates for mu", ylim = c(3,5))
 
 ```{r}
 
-set.seed(123)
+set.seed(0969)
+
 n = 100
 mu = 4
-sd = 3
+sd = 1
 x = rnorm(n, mu, sd)
-c = 7
-
+c = 5
 w = x[x < c]
-r = sum(x < c)
+m = sum(x < c)
 wbar = mean(w)
-m = sum(x>c)
+r = n - m
 
 M = 10
-N = 200
+N = 1000
 mu_new = wbar
 results = numeric(N)
 for(i in 1:N){
     results[i] = mu_new
     mu_old = mu_new
-    #Y = matrix(data = rep(y, M), nrow = r, ncol = M)
-    Z = c + matrix(data = rnorm(n = m*M, mean = mu_old, sd = 1), nrow = m, ncol = M)
-    #X = rbind(Y,Z)
-    mu_new = r*wbar/n + ( m*mean(colMeans(Z))/n ) 
+    Z = matrix(data = (c - mu_old) + rnorm(n = r*M, mean = mu_old, sd = 1), 
+        nrow = r, ncol = M)
+    mu_new = (m*wbar/n) + mean(colMeans(Z))*r/n
     M = M + 1
 }
 
 
-print(tail(results))
-plot(results, type = "l", main = "em estimates for mu")
+plot(results, type = "l", ylim = c(3.5, 4))
+abline(h = mu, col = "red")
+
 
 ```
 
