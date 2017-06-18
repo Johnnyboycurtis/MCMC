@@ -532,6 +532,57 @@ abline(h = truetheta, col = "red") ## true theta
 
 ### EM Normal Example
 
+Suppose $X = (x_1, ..., x_n)^T$ is a random sample from $N(\mu,1).$ Let the observations be in order such that $x_1 < x_2 < ... < x_n$. 
+Suppose that after time c, values are censored or missing, such that only $x_1, ..., x_m$ are observed, and $x_{m+1}, ..., x_n$ are unobserved. 
+Then, r = (n - m) would be the quantity missing. We will use the EM and MCEM algorithms to find approximations for $\mu$.
+Let Z = (x_{m+1}, ..., x_n)^T.
+
+First, construct the likelihood function.
+
+$$
+\begin{aligned}
+L(\mu | x) & = \prod^m f(x_i | \mu, 1) \times \prod^r f(z_i | \mu, 1) \\
+\ & = (2 \pi )^{-n/2} exp(-\frac{1}{2} \sum_{i=1}^m (x_i - \mu)^2) \times exp(-\frac{1}{2} \sum_{i=1}^m (z_i - \mu)^2) \\
+\ & \propto exp(-\frac{1}{2} \sum_{i=1}^m (x_i - \mu)^2) \times exp(-\frac{1}{2} \sum_{i=1}^m (z_i - \mu)^2)
+\end{aligned}
+$$
+
+The log-likelihood is then 
+
+$$
+ln(L(\mu | X)) = -\frac{1}{2} \sum_{i=1}^m (x_i - \mu)^2) - \frac{1}{2} \sum_{i=1}^m (z_i - \mu)^2
+$$
+
+We now find the conditional expectation $E[z_i | X]$
+
+$$
+\begin{aligned}
+E[z_i | X] & =  E[z_i | x > c] = \int_c^{\infty} \frac{P(x_i > x | x_i > c)}{P(x_i > c)}   \\
+\ & = \mu + \sigma \frac{\phi(c - \mu)}{1 - \Phi(c - \mu)}
+\end{aligned}
+$$
+
+For notes on this derivation, see [Truncated Normal Distribution](https://en.wikipedia.org/wiki/Truncated_normal_distribution#Moments)
+
+
+$$
+\begin{aligned}
+Q(\mu | \mu_t) & = -\frac{1}{2} \sum_{i=1}^m (x_i - \mu)^2) - \sum E[z_i | X] \\
+\ & =   -\frac{1}{2} \sum_{i=1}^m (x_i - \mu)^2) - \sum E[z | X] \\
+\ & =   -\frac{1}{2} \sum_{i=1}^m (x_i - \mu)^2) - (n-m) E[z | X] \\
+\end{aligned}
+$$
+
+The MLE for $\mu$ is then,
+
+$$
+\begin{aligned}
+\mu_{t+1} & =  \frac{m \bar{x}}{n} + \frac{(n - m) E[z | X]}{n} \\
+\ & = \frac{m \bar{x}}{n} + \frac{(n - m) (\mu_t)}{n} + \frac{(n-m) \phi(c - \mu_t)}{n \Phi(c-\mu_t)} \\
+\end{aligned}
+$$
+
+
 
 ```{r}
 
@@ -554,13 +605,16 @@ for(i in 1:N){
     results[i] = mu_new
     mu_old = mu_new
     mu_new = m*wbar/n + (r*mu_old/n) + 
-      (1/n)*sd*(dnorm(c - mu_old))/(1 - pnorm(c - mu_old)) 
+      (r/n)*sd*(dnorm(c - mu_old))/(1 - pnorm(c - mu_old))  ## r/n instead of 1/n
     #print(mu_new)
 }
 
 
 print(tail(results))
-plot(results, type = "l", main = "em estimates for mu", ylim = c(3.5, 4))
+plot(results, type = "l", main = "em estimates for mu", ylim = c(3.5, 4.5))
+abline(h = mu, col = "red")
+abline(h = wbar, col = "green", lty = 2)
+abline(h = mean(x), col = "blue", lty = 3)
 
 
 ```
