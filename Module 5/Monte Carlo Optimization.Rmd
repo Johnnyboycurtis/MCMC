@@ -570,8 +570,7 @@ plot(results, type = "l", main = "em estimates for mu", ylim = c(3.5, 4))
 
 ```{r}
 
-set.seed(0969)
-
+set.seed(2345)
 n = 100
 mu = 4
 sd = 1
@@ -582,22 +581,29 @@ m = sum(x < c)
 wbar = mean(w)
 r = n - m
 
+
 M = 10
-N = 1000
+N = 100
 mu_new = wbar
 results = numeric(N)
 for(i in 1:N){
     results[i] = mu_new
     mu_old = mu_new
-    Z = matrix(data = (c - mu_old) + rnorm(n = r*M, mean = mu_old, sd = 1), 
+    ## abs(N(0,1)) + mu_old + (c - mu_old) to *approximate*
+    ## the truncated samples we need
+    Z = matrix(data = (c - mu_old) + (mu_old +  abs(rnorm(n = r*M, mean = 0, sd = 1))), 
         nrow = r, ncol = M)
     mu_new = (m*wbar/n) + mean(colMeans(Z))*r/n
     M = M + 1
 }
 
-
-plot(results, type = "l", ylim = c(3.5, 4))
+plot(results, type = "l", ylim = c(3.5, 5))
 abline(h = mu, col = "red")
+abline(h = wbar, col = "green", lty = 2)
+abline(h = mean(x), col = "blue", lty = 3)
+
+
+
 
 
 ```

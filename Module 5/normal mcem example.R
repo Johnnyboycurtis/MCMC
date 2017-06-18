@@ -184,6 +184,16 @@ abline(h = mean(x), col = "blue", lty = 3)
 
 
 ## alternatively, abs(rnorm(n, 0, 1)) simulations to generate right truncated sims
+n = 100
+mu = 4
+sd = 1
+x = rnorm(n, mu, sd)
+c = 5
+w = x[x < c]
+m = sum(x < c)
+wbar = mean(w)
+r = n - m
+
 
 M = 10
 N = 200
@@ -192,13 +202,15 @@ results = numeric(N)
 for(i in 1:N){
     results[i] = mu_new
     mu_old = mu_new
+    ## abs(N(0,1)) + mu_old + (c - mu_old) to *approximate*
+    ## the truncated samples we need
     Z = matrix(data = (c - mu_old) + (mu_old +  abs(rnorm(n = r*M, mean = 0, sd = 1))), 
         nrow = r, ncol = M)
     mu_new = (m*wbar/n) + mean(colMeans(Z))*r/n
     M = M + 1
 }
 
-plot(results, type = "l", ylim = c(3.5, 4.5))
+plot(results, type = "l", ylim = c(3.5, 5))
 abline(h = mu, col = "red")
 abline(h = wbar, col = "green", lty = 2)
 abline(h = mean(x), col = "blue", lty = 3)
