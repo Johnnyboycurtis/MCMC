@@ -15,6 +15,58 @@ Topics to be covered:
 
 
 
+## Monitoring Convergence 
+
+
+Monitoring convergence of Monte Carlo samples is important to assessing the quality of estimators. For some MC estimate $\theta_{MC}$, it is possible to run many parallel processes and graphically monitor how they converge, and from those samples obtain a confidence band. However, this may be computationally costly, and resource (e.g. hardware + time) intensive.
+
+An approximate but cheaper version of this basic Monte Carlo estimate of the variability is to bootstrap the originally obtained samples and from there estimate a 95% confidence band.
+
+As a toy example, consider the simple function $h(x) = [cos(50x) + sine(50x)]^2$. Using a simple MC algorithm, we can estimate $\theta = \int_0^1 h(x)$. Let us generate $n$ samples $x_1, ..., x_n \sim Unif(0,1)$, such that $\displaystyle \theta = E[h(x)] \approx \frac{1}{n} \sum^n h(x_i)$. 
+
+```{r}
+set.seed(5692)
+n = 1000L
+x = runif(n)
+
+h = function(x){
+  v = (cos(50*x) + sin(50*x))^2
+  return(v)
+}
+
+
+theta_est = mean(h(x)) 
+
+theta_est = cumsum(h(x))/1:n
+
+
+## bootstrap
+M = 5000L
+boot_samples = h(x[sample(x = 1:n, size = n*M, replace = TRUE)])
+boot_samples = matrix(data = boot_samples, nrow = n, ncol = M)
+
+boot_est = apply(X = boot_samples, MARGIN = 2, FUN = cumsum) / 1/1:n
+
+CI = t(apply(X = boot_est, MARGIN = 1, FUN = quantile, c(.025,.975)))
+
+summary(CI)
+
+
+plot(x = 1:n, y = theta_est, type = "l", ylim  = c(0, 2),
+     main = "Estimate of E[h(x)]", ylab = "mean(h(x))", xlab = "number of samples")
+polygon(x = c(1:n, rev(1:n)), y = c(CI[,1], rev(CI[,2])), lty = 4, border = "blue")
+
+
+```
+
+
+
+
+\newpage
+\clearpage
+
+
+
 
 ## Antithetic Variables
 
