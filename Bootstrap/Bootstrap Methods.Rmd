@@ -174,7 +174,7 @@ print(am)
 Define Bias as $Bias(\theta) = E[\theta^*] - \theta$, where in our scenario we have $Bias(\hat\theta) = E[\hat\theta^*] - \hat\theta$. Our bootstrap bias corrected estimates are then $\hat\theta_{BC} = \hat\theta - Bias(\hat\theta)$.
 
 
-
+Another method for applying the bootstrap approach to building an empirical distribution of $\hat\beta$ is to bootstrap the residuals. However, bootstrapping the cases is often more robust when there are doubts about a constant variance for the residuals, such as heteroskedasticity. Additionally, paired bootstrap more resembles the original data generation mechanisms.
 
 
 
