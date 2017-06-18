@@ -183,3 +183,40 @@ cor(U, 1-U)
 ```
 
 
+
+
+
+
+
+
+
+
+### Example 6.10
+
+Suppose $X \sim N(0,1)$ and we wish to estimate $\theta = E[h(X)]$ where $h(X) = \frac{x}{(2^x - 1)}$. By regular Monte Carlo estimation, we can estimate $\theta$ with $n = 10^6$ samples from $N(0,1)$. By antithetic variable estimation we can estimate $\theta$ by m = n/2 = 50,000. The antithetic estimator can be constructed using the $X = (x_1, ..., x_m)$, and `c(X, -X)` as our antithetic sample, where X and -X are negatively correlated. 
+$\hat\theta_AS = \frac{1}{n} \sum_{i=1}^m h(x_i) + h(-x_i)$
+
+
+
+```{r}
+
+n = 10^6
+m = n/2
+
+h <- function(x){
+    out = x/(2^x - 1)
+    return(out)
+}
+
+y = rnorm(n)
+theta_MC = mean(h(y))
+
+w = rnorm(m)
+theta_AS = sum(h(w) + h(-1 * w)) / n
+
+print(theta_MC)
+print(theta_AS)
+
+
+```
+
