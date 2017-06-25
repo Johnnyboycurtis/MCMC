@@ -188,4 +188,10 @@ As in the 2-state example, our Markov chain's transition to $X_t$ only depends o
 
 
 
+For a more thorough review of Markov chains, see [*Chapter 11: Markov Chains*](http://www.dartmouth.edu/~chance/teaching_aids/books_articles/probability_book/Chapter11.pdf).
+
+
+
+
+
 
