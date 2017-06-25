@@ -1,0 +1,90 @@
+
+
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsmath, amsthm, amssymb, mathrsfs}
+\usepackage{fullpage}
+\usepackage{verbatim, graphicx, multirow, url}
+\usepackage[usenames]{color}
+\usepackage{ifthen}
+
+%\parindent 0pt
+
+%\renewcommand{\figurename}{Fig}
+
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\var}{\mathsf{V}}
+\newcommand{\cov}{\mathsf{C}}
+\newcommand{\prob}{\mathsf{P}}
+
+\newcommand{\eps}{\varepsilon}
+\renewcommand{\phi}{\varphi}
+
+\newcommand{\iid}{\overset{\text{\tiny iid}}{\sim}}
+\newcommand{\cd}{\overset{\text{\sc d}}{\to}}
+\newcommand{\cp}{\overset{\text{\sc p}}{\to}}
+
+\newcommand{\nm}{\mathsf{N}}
+\newcommand{\ber}{\mathsf{Ber}}
+\newcommand{\bin}{\mathsf{Bin}}
+\newcommand{\pois}{\mathsf{Pois}}
+\newcommand{\expo}{\mathsf{Exp}}
+\newcommand{\gam}{\mathsf{Gam}}
+\newcommand{\unif}{\mathsf{Unif}}
+\newcommand{\be}{\mathsf{Beta}}
+
+\newcommand{\Xbar}{\bar X}%{\overline{X}}
+\newcommand{\xbar}{\bar x}%{\overline{x}}
+
+\newcommand{\grad}{\nabla}
+
+
+
+\begin{document}
+
+\noindent \large \textbf{Stat 591 -- Homework 06} \hfill \textbf{Due: Wednesday 12/11} \normalsize
+
+\medskip
+
+\noindent \emph{Your group should submit a write-up that includes solutions the problems stated below, along with any \underline{relevant} pictures/graphs or computer code/output.}  
+
+\medskip
+
+\begin{enumerate}
+
+\item Problem 9.11 in [GDS].  
+
+\item Look at Example~9.3 in Section~9.1 of [GDS]; see, also, the last paragraph in Section~9.1.1.  The problem is formulated as follows: $X_{j1},\ldots,X_{jn} \iid \nm(\mu_j, \sigma^2)$, independent across $j=1,\ldots,p$.  Here $(\mu_1,\ldots,\mu_p, \sigma^2)$ are unknown.  Take an exchangeable prior for $(\mu_1,\ldots,\mu_p)$: 
+\begin{align*}
+(\mu_1,\ldots,\mu_p) \mid (m,v,\sigma^2) & \iid \nm(m,v) \\
+(m,v,\sigma^2) & \sim \pi(m,v,\sigma^2) \propto 1/\sigma^2.
+\end{align*}
+Modify your Gibbs sampler for the ANOVA problem in Homework~05 to this setting.  In particular, explain how you would approximate $\E(\mu_j \mid X)$ using the Gibbs sampler output.  There are several ways this can be done, some better than others.  Look at Section~7.4.5 in [GDS] on Rao--Blackwellization, and Equation~(9.1).  
+
+\item Consider the multiple testing problem in Scott \& Berger (\emph{JSPI}, 2006).  In particular, note that the goal there is to evaluate $p_j := \prob(\mu_j=0 \mid x)$, $j=1,\ldots,M$.  
+\begin{enumerate}
+\item Suppose one can sample from the posterior distribution of $(\mu_1,\ldots,\mu_M, p, \sigma^2, V)$.  How could you use that posterior sample to evaluate $p_1,\ldots,p_M$?  
+\item Why do they opt for an importance sampling strategy to evaluate $p_1,\ldots,p_M$ instead of a method like you described in part (a)?  In other words, what is the advantage of importance sampling over MCMC in this case?  
+\end{enumerate}
+
+\item \emph{Students' choice}.  Complete one (or more) of the following computational exercises.
+\begin{enumerate}
+\item For the multiple testing problem, implement the Scott \& Berger (\emph{JSPI}, 2006) importance sampling procedure to compute $p_j := \prob(\mu_j = 0 \mid x)$, $j=1,\ldots,M$.  Using all the same settings, reproduce the results in their Table~1 for the prior $\pi(p)=11p^{10}$ and $n=25, 100$.  
+\item Park \& Casella (\emph{JASA}, 2008) propose a Bayesian lasso method for variable selection in regression.\footnote{Links to references available on course website; data available there too.}  Reproduce the results displayed in their Figure~2 for the Bayesian lasso and least squares estimates only.  For handling the Bayesian lasso parameter $\lambda$, you may use either the empirical Bayes (Section~3.1) or the full Bayes (Section~3.2) procedure.  
+\item Consider the simple many-normal-means problem discussed in Castillo \& van der Vaart (\emph{Annals}, 2012).$^1$  The theory presented there is relatively sophisticated (you don't have to read it) but, ultimately, they give some guidelines for choosing good priors in this problem.  A relatively simple prior, which is not covered by their theory, is the following: 
+\begin{align*}
+(\theta_1,\ldots,\theta_n) \mid \omega & \iid \omega \delta_0 + (1-\omega) \unif(-\infty,\infty) \\
+\omega & \sim {\sf Beta}(an, 1), 
+\end{align*}
+where ``$\unif(-\infty,\infty)$'' denotes a flat prior, and $a > 0$ is a fixed constant.  
+\begin{enumerate}
+\item Derive a Gibbs sampler to simulate from the posterior distribution of the mean vector $\theta=(\theta_1,\ldots,\theta_n)$.
+\item Consider using the coordinate-wise posterior mean $\hat\theta$ as an estimate of $\theta$.  Perform the simulation described in Section~3.4 of the paper and compute the mean square errors, $\E_\theta\|\hat\theta-\theta\|^2$, for the Bayes estimate above.  Compare your results with those given in Table~1 of the paper.  
+\end{enumerate}
+\end{enumerate}
+
+\end{enumerate}
+
+
+
+
+\end{document}

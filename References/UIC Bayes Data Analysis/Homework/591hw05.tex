@@ -1,0 +1,113 @@
+
+
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsmath, amsthm, amssymb, mathrsfs}
+\usepackage{fullpage}
+\usepackage{verbatim, graphicx, multirow, url}
+\usepackage[usenames]{color}
+\usepackage{ifthen}
+
+%\parindent 0pt
+
+%\renewcommand{\figurename}{Fig}
+
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\var}{\mathsf{V}}
+\newcommand{\cov}{\mathsf{C}}
+\newcommand{\prob}{\mathsf{P}}
+
+\newcommand{\eps}{\varepsilon}
+\renewcommand{\phi}{\varphi}
+
+\newcommand{\iid}{\overset{\text{\tiny iid}}{\sim}}
+\newcommand{\cd}{\overset{\text{\sc d}}{\to}}
+\newcommand{\cp}{\overset{\text{\sc p}}{\to}}
+
+\newcommand{\nm}{\mathsf{N}}
+\newcommand{\ber}{\mathsf{Ber}}
+\newcommand{\bin}{\mathsf{Bin}}
+\newcommand{\pois}{\mathsf{Pois}}
+\newcommand{\expo}{\mathsf{Exp}}
+\newcommand{\gam}{\mathsf{Gam}}
+\newcommand{\unif}{\mathsf{Unif}}
+\newcommand{\be}{\mathsf{Beta}}
+
+\newcommand{\Xbar}{\bar X}%{\overline{X}}
+\newcommand{\xbar}{\bar x}%{\overline{x}}
+
+\newcommand{\grad}{\nabla}
+
+
+
+\begin{document}
+
+\noindent \large \textbf{Stat 591 -- Homework 05} \hfill \textbf{Due: Friday 11/15} \normalsize
+
+\medskip
+
+\noindent \emph{Your group should submit a write-up that includes solutions the problems stated below, along with any \underline{relevant} pictures/graphs or computer code/output.}  
+
+\medskip
+
+\begin{enumerate}
+
+\item 
+\begin{enumerate}
+\item Problem 7.3 in [GDS].
+\item Problem 7.4 in [GDS].  
+\item Explain the advantage of the Box--Muller method compared to the inverse CDF method for simulating from $\nm(0,1)$.
+\end{enumerate}
+
+\item (Based on Problems 7.5 and 7.9 in [GDS].)  The goal to simulate $X \sim f(x)$.  Suppose that $f(x)$ is a non-standard density, but that there exists a density $g(x)$ that is easy to sample from and satisfies $f(x) \leq M g(x)$ for some $M \geq 1$.  Then the accept--reject method (closely related to Metropolis--Hastings) is as follows:  
+\begin{description}
+\item[\sc Step 1.] Sample $Y \sim g$ and $U \sim \unif(0,1)$, independent.  
+\vspace{-1mm}
+\item[\sc Step 2.] If $U \leq f(Y) / Mg(Y)$, then accept $Y$ as a sample $X \sim f(x)$; otherwise, reject $Y$ and return to Step~1. 
+\end{description}
+\begin{enumerate}
+\item Show that the output $X$ of the accept--reject method has distribution $f(x)$.  The distribution in question is that of $Y$ given that it's accepted, i.e., given that $U \leq f(Y) / Mg(Y)$.  
+\item Find the acceptance probability $\prob(U \leq f(Y) / M g(Y))$.  The algorithm is most efficient if the acceptance probability equals 1.  Under what conditions can the acceptance probability equal 1?  Can this be achieved?
+\item Consider sampling from ${\sf Gamma}(\theta,1)$.  If $\theta$ is an integer, then this can be done by sampling $\theta$ ${\sf Exp}(1)$ random variables and summing them.  If $\theta$ is not an integer, then it's more difficult.  Develop and implement an accept--reject method for simulating from a ${\sf Gamma}(\theta,1)$ when $\theta$ is $\geq 2$ and a non-integer.  Your method cannot use {\tt rgamma} or {\sf qgamma}.  Simulate 1000 values from ${\sf Gamma}(5.5, 1)$ using your method and draw a histogram with the gamma density overlaid.  How is the fit?  What is your acceptance rate?  
+
+\emph{Hint}.  For non-integer $\theta$, a gamma proposal with shape $[\theta]$, the integer part, would be OK, especially if $\theta$ is large.  You can improve on this with proposal ${\sf Gamma}([\theta],b)$ where $b$ is chosen so that the mean is $\theta$.  
+\end{enumerate}
+
+\item Suppose data $X_1,\ldots,X_n$ are iid from a Student-t distribution, with known degrees of freedom $\nu$, and unknown location $\theta \in (-\infty, \infty)$.  The pdf for $X_1$ is 
+\[ f_\theta(x) \propto \Bigl(1 + \frac{(x-\theta)^2}{\nu} \Bigr)^{-(\nu+1)/2}, \quad x \in (-\infty,\infty). \]
+This is a location parameter problem, so the invariant prior distribution is a flat prior for $\theta$, with density $\pi(\theta) \propto 1$.  If $L_n(\theta)$ is the likelihood function, then the posterior mean 
+\[ \tilde\theta_n(X) := \int \theta \pi(\theta \mid X) \,d\theta = \frac{\int \theta L_n(\theta) \,d\theta}{\int L_n(\theta) \,d\theta} \]
+is the \emph{Pitman estimator}, and is the ``best equivariant estimator'' of $\theta$ in a decision theoretic sense.  Develop and implement an importance sampling strategy to evaluate the posterior mean/Pitman estimator, and test it on a simulated sample of size $n=50$ with $\nu=5$ and $\theta=7$.  
+
+\emph{Hint}. The $n$ is relatively large, so the posterior for $\theta$ ought to be close to normal.  Use a fatter-tailed version of this normal distribution as your proposal/importance density.  Also, you'll need a numerical optimization procedure (e.g., {\tt nlm} in R) to find the MLE and observed information for the normal approximation.  
+
+%Recall the multinomial agreement problem from previous homework assignments.  Develop an importance sampling strategy to approximate the posterior mean of $\kappa$.  Your method should simulate from (an approximation of) the posterior distribution of $\kappa$, not from the posterior distribution of $\theta$.  Implement your method with the given data and compare your importance sampling approximation with that obtained based on direct sampling of the posterior distribution of $\theta$.  
+
+%\emph{Hint}. The sample size is relatively large, so the posterior distribution of $\kappa$ ought to be close to normal.  Use a suitable adjustment to this normal distribution as your proposal/importance density. 
+
+\item Problem 7.11 in [GDS]; you can use my Metropolis--Hastings code.  Recall that the exponential distribution is a special case of Weibull, i.e., when $\alpha=1$.  Draw a histogram to visualize the (marginal) posterior distribution for $\alpha$.  Based on this plot, do you think an exponential model would give a reasonable fit for the given data?  Explain.  
+
+\item The Gibbs sampling strategy given in Example~7.13 of [GDS] is for an extension of the usual one-way ANOVA model.  The standard one-way ANOVA model looks the same as in Example~7.13 except that the errors, $\eps_{ij}$, are iid normal with \emph{common} variance $\sigma^2$.  Derive a Gibbs sampler for this simpler one-way ANOVA model using the same priors as in Example~7.13.  The details are similar to those in the text. but the problem is a bit simpler now since there is only one variance.  
+
+Next, consider the following simulated data $Y=(y_{ij})$: 
+\begin{center}
+\begin{tabular}{cccccccc}
+Treatment, $i$ & & \multicolumn{6}{c}{Replication, $j$} \\
+\cline{1-1} \cline{3-8} 
+1 & & 6.58 & 6.54 & 0.61 & 7.69 & 2.18 & 3.84 \\
+2 & & 2.48 & 3.89 & 2.11 & 2.46 & 5.93 & 5.65 \\
+3 & & 1.32 & 3.27 & 6.90 & 5.65 & 1.81 & 2.79 \\
+4 & & 3.53 & 3.11 & 5.58 & 7.80 & 6.33 & 4.72 \\
+5 & & 7.01 & 3.96 & 4.60 & 5.47 & 6.29 & 1.97 \\
+\hline
+\end{tabular}
+\end{center}
+Implement your Gibbs sampler and simulate from the (marginal) posterior distribution of $\sigma_\pi^2$ for the given data.  Plot a histogram of this posterior sample.  Does this picture give you any indication of whether there is a significant treatment effect?  Explain.  
+
+
+
+\end{enumerate}
+
+
+
+
+\end{document}

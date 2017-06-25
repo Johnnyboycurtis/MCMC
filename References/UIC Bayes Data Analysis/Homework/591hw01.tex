@@ -1,0 +1,114 @@
+
+
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsmath, amsthm, amssymb, mathrsfs}
+\usepackage{fullpage}
+\usepackage{verbatim, graphicx, multirow}
+\usepackage[usenames]{color}
+\usepackage{ifthen}
+
+%\parindent 0pt
+
+%\renewcommand{\figurename}{Fig}
+
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\var}{\mathsf{V}}
+\newcommand{\cov}{\mathsf{C}}
+\newcommand{\prob}{\mathsf{P}}
+
+\newcommand{\eps}{\varepsilon}
+\renewcommand{\phi}{\varphi}
+
+\newcommand{\iid}{\overset{\text{\tiny iid}}{\sim}}
+\newcommand{\cd}{\overset{\text{\sc d}}{\to}}
+\newcommand{\cp}{\overset{\text{\sc p}}{\to}}
+
+\newcommand{\nm}{\mathsf{N}}
+\newcommand{\ber}{\mathsf{Ber}}
+\newcommand{\bin}{\mathsf{Bin}}
+\newcommand{\pois}{\mathsf{Pois}}
+\newcommand{\expo}{\mathsf{Exp}}
+\newcommand{\gam}{\mathsf{Gam}}
+\newcommand{\unif}{\mathsf{Unif}}
+\newcommand{\be}{\mathsf{Beta}}
+
+\newcommand{\Xbar}{\bar X}%{\overline{X}}
+\newcommand{\xbar}{\bar x}%{\overline{x}}
+
+\newcommand{\grad}{\nabla}
+
+
+
+\begin{document}
+
+\noindent \large \textbf{Stat 591 -- Homework 01} \hfill \textbf{Due: Wednesday 09/11} \normalsize
+
+\medskip
+
+\noindent \emph{Your group should submit a write-up that includes solutions the problems stated below, any relevant pictures, and a print-out of your computer code and \underline{relevant} output.}  
+
+\medskip
+
+An interesting statistical problem is the assessment of agreement.  For example, consider a population of items, each of which can be classified as either ``good'' (=1) or ``bad'' (=0).  Suppose, also, that there are two raters, A and B, to rate a given item as good or bad.  The goal is to assess if the A and B ratings agree.  To investigate this, we take an independent sample of $n$ items from the given population, to be rated by \emph{both} raters.  There are two classifications and two raters, so there are four possible outcomes, and the results are summarized in a $2 \times 2$ table:
+\begin{center}
+\begin{tabular}{ cr|c|c| }
+\multicolumn{2}{r}{} & \multicolumn{2}{c}{{\bf Rater B}} \\
+\multicolumn{2}{r}{} & \multicolumn{1}{c}{Bad (=0)} & \multicolumn{1}{c}{Good (=1)} \\
+\cline{3-4}
+\multirow{2}{*}{{\bf Rater A}} 
+& Bad (=0) & $X_{00}$ & $X_{01}$ \\
+\cline{3-4}
+& Good (=1) & $X_{10}$ & $X_{11}$ \\
+\cline{3-4}
+\end{tabular}
+\end{center}
+Note that $X_{00} + X_{01} + X_{10} + X_{11} \equiv n$.  Here, for example, $X_{00}$ is the number of sample items rated ``bad'' by both raters.  The two raters exactly agree if $X_{00} + X_{11} = n$ or equivalently, if $X_{01} + X_{10} = 0$.  However, the two raters could effectively agree, but have had a few chance disagreements for this particular sample of items.  That is, there may be no \emph{significant disagreement}.\footnote{Though this particular setup may not seem so interesting, there are important examples where this kind of problem arises.  Our own Professor Hedayat has a recent book (Springer 2012, with L.~Lin and W.~Wu) on non-Bayesian methods for assessing agreement.  There are also a number of nice examples in the book by L.~Broemeling (Chapman--Hall 2009) on Bayesian methods for agreement.}  
+
+For a statistical model, consider a corresponding $2 \times 2$ table of parameters:
+\begin{center}
+\begin{tabular}{ cr|c|c| }
+\multicolumn{2}{r}{} & \multicolumn{2}{c}{{\bf Rater B}} \\
+\multicolumn{2}{r}{} & \multicolumn{1}{c}{Bad (=0)} & \multicolumn{1}{c}{Good (=1)} \\
+\cline{3-4}
+\multirow{2}{*}{{\bf Rater A}} 
+& Bad (=0) & $\theta_{00}$ & $\theta_{01}$ \\
+\cline{3-4}
+& Good (=1) & $\theta_{10}$ & $\theta_{11}$ \\
+\cline{3-4}
+\end{tabular}
+\end{center}
+Note that $\theta_{00} + \theta_{01} + \theta_{10} + \theta_{11} \equiv 1$.  Here, for example, $\theta_{00}$ denotes the probability that both raters would classify an item as ``bad.''  There's nothing special about the $2 \times 2$ tabular structure, so let's rewrite the data and parameters as 
+\begin{align*}
+X & = (X_{00}, X_{01}, X_{10}, X_{11}) \equiv (X_1, X_2, X_3, X_4) \\
+\theta & =(\theta_{00}, \theta_{01}, \theta_{10}, \theta_{11}) \equiv (\theta_1, \theta_2, \theta_3, \theta_4).
+\end{align*}
+For the model, we shall assume $X =(X_1,X_2,X_3,X_4) \sim {\sf Mult}_4(n, \theta)$, i.e., a four-dimensional multinomial distribution with sample size $n$ and category probabilities $\theta=(\theta_1,\theta_2,\theta_3,\theta_4)$.  The corresponding likelihood function is 
+\[ L(\theta) = c(X) \theta_1^{X_1} \theta_2^{X_2} \theta_3^{X_3} (1-\theta_1-\theta_2-\theta_3)^{n-X_1-X_2-X_3}, \]
+where $c(X)$ is a function of data but not the parameter; note that the constraints on $X$ and $\theta$ have been explicitly enforced, so that there are effectively only three parameters.  
+
+For assessing agreement, a quantity of interest is the ``kappa'' coefficient
+\[ \kappa = g(\theta) := \frac{(\theta_1 + \theta_4) - \{(\theta_1 + \theta_2)(\theta_1 + \theta_3) + (\theta_3 + \theta_4)(\theta_2 + \theta_4)\}}{1 - \{(\theta_1 + \theta_2)(\theta_1 + \theta_3) + (\theta_3 + \theta_4)(\theta_2 + \theta_4)\}}. \]
+If there is exact agreement, then $\theta_1 + \theta_4=1$ and $\kappa$ is exactly 1, and if there is ``effective agreement,'' so that $\theta_2+\theta_3 \approx 0$, then $\kappa$ will be approximately 1.  So, the extent of agreement can be measured (at least intuitively) by the proximity of $\kappa$ to 1.  Therefore, we are interested in producing a confidence interval for $\kappa$.    
+
+
+\begin{enumerate}
+
+\item Show that the maximum likelihood estimator $\hat\theta$ of $\theta$ has $\hat\theta_j=X_j/n$, $j=1,\ldots,4$.  All you need to do is check that $\hat\theta$ above satisfies the likelihood equation.  [Hint: Think of $L(\theta)$ a function of only $(\theta_1,\theta_2,\theta_3)$, and find the gradient of the log-likelihood.]
+
+\item A Central Limit Theorem holds for $\hat\theta$.\footnote{You can see this intuitively since each $\hat\theta_j$ is a nice sample proportion, but we'll not worry about verifying this rigorously.  You can prove it using characteristic functions.}  That is, $n^{1/2}(\hat\theta - \theta) \to \nm_4(0, \Sigma_\theta)$, in distribution, where $\Sigma_\theta$ is a $4 \times 4$ covariance matrix that depends on $\theta$.  Find $\Sigma_\theta$.  [Hint: Use the formulae provided in Appendix~A.2.5 in the textbook.]
+
+\item For this problem, and those that follow, suppose that the observed data is 
+\[ X = (22, 15, 33, 30), \]
+so that $n=100$ (Broemeling 2009, p.~39).  
+
+We can get an approximate variance of $\hat\kappa=g(\hat\theta)$ using the result in Problem~2b above, along with the Delta Theorem.  Let $\grad g(\theta)$ be the ($4 \times 1$) gradient of $g(\theta)$.  Then the Delta Theorem says the asymptotically approximate variance is $\var(\hat\kappa) = \frac1n \grad g(\theta)^\top \,\Sigma_{\theta} \,\grad g(\theta)$.  You can estimate $\var(\hat\kappa)$ by plugging in $\hat\theta$ on the right-hand side.  Find the estimate of $\var(\hat\kappa)$ for the data above, and give a 90\% confidence interval for $\kappa$.  [Hint: The matrix multiplication in the variance formula is too messy to do by hand, so you should do this numerically; you can calculate the gradient $\grad g(\theta)|_{\theta=\hat\theta}$ analytically or numerically, whichever you prefer.]
+
+\item Using the data in Problem~3, find a bootstrap 90\% confidence interval for $\kappa$, and compare with your Delta Theorem interval above.  [Hint: In this problem, the parametric and nonparametric bootstrap are the same.  Just sample, say, $B=3000$ tables from a multinomial distribution\footnote{Here's a naive way to sample $X=(X_1,X_2,X_3,X_4)$ from the ${\sf Mult}_4(n,\theta)$ distribution using R: \\ {\tt X <- as.numeric(table(sample(1:4, size=n, prob=theta, replace=TRUE)))}} with parameters $n$ and $\hat\theta$; for each sampled table, $X_b^\star=(X_{b1}^\star,X_{b2}^\star, X_{b3}^\star, X_{b4}^\star)$, compute the maximum likelihood estimator, $\hat\theta_b^\star$, and then the corresponding $\hat\kappa_b^\star=g(\hat\theta_b^\star)$.]  
+
+\item Draw a histogram of the bootstrap distribution of $\hat\kappa$ from Problem~4, with the normal density corresponding to the Delta Theorem approximation in Problem~3 overlaid.  Compare the two plots.  
+
+\item Do you think there is agreement in this case?  Do the two analyses (MLE-based and bootstrap-based) give the same conclusion, or different?  Is the result consistent with your intuition based on looking at the observed data?
+
+\end{enumerate}
+
+\end{document}

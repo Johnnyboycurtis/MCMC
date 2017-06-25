@@ -1,0 +1,99 @@
+
+
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsmath, amsthm, amssymb, mathrsfs}
+\usepackage{fullpage}
+\usepackage{verbatim, graphicx, multirow, url}
+\usepackage[usenames]{color}
+\usepackage{ifthen}
+
+%\parindent 0pt
+
+%\renewcommand{\figurename}{Fig}
+
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\var}{\mathsf{V}}
+\newcommand{\cov}{\mathsf{C}}
+\newcommand{\prob}{\mathsf{P}}
+
+\newcommand{\eps}{\varepsilon}
+\renewcommand{\phi}{\varphi}
+
+\newcommand{\iid}{\overset{\text{\tiny iid}}{\sim}}
+\newcommand{\cd}{\overset{\text{\sc d}}{\to}}
+\newcommand{\cp}{\overset{\text{\sc p}}{\to}}
+
+\newcommand{\nm}{\mathsf{N}}
+\newcommand{\ber}{\mathsf{Ber}}
+\newcommand{\bin}{\mathsf{Bin}}
+\newcommand{\pois}{\mathsf{Pois}}
+\newcommand{\expo}{\mathsf{Exp}}
+\newcommand{\gam}{\mathsf{Gam}}
+\newcommand{\unif}{\mathsf{Unif}}
+\newcommand{\be}{\mathsf{Beta}}
+
+\newcommand{\Xbar}{\bar X}%{\overline{X}}
+\newcommand{\xbar}{\bar x}%{\overline{x}}
+
+\newcommand{\grad}{\nabla}
+
+
+
+\begin{document}
+
+\noindent \large \textbf{Stat 591 -- Homework 03} \hfill \textbf{Due: Wednesday 10/16} \normalsize
+
+\medskip
+
+\noindent \emph{Your group should submit a write-up that includes solutions the problems stated below, along with any \underline{relevant} pictures/graphs or computer code/output.}  
+
+\medskip
+
+\begin{enumerate}
+
+\item Let $(X_1,\ldots,X_n) \mid \theta \iid \nm(\theta, 1)$ and consider an improper flat prior for $\theta$, i.e., the prior density is $\pi(\theta) = 1$.  
+\begin{enumerate}
+\item If $X_1,\ldots,X_n \iid \nm(\theta^\star, 1)$, show that the posterior is consistent.  
+\item Design a simulation study that demonstrates the posterior consistency result you derived.  Explain the results of your simulation.  
+
+\emph{Hints:}
+\begin{itemize}
+\item Fix $\theta^\star=0$ and $\eps=0.01$, say, and define 
+\[ Q_n = \Pi(\theta: |\theta-\theta^\star| > \eps \mid X_1,\ldots,X_n), \]
+a random variable as a function of $X_1,\ldots,X_n \iid \nm(\theta^\star, 1)$. 
+\item For a given $n$, get a sample of size $M$ from the distribution of $Q_n$ by simulating $M$ sequences $X_1,\ldots,X_n \iid \nm(\theta^\star, 1)$ and computing the corresponding $Q_n$ for each; take $M=1000$, say.  
+\item Repeat this experiment for several values of $n$, ranging from relatively small to relatively large.  
+\item Summarize the results by plotting, say, the 50th, 75th, and 95th percentiles of the $Q_n$ distribution as a function of $n$.  
+\end{itemize}
+\end{enumerate}
+
+\item Problem 4.2 in [GDS], page 119.
+
+\emph{Hint:} Let $\theta^\star=\theta_i$.  Because the problem is discrete, it suffices to show that 
+\[ \Pi(\theta=\theta_i \mid X_1,\ldots,X_n) \to 1 \quad \text{in $\prob_{\theta_i}$-probability}. \]
+Look at the hint given in [GDS].  If $r=i$, then $Z_r \equiv 0$; if $r \neq i$, then $Z_r$ converges in $\prob_{\theta_i}$-probability to $-K(\theta_i, \theta_r)$, where $K(\theta_i,\theta_r) = \int \log\{ f_{\theta_i}(x) / f_{\theta_r}(x)\} f_{\theta_i}(x) \,dx$ is the \emph{Kullback--Leibler divergence} of $f_{\theta_r}(x)$ from $f_{\theta_i}(x)$.  By Jensen's inequality, we know that $K(\theta_i, \theta_r)$ is strictly positive for $r \neq i$.  
+
+\item Problem 4.3 in [GDS], page 119.
+
+\emph{Hint:} For given $\eps > 0$, define a sequence of random variables 
+\[ Q_n(X_1,\ldots,X_n) = \Pi(|\theta-\theta^\star| > \eps \mid X_1,\ldots,X_n) \]
+and a sequence of subsets of the sample space 
+\[ A_n = \{(x_1,x_2,\ldots): |\hat\theta_n(x_1,\ldots,x_n)-\theta^\star| \leq \eps/2\}. \]
+Dropping the dependence on $(X_1,\ldots,X_n)$ in the notation, write 
+\[ Q_n = Q_n \cdot I_{A_n} + Q_n \cdot I_{A_n^c}, \]
+where, e.g., $I_{A_n} = I_{A_n}(X_1,\ldots,X_n)$ is the indicator of $A_n$.  Now show that both terms in this sum go to zero as $n \to \infty$ in $\prob_{\theta^\star}$-probability.  
+
+\item Problem 4.4 in [GDS], page 119.
+
+\emph{Hint:} Note that [GDS] defines $L_n(\theta)$ to be the log-likelihood function, what I would usually write as $\ell_n(\theta)$.  Then 
+\[ \frac{L_n(\theta) - L_n(\theta^\star)}{n} = (\Xbar-\theta^\star) (\theta-\theta^\star) - \frac{(\theta-\theta^\star)^2}{2}. \]
+For a fixed real number $a$, define the function $g_a(z)=az-z^2/2$.  Argue that this function is negative for $|z| > 2|a|$.  Now note that the right-hand side of the above display is $g_a(z)$ with $a=\Xbar-\theta^\star$ and $z=\theta-\theta^\star$.  You'll need the law of large numbers to control $\Xbar-\theta^\star$.  
+
+\item Recall Problem~\#4 in Homework~2, the one on multinomial with a Dirichlet prior and the agreement application.  Argue that the posterior distribution of $n^{1/2}(\kappa-\hat\kappa_n)$ is asymptotically normal,\footnote{In this problem, the parameter $\theta$ is four-dimensional but, as I said in class, all the posterior convergence theorems hold, with obvious adjustments, for any finite-dimensional problem.} and write down an expression for the variance in the normal approximation.  Compare this to the results for the asymptotic distribution of the MLE $\hat\kappa_n$ you found in Homework~1.   
+
+\end{enumerate}
+
+
+
+
+\end{document}

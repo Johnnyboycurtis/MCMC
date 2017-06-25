@@ -1,0 +1,98 @@
+
+
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsmath, amsthm, amssymb, mathrsfs}
+\usepackage{fullpage}
+\usepackage{verbatim, graphicx, multirow, url}
+\usepackage[usenames]{color}
+\usepackage{ifthen}
+
+%\parindent 0pt
+
+%\renewcommand{\figurename}{Fig}
+
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\var}{\mathsf{V}}
+\newcommand{\cov}{\mathsf{C}}
+\newcommand{\prob}{\mathsf{P}}
+
+\newcommand{\eps}{\varepsilon}
+\renewcommand{\phi}{\varphi}
+
+\newcommand{\iid}{\overset{\text{\tiny iid}}{\sim}}
+\newcommand{\cd}{\overset{\text{\sc d}}{\to}}
+\newcommand{\cp}{\overset{\text{\sc p}}{\to}}
+
+\newcommand{\nm}{\mathsf{N}}
+\newcommand{\ber}{\mathsf{Ber}}
+\newcommand{\bin}{\mathsf{Bin}}
+\newcommand{\pois}{\mathsf{Pois}}
+\newcommand{\expo}{\mathsf{Exp}}
+\newcommand{\gam}{\mathsf{Gam}}
+\newcommand{\unif}{\mathsf{Unif}}
+\newcommand{\be}{\mathsf{Beta}}
+
+\newcommand{\Xbar}{\bar X}%{\overline{X}}
+\newcommand{\xbar}{\bar x}%{\overline{x}}
+
+\newcommand{\grad}{\nabla}
+
+
+
+\begin{document}
+
+\noindent \large \textbf{Stat 591 -- Homework 04} \hfill \textbf{Due: Wednesday 10/30} \normalsize
+
+\medskip
+
+\noindent \emph{Your group should submit a write-up that includes solutions the problems stated below, along with any \underline{relevant} pictures/graphs or computer code/output.}  
+
+\medskip
+
+\begin{enumerate}
+
+\item Problem 5.1 in [GDS].
+
+\item Problem 5.2 in [GDS].
+
+\item (Based on Problem 5.5 in [GDS].)  Consider the multinomial setup you've seen in previous homework.  That is, let $X=(X_1,X_2,X_3,X_4)$ and suppose that, for a given $\theta=(\theta_1,\theta_2,\theta_3,\theta_4)$, $X$ has a four-dimensional multinomial distribution, ${\sf Mult}_4(n;\theta)$ with parameters $n$ and $\theta$.  Recall, the Dirichlet prior, ${\sf Dir}_4(a)$, is a distribution on the four-dimensional probability simplex, parametrized by $a=(a_1,a_2,a_3,a_4)$, where each $a_i$ is a non-negative number.  This time, write the Dirichlet distribution in terms of a precision parameter $m$ and a mean parameter $p=(p_1,p_2,p_3,p_4)$.  The connection is $a=mp$, so that $m=\sum_{i=1}^4 a_i$ and $p_i = a_i / m$.  Write ${\sf Dir}_4(m, p)$ for this ``new'' Dirichlet distribution.    
+\begin{enumerate}
+\item Go to Appendix~A.1 in [GDS].  Rewrite the mean vector and dispersion matrix formulas provided there in terms of the new parameters $(m,p)$.  Explain why $m$ is called the precision parameter by looking at how the dispersion matrix changes as $m \to 0$ and as $m \to \infty$.  
+\item An idea towards defining a ``non-informative'' prior for the multinomial problem is to let the precision parameter $m \to 0$.  
+\begin{enumerate}
+\item Use your answer to part (a) to explain the intuition behind this choice.    
+\item There is a problem with this approach, however.  Despite the intuition, the limiting prior, as $m \to 0$, is actually very informative---it's a discrete distribution, with masses at the corners of the simplex.\footnote{For a precise statement of this result, see Ghosh and Ramamoorthi, \emph{Bayesian Nonparametrics}, Springer 2003, page 93.}  To convince yourself of this, consider the marginal distribution of $\theta_i$ under the ${\sf Dir}_4(m,p)$ prior.  First show that, for each $i=1,\ldots,4$,  
+\[ \E_{(m,p)}(\theta_i) \to p_i \quad \text{and} \quad \var_{(m,p)}(\theta_i) \to p_i(1-p_i), \quad \text{as $m \to 0$}. \]
+For this, use the fact that a Dirichlet distribution has beta marginals.\footnote{\url{http://en.wikipedia.org/wiki/Dirichlet_distribution#Marginal_beta_distributions}}  Now argue that, since each $\theta_i$ is $\ber(p_i)$ in the limit, the limiting prior must be such that one of the four corners\footnote{In this case, the corners are $(1,0,0,0)$, $(0,1,0,0)$, $(0,0,1,0)$, and $(0,0,0,1)$.} is selected at random.  
+\end{enumerate}
+\item Alternatively, one can define a ``non-informative posterior'' by taking $m \to 0$ after updating prior to posterior.  Go back to your work on this multinomial--Dirichlet problem from Homework~2 and write down the posterior distribution for $\theta$, given $X$, when $m \to 0$.  
+\item Re-do the simulations in the previous homework using this ``non-informative'' posterior.  Plot, side by side, histograms of the posterior distribution for $\kappa$, one for this new ``non-informative'' posterior and one for your previous ``informative'' posterior.  How do these plots compare?
+\end{enumerate}
+
+\item (Based on Problem 5.10 in [GDS].) Let $(X_1,\ldots,X_n) \mid (\mu, \sigma^2) \iid \nm(\mu, \sigma^2)$.  %(Note that the parametrization here is in terms of the variance $\sigma^2$, not the scale $\sigma$.)  
+\begin{enumerate}
+\item Consider the prior $\pi(\mu, \sigma^2) \propto 1/\sigma^2$.  This is the reference prior (see Example~5.4 in [GDS]) and also the right invariant prior, but not Jeffreys prior.  Find the posterior distribution for $(\mu, \sigma^2)$.  
+\item Find the marginal posterior distribution for $\mu$.  That is, integrate out $\sigma^2$ from the joint posterior distribution for $(\mu,\sigma^2)$.  Do you know this distribution?
+\item Find a $100(1-\alpha)$\% credible upper bound for $\mu$ using the marginal posterior.  That is, find $\bar\mu_\alpha$ such that $\Pi(\mu \leq \bar\mu_\alpha \mid X_1,\ldots,X_n) = 1-\alpha$.  
+\item Think of $\bar\mu_\alpha=\bar\mu_\alpha(X_1,\ldots,X_n)$ as a function of data.  Show that the above credible upper bound is exactly probability matching.  That is, show that 
+\[ \prob_{(\mu,\sigma^2)}\{\bar\mu_\alpha(X_1,\ldots,X_n) \geq \mu\} = 1-\alpha, \quad \forall \; (\mu,\sigma^2). \]
+\end{enumerate}
+
+\item (Based on Problem 5.11 in [GDS].)  Given $\theta$, let $X \sim \bin(n,\theta)$. 
+\begin{enumerate}
+\item Find Jeffreys prior and the corresponding posterior.  (Jeffreys prior is the same whether you work with binomial directly or with iid Bernoulli's.)
+\item Given $\alpha \in (0,1)$, let $\bar\theta_\alpha(X)$ be such that $\Pi(\theta \leq \bar\theta_\alpha(X) \mid X) = 1-\alpha$.  For $\alpha=0.05$, how do you compute $\bar\theta_\alpha(X)$ in R?  
+\item For an upper 95\% confidence limit for $\theta$, a Bayesian might use $\bar\theta_{0.05}(X)$ as defined above.  A frequentist might use the bound $\hat\theta + 1.65 \{\hat\theta(1-\hat\theta)/n\}^{1/2}$, where $\hat\theta=X/n$ is the MLE.  Perform simulations to compare the coverage probability of these two 95\% upper confidence limits.  
+\begin{itemize}
+\item[---] Consider $n \in \{50,100\}$ and $\theta$ on a grid $\{0.05, \cdots, 0.95\}$ of length 20.  For each $(n,\theta)$ pair, simulate 1000 $\bin(n,\theta)$ and compute the Bayesian and frequentist upper limits and record the coverage proportion for each.  
+\item[---] Draw two figures, one for each $n$.  In each figure, plot the coverage probabilities for the two methods as functions of $\theta$.  
+\end{itemize}  
+Explain what you see in these plots.  In particular, do you think the Bayes or the frequentist method is better?  Explain your answer.\footnote{There is a really nice paper that discusses this simple but important problem; see Brown, Cai, and DasGupta, ``Interval estimation for a binomial proportion,'' \emph{Statistical Science}, 2001.}
+\end{enumerate}
+
+\end{enumerate}
+
+
+
+
+\end{document}

@@ -1,0 +1,100 @@
+
+
+\documentclass[a4paper,12pt]{article}
+\usepackage{amsmath, amsthm, amssymb, mathrsfs}
+\usepackage{fullpage}
+\usepackage{verbatim, graphicx, multirow, url}
+\usepackage[usenames]{color}
+\usepackage{ifthen}
+
+%\parindent 0pt
+
+%\renewcommand{\figurename}{Fig}
+
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\var}{\mathsf{V}}
+\newcommand{\cov}{\mathsf{C}}
+\newcommand{\prob}{\mathsf{P}}
+
+\newcommand{\eps}{\varepsilon}
+\renewcommand{\phi}{\varphi}
+
+\newcommand{\iid}{\overset{\text{\tiny iid}}{\sim}}
+\newcommand{\cd}{\overset{\text{\sc d}}{\to}}
+\newcommand{\cp}{\overset{\text{\sc p}}{\to}}
+
+\newcommand{\nm}{\mathsf{N}}
+\newcommand{\ber}{\mathsf{Ber}}
+\newcommand{\bin}{\mathsf{Bin}}
+\newcommand{\pois}{\mathsf{Pois}}
+\newcommand{\expo}{\mathsf{Exp}}
+\newcommand{\gam}{\mathsf{Gam}}
+\newcommand{\unif}{\mathsf{Unif}}
+\newcommand{\be}{\mathsf{Beta}}
+
+\newcommand{\Xbar}{\bar X}%{\overline{X}}
+\newcommand{\xbar}{\bar x}%{\overline{x}}
+
+\newcommand{\grad}{\nabla}
+
+
+
+\begin{document}
+
+\noindent \large \textbf{Stat 591 -- Homework 02} \hfill \textbf{Due: Monday 09/30} \normalsize
+
+\medskip
+
+\noindent \emph{Your group should submit a write-up that includes solutions the problems stated below, along with any \underline{relevant} pictures/graphs or computer code/output.}  
+
+\medskip
+
+\begin{enumerate}
+
+\item (From Gelman et al., 2004, Chap.~2.) Let $X \mid \theta$ have an exponential distribution with rate $\theta$, i.e., $f_\theta(x) = \theta e^{-\theta x}$, $x > 0$.  Consider a ${\sf Gamma}(a,b)$ prior for $\theta$, with PDF of the form $\pi(\theta) \propto \theta^{a-1} e^{-b\theta}$.    
+\begin{enumerate}
+\item Suppose that we observe $X \geq 100$, but the exact value of $X$ remains hidden; this is a right-censored observation.  Find the posterior distribution of $\theta$, given, $X \geq 100$, and write down the posterior mean and variance.  
+\item Now suppose we learn the exact value, $X=100$.  Find the posterior distribution of $\theta$, as well as the corresponding posterior mean and variance.  
+\item Are you surprised that the posterior variance in (b), based on exact data, is larger than that in part (a), based on censored data?  Why or why not? 
+\end{enumerate}
+
+\item 
+\begin{enumerate}
+\item Problem 2.3a in [GDS], page 59.
+\item Problem 2.21 in [GDS], page 63. 
+\end{enumerate}
+
+%\item Problem 2.7 in [GDS], page 60.
+
+%\item Problem 2.10 in [GDS], page 60.  
+
+%\item Problem 2.12 in [GDS], page 60.
+
+\item \emph{Students' choice:} pick one of the two problems below.
+\begin{itemize}
+\item[---] Problem 2.13bc in [GDS], page 61. [Hint: For Part~b(ii), find the conditional PMF for $(X_1,\ldots,X_k)$ given $n$ and $X_1+\cdots+X_k$; this \emph{will not} depend on $p$.  Then treat this conditional PMF as a likelihood function for $n$, given data.  It is interesting that conditioning sometimes has a marginalization effect.]
+\item[---] Problem 2.14 in [GDS], page 61.
+\end{itemize}
+
+\item (Based, in part, on Problem 2.19 in [GDS], page 62.)  Data $X=(X_1,X_2,X_3,X_4)$ is assumed to have, for a given probability vector $\theta=(\theta_1,\theta_2,\theta_3,\theta_4)$, a four-dimensional multinomial distribution, ${\sf Mult}_4(n,\theta)$, with PMF
+\[ f_\theta(x) = \frac{n!}{x_1! x_2! x_3! x_4!} \theta_1^{x_1} \theta_2^{x_2} \theta_3^{x_3} \theta_4^{x_4}. \]
+Note the constraints: $\sum_i X_i \equiv n$ and $\sum_i \theta_i \equiv 1$.  (There's nothing special about four dimensions; this is just to be consistent with the example in part~(c) below.)
+\begin{enumerate}
+\item As a prior for $\theta$, consider a Dirichlet distribution,\footnote{There is lots of information about the Dirichlet distribution on the web, e.g., \url{http://en.wikipedia.org/wiki/Dirichlet_distribution}} denoted by ${\sf Dir}_4(a)$, with PDF\footnote{This is a PDF on the \emph{probability simplex}, the set of all probability vectors, which, in this case, is a three-dimensional subset of the full four-dimensional real space.} 
+\[ \pi(\theta) = \frac{\Gamma(a_1 + \cdots + a_4)}{\Gamma(a_1) \cdots \Gamma(a_4)} \theta_1^{a_1-1} \theta_2^{a_2-1} \theta_3^{a_3-1} \theta_4^{a_4-1}, \]
+where $a=(a_1,a_2,a_3,a_4)$ is a vector of positive numbers.  Show that the Dirichlet prior is conjugate for the multinomial likelihood.  That is, show that the posterior distribution for $\theta$, given $X$, is also of the Dirichlet form, and identify the new parameter, say, $a'$.  
+\item Explain how you can simulate from a Dirichlet distribution using a gamma random number generator, such as {\tt rgamma} in R.  [Hint: Look at the {\tt wikipedia} page for the Dirichlet distribution.]  Based on this, explain how you can simulate from the posterior distribution of $g(\theta)$, where $g$ is some real-valued function defined on the $\theta$-space.  
+\item For the agreement application in Homework 01, using the same data, draw a sample of size 3000 from the posterior distribution of $\kappa$.  Then:
+\begin{enumerate}
+\item Draw a histogram of this sample to visualize the posterior distribution of $\kappa$.  How does this picture look compared to that of the sampling distribution of $\hat\kappa$ based on the asymptotic normality and bootstrap approximations from Homework 01?
+\item Find an equi-tailed 90\% credible interval for $\kappa$.  
+\end{enumerate}
+For this, you'll need to select a value for the hyper-parameter $a=(a_1,a_2,a_3,a_4)$, and you can pick anything you like, e.g., all 1's.  You may also want to duplicate your calculations here for several different values of $a$ to see if there's any difference in the results.  
+\end{enumerate}
+
+\end{enumerate}
+
+
+
+
+\end{document}
