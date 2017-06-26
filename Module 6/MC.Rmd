@@ -8,39 +8,10 @@ output: pdf_document
 
 ## Introduction
 
-In the set up of MCMC algorithms, Markov chains are constructed from a *transitional kernel K*, a conditional probability density such that $X_{n+1} \sim K(X_n, X_{n+1})$. A typical example is provided by the random walk process, formally defined as follows. As we continue with notes and definitions, note that this will be through the perspective of a discrete-time stochastic processes, $(X_n)_{n \in \mathbb{N}}$
-
-### Definition 6.1 Random Walk
-
-A sequence of random variables ($X_n$) is a *random walk* if it satisfies
-
-$$
-X_{n+1} = X_n + \epsilon_n,
-$$
-
-where $\epsilon_n$ is generated independently of $X_n, X_{n_1},...$. If the distribution of the $\epsilon_n$ is symetric about zero, the sequence is called a symmetric random walk. 
-
-There are many examples of random walks, and random walks play a key role in many MCMC algorithms, particularly thosed based on the Metropolis-Hastings algorithm.
-
-The chains encountered in MCMC settings enjoy a very strong stability proerty, namely a *stationary probability distribution* exists by construction; that is,  a distribution $\pi$ such that if $X_n \sim \pi$, then $X_{n+1} \sim \pi$, if the kernel *K* allows for free moves all over the state space. This freedom to move all around the state space is called *irreducibility*, and is essential for MCMC algorithms. Irreducibility states that for $n \in \mathbb{N}$ such that $P(X_n \in A | X_0) > 0$ for every *A* such that $\pi(A) > 0$. 
-
-The irreducibility property also ensures that most of the chains involved in MCMC algorithms are *recurrent*, that the number of times a chain visits an arbitrary set *A* in the state space is infinity; a chain is allowed to revisit any part of the state space always.
+Consider a (discrete) random process $X_t$ that can take k-*states*. The process starts at one of these states and proceeds forward with some probability $p_{i,j}$, the probability of transitioning from state *i* to state *j*. The probabilities $p_{i,j}$ are called *transition probabilities*. 
 
 
-This latter point is quite important in the context of MCMC algorithms. Since most algorithms are started from some arbitrary point $x_0$, we are in effect starting the algorithm from a set of measure zero. Thus, ensuring that the chain converges for almost every starting point is not enough, and we need Harris reccurence (see [Harris theorem](http://www.hairer.org/papers/harris.pdf) )to guarantee convergence from every starting point.
-
-The *stationary distribution* is also a *limiting distribution* in the sense that the limiting distribution of $X_n+1$ is $\pi$ under the total variation norm, notwithstanding the initial value of $X_0$. Stronger forms of convergence are also encountered in MCMC settings, like geometric and *uniform* convergences. In a simulation setup, a most interesting consequence of this convergence property is that the empirical average
-$$
-\displaystyle \frac{1}{N} \sum_{n=1}^N h(X_n)
-$$
-convergence to the expectation $E[h(X)]$ almost surely. When the chain is *reversible* (that is, when the transition kernel is symmetric), a Central Limit Theorem also holds for this average.
-
-
-
-
-## Example: Two State Chain
-
-Consider a (discrete) Markov chain $(X_n)$ (with *n* iterations)  with two states, *[i, j]*. This chain takes $X_1, X_2, ...$ steps where at each step it transitions between the two states with some probability $p_{i,j}$. Let i and j takes values 0 and 1, respectively. Therefore, when the chain is at state $i = 0$, the chain can transition to state $j = 1$ with some probability, or remain at $i = 0$.
+Now consider a chain with two states, *[0, 1]*. This chain takes $X_1, X_2, ...$ steps where at each step it transitions between the two states with some probability $p_{i,j}$. Therefore, when the chain is at state $i = 0$, the chain can transition to state $j = 1$ with some probability, or remain at $i = 0$.
 
 The random variables $X_{t-1}, X_{t-2}, ...$ depend on the previous it state, the random variables are not independent. The random variables, albeit dependent, are only dependent on the previous iteration such that
 $$
@@ -199,6 +170,37 @@ As in the 2-state example, our Markov chain's transition to $X_t$ only depends o
 
 For a more thorough review of Markov chains, see [*Chapter 11: Markov Chains*](http://www.dartmouth.edu/~chance/teaching_aids/books_articles/probability_book/Chapter11.pdf).
 
+
+
+
+## Ergodic Properties
+
+In the set up of MCMC algorithms, Markov chains are constructed from a *transitional kernel K*, a conditional probability density such that $X_{n+1} \sim K(X_n, X_{n+1})$. A typical example is provided by the random walk process, formally defined as follows. As we continue with notes and definitions, note that this will be through the perspective of a discrete-time stochastic processes, $(X_n)_{n \in \mathbb{N}}$
+
+### Definition 6.1 Random Walk
+
+A sequence of random variables ($X_n$) is a *random walk* if it satisfies
+
+$$
+X_{n+1} = X_n + \epsilon_n,
+$$
+
+where $\epsilon_n$ is generated independently of $X_n, X_{n_1},...$. If the distribution of the $\epsilon_n$ is symetric about zero, the sequence is called a symmetric random walk. 
+
+There are many examples of random walks, and random walks play a key role in many MCMC algorithms, particularly thosed based on the Metropolis-Hastings algorithm.
+
+The chains encountered in MCMC settings enjoy a very strong stability proerty, namely a *stationary probability distribution* exists by construction; that is,  a distribution $\pi$ such that if $X_n \sim \pi$, then $X_{n+1} \sim \pi$, if the kernel *K* allows for free moves all over the state space. This freedom to move all around the state space is called *irreducibility*, and is essential for MCMC algorithms. Irreducibility states that for $n \in \mathbb{N}$ such that $P(X_n \in A | X_0) > 0$ for every *A* such that $\pi(A) > 0$. 
+
+The irreducibility property also ensures that most of the chains involved in MCMC algorithms are *recurrent*, that the number of times a chain visits an arbitrary set *A* in the state space is infinity; a chain is allowed to revisit any part of the state space always.
+
+
+This latter point is quite important in the context of MCMC algorithms. Since most algorithms are started from some arbitrary point $x_0$, we are in effect starting the algorithm from a set of measure zero. Thus, ensuring that the chain converges for almost every starting point is not enough, and we need Harris reccurence (see [Harris theorem](http://www.hairer.org/papers/harris.pdf) )to guarantee convergence from every starting point.
+
+The *stationary distribution* is also a *limiting distribution* in the sense that the limiting distribution of $X_n+1$ is $\pi$ under the total variation norm, notwithstanding the initial value of $X_0$. Stronger forms of convergence are also encountered in MCMC settings, like geometric and *uniform* convergences. In a simulation setup, a most interesting consequence of this convergence property is that the empirical average
+$$
+\displaystyle \frac{1}{N} \sum_{n=1}^N h(X_n)
+$$
+convergence to the expectation $E[h(X)]$ almost surely. When the chain is *reversible* (that is, when the transition kernel is symmetric), a Central Limit Theorem also holds for this average.
 
 
 
