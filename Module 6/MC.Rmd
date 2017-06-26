@@ -52,23 +52,23 @@ This conditional dependence on one-previous-step is a key property of **Markov C
 From the conditional probabilities, we can form a **transition matrix**
 
 $$
-P_{2 \times 2} = 
- \begin{pmatrix}
-  p_{i,i} & p_{i,j} \\
-  p_{j,j} & p_{j,j}
- \end{pmatrix}
+\mathbf{P}_{2 \times 2} = 
+\bordermatrix{ 
+  & 0 & 1 \cr
+  0 & p_{i,i} & p_{i,j} \cr
+  1 & p_{j,j} & p_{j,j} }
 \ =
- \begin{pmatrix}
-  p_{0,0} & p_{0,1} \\
-  p_{1,0} & p_{1,1}
- \end{pmatrix}
+\bordermatrix{ 
+  & 0 & 1 \cr
+  0 & p_{0,0} & p_{0,1} \cr
+  1 & p_{1,0} & p_{1,1} } \qquad
 $$
 
 
 where the $i^{th}$ row gives the conditional distribution of $X_t | X_{t-1}$, and each row's probabilities sum up to 1. If, for example, at from state $i = 1$, we have a probability of 0.4 to transition to $j = 1$, and from state $j = 1$ we have a probability of 0.55 of transitioning to state $i = 0$ for $n = 1, 2, ...$ iterations, then our matrix would be
 
 $$
-P_{2 \times 2} = 
+\mathbf{P}_{2 \times 2} = 
  \begin{pmatrix}
   p_{0,0} & p_{0,1} \\
   p_{1,0} & p_{1,1}
@@ -134,6 +134,15 @@ P_{m,n} =
 $$
 
 
+
+Here is another matrix
+
+$$
+\bordermatrix{ & H & Y & D \cr
+      H & .8 & .2 & .0 \cr
+      Y & .3 & .4 & .3 \cr
+      D & .2 & .1 & .7 } \qquad
+$$
 
 
 
