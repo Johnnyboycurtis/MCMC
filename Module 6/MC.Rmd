@@ -175,32 +175,43 @@ For a more thorough review of Markov chains, see [*Chapter 11: Markov Chains*](h
 
 ## Ergodic Properties
 
-In the set up of MCMC algorithms, Markov chains are constructed from a *transitional kernel K*, a conditional probability density such that $X_{n+1} \sim K(X_n, X_{n+1})$. A typical example is provided by the random walk process, formally defined as follows. As we continue with notes and definitions, note that this will be through the perspective of a discrete-time stochastic processes, $(X_n)_{n \in \mathbb{N}}$
+In the set up of MCMC algorithms, Markov chains are constructed from a *transitional kernel K*, a conditional probability density such that $X_{t+1} \sim K(X_t, X_{t+1})$. A typical example is provided by the random walk process, formally defined as follows. As we continue with notes and definitions, note that this will be through the perspective of a discrete-time stochastic processes, $(X_t)_{t \in \mathbb{N}}$
 
 ### Definition 6.1 Random Walk
 
-A sequence of random variables ($X_n$) is a *random walk* if it satisfies
+A sequence of random variables ($X_t$) is a *random walk* if it satisfies
 
 $$
-X_{n+1} = X_n + \epsilon_n,
+X_{t+1} = X_t + \epsilon_t,
 $$
 
-where $\epsilon_n$ is generated independently of $X_n, X_{n_1},...$. If the distribution of the $\epsilon_n$ is symetric about zero, the sequence is called a symmetric random walk. 
+where $\epsilon_t$ is generated independently of $X_t, X_{t-1},...$. If the distribution of the $\epsilon_t$ is symetric about zero, the sequence is called a symmetric random walk. 
 
 There are many examples of random walks, and random walks play a key role in many MCMC algorithms, particularly thosed based on the Metropolis-Hastings algorithm.
 
-The chains encountered in MCMC settings enjoy a very strong stability proerty, namely a *stationary probability distribution* exists by construction; that is,  a distribution $\pi$ such that if $X_n \sim \pi$, then $X_{n+1} \sim \pi$, if the kernel *K* allows for free moves all over the state space. This freedom to move all around the state space is called *irreducibility*, and is essential for MCMC algorithms. Irreducibility states that for $n \in \mathbb{N}$ such that $P(X_n \in A | X_0) > 0$ for every *A* such that $\pi(A) > 0$. 
+The chains encountered in MCMC settings enjoy a very strong stability proerty, namely a *stationary probability distribution* exists by construction; that is,  a distribution $f$ such that if $X_t \sim f$, then $X_{t+1} \sim f$, if the kernel *K* allows for free moves all over the state space. This freedom to move all around the state space is called *irreducibility*, and is essential for MCMC algorithms. Irreducibility states that for $n \in \mathbb{N}$ such that $P(X_n \in A | X_0) > 0$ for every *A* such that $\pi(A) > 0$. 
 
 The irreducibility property also ensures that most of the chains involved in MCMC algorithms are *recurrent*, that the number of times a chain visits an arbitrary set *A* in the state space is infinity; a chain is allowed to revisit any part of the state space always.
 
 
 This latter point is quite important in the context of MCMC algorithms. Since most algorithms are started from some arbitrary point $x_0$, we are in effect starting the algorithm from a set of measure zero. Thus, ensuring that the chain converges for almost every starting point is not enough, and we need Harris reccurence (see [Harris theorem](http://www.hairer.org/papers/harris.pdf) )to guarantee convergence from every starting point.
 
-The *stationary distribution* is also a *limiting distribution* in the sense that the limiting distribution of $X_n+1$ is $\pi$ under the total variation norm, notwithstanding the initial value of $X_0$. Stronger forms of convergence are also encountered in MCMC settings, like geometric and *uniform* convergences. In a simulation setup, a most interesting consequence of this convergence property is that the empirical average
+For the most part, the Markov chains encountered in Markov chain Monte Carlo (MCMC) settings enjoy a very stsrong stability property. Indeed, a stationary probability distribution exists by construction for those chains; that is, there exists a probability distribution $f$ such that if $X_t \sim f$, then $X_{t+1} \sim f$. Therefore, formally, the kernel and stationary distribution satisfy the equation 
 $$
-\displaystyle \frac{1}{N} \sum_{n=1}^N h(X_n)
+\displaystyle \int_{\mathcal{X}} K(x,y) f(x) dx = f(y)
 $$
-convergence to the expectation $E[h(X)]$ almost surely. When the chain is *reversible* (that is, when the transition kernel is symmetric), a Central Limit Theorem also holds for this average.
+The existence of a stationary distribution (or stationarity) imposes a preliminary constraint on $K$ called *irreducibility* in the theory of Markov chains, in which the kernel *K* allows free movement all over the state-space. Thus, no matter the starting value of $X_0$, the sequence $(X_t)$ has a positive probability of eventually reaching any region of the state-space. A sufficient condition is that $K(x, \cdot) > 0$ everywhere. 
+
+
+The *stationary distribution* is also a *limiting distribution* in the sense that the limiting distribution of $X_{t+1}$ is $f$ under the total variation norm, notwithstanding the initial value of $X_0$. Stronger forms of convergence are also encountered in MCMC settings, like geometric and *uniform* convergences. In a simulation setup, a most interesting consequence of this convergence property is that the empirical average
+$$
+\displaystyle \frac{1}{T} \sum_{n=1}^T h(X_t) \to E_f[h(X)]
+$$
+convergence to the expectation $E[h(X)]$ almost surely. When the chain is *reversible* (that is, when the transition kernel is symmetric), a Central Limit Theorem also holds for this average. In summary, the Law of Large Numbers that lies at the basis of previous *i.i.d.* Monte Carlo methods can also be applied in MCMC settings. This is often referred to the **Ergodic Theorem**.
+
+
+
+This said, we can now begin delving into MCMC algorithms such as the Metropolis-Hastings algirithm or the Gibbs sampler, which by the ergodic theorem are almost always theretically convergent.
 
 
 
