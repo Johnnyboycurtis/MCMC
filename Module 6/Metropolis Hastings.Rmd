@@ -64,7 +64,7 @@ M = maximum$objective
 curve(expr = dgamma(x = x, shape = 4.3, rate = 6.2), 
       from = 0, to = 2, col = "blue",
       main = "Gamma(4.3, 6.2", xlab = "X", ylab = "Density")
-abline(h = M, lty = 3, col = "red")
+abline(h = M, lty = 3, lwd = 2, col = "red")
 
 f = function(x){
   dgamma(x = x, shape = 4.3, rate = 6.2)
@@ -179,5 +179,135 @@ curve(expr = dgamma(x = x, shape = 4.3, rate = 6.2),
 
 
 ```
+
+
+
+
+
+
+
+### Example 6.1: Beta(2.7, 6.3)
+
+Let us compare the accept-reject algorithm once more with the Metropolis-Hastings algorithm. Generate *N* samples from $Beta(2.7, 6.3)$
+
+
+
+
+```{r}
+## potential instumential distributions
+curve(expr = dbeta(x, 2.7, 6.3), from = 0, to = 2)
+curve(expr = dbeta(x, 3, 6), from = 0, to = 2, add = TRUE, col = 2, lty = 2)
+curve(expr = dexp(x, rate = 3), from = 0, to = 2, add = TRUE, col = 3, lty = 2)
+curve(expr = dnorm(x, mean = 1, sd = 1), from = 0, to = 2, add = TRUE, col = 4, lty = 2)
+
+```
+
+
+
+
+
+
+```{r}
+N = 10000
+
+## For accept-reject, we need to find a value for M
+## we can use `optimize` to find the maximum of our target density
+maximum  = optimize(f = function(x){ dbeta(x, 2.7, 6.3) }, 
+                    interval = c(0, 2), maximum = TRUE ) ## obtain maximum
+
+M = maximum$objective
+curve(expr = dbeta(x, 2.7, 6.3), 
+      from = 0, to = 2, col = "blue",
+      main = "Beta(2.7, 6.3)", xlab = "X", ylab = "Density")
+abline(h = M, lty = 2, lwd = 2, col = "red")
+
+f = function(x){
+  dbeta(x, 2.7, 6.3)
+}
+
+g = function(x){
+  #dnorm(x, mean = maximum$maximum, sd = 1)
+  dexp(x, rate = 3)
+}
+
+
+#N = 100000
+X = numeric(N)
+i = 0
+while(i < N){
+  #Y = abs(rnorm(n = 1, mean = maximum$maximum, sd = 1))
+  Y = rexp(n = 1, rate = 3)
+  U = runif(1)
+  if(U*M <= f(Y)/g(Y)){
+    i = i + 1
+    X[i] = Y
+  }
+}
+
+## see how samples from chain compare to Beta(2.7, 6.3) density
+hist(X, main = "Histogram of MCMC samples", prob = TRUE)
+curve(expr = dbeta(x, 2.7, 6.3), 
+      from = 0, to = 2, add = TRUE, col = "blue")
+
+```
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+## Metropolis Hastings
+## now compare results with Beta(2.7, 6.3)
+
+N = 10000
+X = numeric(N)
+X[1] = rbeta(n = 1, shape1 = 2.7, shape2 = 6.3)
+for(i in 1:N){
+  Y = rexp(n = 1, rate = 3)
+  rho = (dbeta(x = Y, 2.7, 6.3) * dexp(x = X[i], rate = 3)) / 
+    (dbeta(x = X[i], 2.7, 6.3) * dexp(x = Y, rate = 3)) 
+  
+  if(runif(1) < rho){
+    X[i+1] = Y
+  } else{
+    X[i+1] = X[i]
+  }
+  
+}
+
+
+mean(rbeta(n = 1000, shape1 = 2.7, shape2 = 6.3))
+mean(X)
+
+## see chain transitions
+plot(X, type = "o", main = "MCMC samples",
+     xlim = c(500,1000),
+     xlab = "iterations", ylab = "X (samples obtained)")
+
+## see how samples from chain compare to Beta(2.7, 6.3) density
+hist(X, main = "Histogram of MCMC samples", prob = TRUE)
+curve(expr = dbeta(x, 2.7, 6.3), 
+      from = 0, to = 2, add = TRUE, col = "blue")
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
