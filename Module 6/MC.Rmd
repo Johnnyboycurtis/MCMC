@@ -8,17 +8,16 @@ output: pdf_document
 
 ## Introduction
 
-Consider a (discrete) random process $X_t$ that can take k-*states*. The process starts at one of these states and proceeds forward with some probability $p_{i,j}$, the probability of transitioning from state *i* to state *j*. The probabilities $p_{i,j}$ are called *transition probabilities*. 
+A (discrete) **Markov chain** is a random (stochastic) process ${X_t : t \in T}$ that can take *k*-states over time $t = 1, 2, ...$. The process starts at one of these states and proceeds forward with some probability $p_{i,j}$, the probability of transitioning from state *i* to state *j*. The probabilities $p_{i,j}$ are called *transition probabilities*. 
 
+Consider an ordered stochastic process with *k* = 2 states (or outcomes), *[0, 1]*. This chain takes $X_1, X_2, ...$ steps where at each step it transitions between the two states with some probability $p_{i,j}$. When the chain is at state $i = 0$, the chain can transition to state $j = 1$ with some probability, $\alpha$, or remain at $j = 0$ with probability $1 - \alpha$. Similarly, if the chain ist at state $i = 1$, the chain can transition to $j = 0$ with probability $\beta$ or remain at $j = 1$ with probability $1 - \beta$. 
 
-Now consider a chain with two states, *[0, 1]*. This chain takes $X_1, X_2, ...$ steps where at each step it transitions between the two states with some probability $p_{i,j}$. Therefore, when the chain is at state $i = 0$, the chain can transition to state $j = 1$ with some probability, or remain at $i = 0$.
-
-The random variables $X_{t-1}, X_{t-2}, ...$ depend on the previous it state, the random variables are not independent. The random variables, albeit dependent, are only dependent on the previous iteration such that
+In a Markov chain, the random variables $X_{t-1}, X_{t-2}, ...$ depend on the previous it state, the random variables are not independent. The random variables, albeit dependent, are only dependent on the previous iteration such that
 $$
 P(X_t = x_{t} | X_{t-1} = x_{t-1}, X_{t-2} = x_{t-2}, ...) = P(X_t = 1 | X_{t-1} = x_{t-1})
 $$
 
-This conditional dependence on one-previous-step is a key property of **Markov Chains**, known as the **Markov Property**.
+This conditional dependence on one-previous-step is known as the **Markov Property**.
 
 From the conditional probabilities, we can form a **transition matrix**
 
@@ -76,21 +75,17 @@ for (i in 2:m){
 }
 
 
-y = cumsum(x)/n
-
-# Running fractions of Long eruption# Results
-
-y[m]
-
-# Fraction of Long eruptions among m. Same as: mean(a = sum(x[1:(m-1)]==0 & x[2:m]==1); a # No. of cycles
-
-#m/a
-
-# Average cycle length
-plot(x[1:20], type="b", xlab="Step", ylab="State")
+## First 35 transitions of the chain
+plot(x[1:35], type="b", 
+     main = "First 35 transitions of the chain",
+     xlab="Step", ylab="State")
 
 
 ```
+
+
+As can be seen in the first $t = 1, ..., 35$ transitions of the chain, the Markov chain does not always leave its current state. It transitions with a given transition probability.
+
 
 
 
@@ -118,9 +113,9 @@ $$
 
 
 
-### Another Example: 3-state chain
+### Another Example: 3-state Markov chain
 
-For this following example we'll be utilizing the `markovchain` library available from **CRAN**. Revolution Analytics (currently an extension of Microsoft) has a nice blog post and tutorial on the use of this package. See [*Getting Started with Markov Chains*](http://blog.revolutionanalytics.com/2016/01/getting-started-with-markov-chains.html)
+For this following example we'll be utilizing the `markovchain` library available from **CRAN**. Revolution Analytics (now an extension of Microsoft) has a nice blog post and tutorial on the use of this package. See [*Getting Started with Markov Chains*](http://blog.revolutionanalytics.com/2016/01/getting-started-with-markov-chains.html)
 
 
 Consider a basketball team currently participating in a tournament. As they proceed through their games, assume the team has three states: *win, lose, tie*. Say, at the start of the season, they win their first game, $X_0 = win$. From this point, they probabilities of winning, losing or drawing their next game. For our favorite team, say these probabilities are $P(X_t = win | X_{t-1} = win) = 0.35$, $P(X_t = lose | X_{t-1} = win) = 0.45$, $P(X_t = tie | X_{t-1} = win) = 0.2$. However, if they were to lose their first game, the probabilities change to $P(X_t = win | X_{t-1} = lose) = 0.60$, $P(X_t = lose | X_{t-1} = lose) = 0.30$, $P(X_t = tie | X_{t-1} = lose) = 0.1$. And if they were to draw their first game, then $P(X_t = win | X_{t-1} = tie) = 0.55$, $P(X_t = lose | X_{t-1} = tie) = 0.40$, $P(X_t = tie | X_{t-1} = tie) = 0.05$. Thus, these probabilities construct a transition matrix **P**.
@@ -131,9 +126,9 @@ Consider a basketball team currently participating in a tournament. As they proc
 $$
 P_{3 \times 3} = 
  \begin{pmatrix}
-  p_{win,win} & p_{win,lose} & p_{win,draw} \\
-  p_{lose,win} & p_{lose,lose} & p_{lose,draw} \\
-  p_{draw,win} & p_{draw,lose} & p_{draw,draw} \\
+  p_{win,win} & p_{win,lose} & p_{win,tie} \\
+  p_{lose,win} & p_{lose,lose} & p_{lose,tie} \\
+  p_{draw,win} & p_{tie,lose} & p_{tie,tie} \\
  \end{pmatrix}
 \ = 
 \begin{pmatrix}
@@ -151,7 +146,8 @@ library(markovchain)
 P <- matrix(data = c(0.35, 0.45, 0.20,
                      0.60, 0.30, 0.10,
                      0.55, 0.40, 0.05), byrow = TRUE, 
-            nrow = 3, ncol = 3, dimnames = list(c("win", "lose", "tie"), c("win", "lose", "tie")))
+            nrow = 3, ncol = 3, 
+            dimnames = list(c("win", "lose", "tie"), c("win", "lose", "tie")))
 
 P <- new( "markovchain", transitionMatrix = P)
 
@@ -175,7 +171,9 @@ For a more thorough review of Markov chains, see [*Chapter 11: Markov Chains*](h
 
 ## Ergodic Properties
 
-In the set up of MCMC algorithms, Markov chains are constructed from a *transitional kernel K*, a conditional probability density such that $X_{t+1} \sim K(X_t, X_{t+1})$. A typical example is provided by the random walk process, formally defined as follows. As we continue with notes and definitions, note that this will be through the perspective of a discrete-time stochastic processes, $(X_t)_{t \in \mathbb{N}}$
+For MCMC computations, only Markov chains with specific properties can be used. Markov chains are constructed from a *transitional kernel K*, a conditional probability density such that $X_{t+1} \sim K(X_t, X_{t+1})$. A typical example is provided by the random walk process, formally defined as follows. As we continue with notes and definitions, note that this will be through the perspective of a discrete-time stochastic processes, $(X_t)_{t \in \mathbb{N}}$
+
+
 
 ### Definition 6.1 Random Walk
 
@@ -207,12 +205,17 @@ The *stationary distribution* is also a *limiting distribution* in the sense tha
 $$
 \displaystyle \frac{1}{T} \sum_{n=1}^T h(X_t) \to E_f[h(X)]
 $$
-convergence to the expectation $E[h(X)]$ almost surely. When the chain is *reversible* (that is, when the transition kernel is symmetric), a Central Limit Theorem also holds for this average. In summary, the Law of Large Numbers that lies at the basis of previous *i.i.d.* Monte Carlo methods can also be applied in MCMC settings. This is often referred to the **Ergodic Theorem**.
+convergence to the expectation $E[h(X)]$ almost surely. 
 
 
+Another condition to be reviewed is the *detailed balance condition*, also known as *reversibility*. 
+$$
+f(x) K(y | x) = f(y) K(x | y)
+$$
 
-This said, we can now begin delving into MCMC algorithms such as the Metropolis-Hastings algirithm or the Gibbs sampler, which by the ergodic theorem are almost always theretically convergent.
+When the chain is *reversible* (that is, when the transition kernel is symmetric), a Central Limit Theorem also holds for this average. In summary, the Law of Large Numbers that lies at the basis of previous *i.i.d.* Monte Carlo methods can also be applied in MCMC settings. Reversibility is important because it has the effect of balancing movement through the entire state space. When a Markov chain is reversible, $f(\cdot)$ is the unique, invariant, stationary distribution of that chain. Hence, if $f(\cdot)$ is of interest, we need only find the reversible Markov chain for which $f(\cdot)$ is the limiting distribution. This is why MCMC works!
 
+These conditions together form what is often referred to the **Ergodic Theorem**. That said, we can now begin delving into MCMC algorithms such as the Metropolis-Hastings algirithm or the Gibbs sampler, which by the ergodic theorem are almost always theretically convergent.
 
 
 
