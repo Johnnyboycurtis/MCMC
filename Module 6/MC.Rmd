@@ -162,11 +162,57 @@ As in the 2-state example, our Markov chain's transition to $X_t$ only depends o
 
 
 
+### Limiting Probabilities
+
+The *Chapman-Kolmogorov* equations provide a method for computing 1, 2, ..., *n*-step transition probabilities. The following can be used to calculate the *n*-step probabilities 
+
+$$
+\displaystyle P^{n+m}_{ij} = \sum_{x=0}^{\infty} P^{n}_{ix} P^{m}_{xj} \text{\ for all }\ n,m \geq 0,\ \text{all}\ i,j
+$$
+Let $\mathbf{P}^{(n)}$ denote the *n*-ste transition matrix, then by the *Chapman-Kolmogorov* equations
+
+$$
+\mathbf{P}^{(n+m)} = \mathbf{P}^{(n)} \cdot \mathbf{P}^{(m)}
+$$
+
+Thus, we can use simple matrix multiplication to evaluate the probability matrix for step *n*.
+
+
+```{r}
+
+P <- matrix(data = c(0.35, 0.45, 0.20,
+                     0.60, 0.30, 0.10,
+                     0.55, 0.40, 0.05), byrow = TRUE, 
+            nrow = 3, ncol = 3, 
+            dimnames = list(c("win", "lose", "tie"), c("win", "lose", "tie")))
+
+P_2 = P %*% P
+print(P_2)
+
+P_4 = P_2 %*% P_2
+print(P_4)
+
+P_8 = P_4 %*% P_4
+print(P_8)
+
+P_16 = P_8 %*% P_8
+print(P_16)
+
+P_20 = P_16 %*% P_4
+print(P_20)
+
+```
+
+
+By step 20, it appears that we see a convergence in the *n*-step transition matrix. We've arrived at a limiting distribution for our 3-state Markov chain.
+
+
 
 
 For a more thorough review of Markov chains, see [*Chapter 11: Markov Chains*](http://www.dartmouth.edu/~chance/teaching_aids/books_articles/probability_book/Chapter11.pdf).
 
-
+\newpage
+\clearpage
 
 
 ## Ergodic Properties
