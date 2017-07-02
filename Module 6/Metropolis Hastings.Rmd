@@ -304,7 +304,42 @@ curve(expr = dbeta(x, 2.7, 6.3),
 
 
 
+```{r}
+## Metropolis Hastings
+## now compare results with Beta(2.7, 6.3)
 
+N = 10000
+X = numeric(N)
+X[1] = rbeta(n = 1, shape1 = 2.7, shape2 = 6.3)
+for(i in 1:N){
+  Y = rexp(n = 1, rate = 3)
+  rho = (dbeta(x = Y, 2.7, 6.3) * dexp(x = X[i], rate = Y)) / 
+    (dbeta(x = X[i], 2.7, 6.3) * dexp(x = Y, rate = X[i])) 
+  
+  if(runif(1) < rho){
+    X[i+1] = Y
+  } else{
+    X[i+1] = X[i]
+  }
+  
+}
+
+
+mean(rbeta(n = 1000, shape1 = 2.7, shape2 = 6.3))
+mean(X)
+
+## see chain transitions
+plot(X, type = "o", main = "MCMC samples",
+     xlim = c(500,1000),
+     xlab = "iterations", ylab = "X (samples obtained)")
+
+## see how samples from chain compare to Beta(2.7, 6.3) density
+hist(X, main = "Histogram of MCMC samples", prob = TRUE)
+curve(expr = dbeta(x, 2.7, 6.3), 
+      from = 0, to = 2, add = TRUE, col = "blue")
+
+
+```
 
 
 
