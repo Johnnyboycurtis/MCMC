@@ -30,7 +30,7 @@ X_{t+1} =
 $$
 where 
 $$
-\displaystyle \rho(x^{(t)}, Y_t) = \text{min}\{ \frac{f(y)}{f(x)} \frac{q(x | y)}{q(y | x)} \}
+\displaystyle \rho(x^{(t)}, Y_t) = \text{min}\{ \frac{f(Y_t)}{f(x^{(t)})} \frac{q(x^{(t)} | Y_t)}{q(Y_t | x^{(t)})} , 1\}
 $$
 \end{enumerate}
 
@@ -47,9 +47,241 @@ else we take $X^{(1)} = X^{(0)}$
 
 
 
+
+\newpage
+\clearpage
+
+
+
+### Example 6.1: Beta(2.7, 6.3)
+
+As of now, we've covered multiple ways of generating random samples from a target density. Let us compare the accept-reject algorithm once more with the Metropolis-Hastings algorithm. Generate *N* samples from $Beta(2.7, 6.3)$
+
+
+In order to use the accept-reject algorithm, we need a candidate distribution to sample from. Below are a set of potential candidate distributions.
+
+```{r}
+## potential instumential distributions
+curve(expr = dbeta(x, 2.7, 6.3), from = 0, to = 2)
+curve(expr = dbeta(x, 3, 6), from = 0, to = 2, add = TRUE, col = 2, lty = 2)
+curve(expr = dexp(x, rate = 3), from = 0, to = 2, add = TRUE, col = 3, lty = 2)
+#curve(expr = dnorm(x, mean = 1, sd = 1), from = 0, to = 2, add = TRUE, col = 4, lty = 2)
+curve(expr = dnorm(x, mean = 0.25, 0.25), from = -2, to = 2, add = TRUE, col = 4, lty = 2)
+
+
+
+
+
+
+
+fg = function(x){
+  1.5*dbeta(x, 2.7, 6.3)/dexp(x, rate = 1)
+}
+
+curve(expr = fg, from = 0, to = 2)
+curve(expr = dbeta(x, 2.7, 6.3), from = 0, to = 2, add = TRUE, lty = 3)
+
+```
+
+
+We will use $Exp(3)$ as our candidate distribution, $g$.
+
+```{r}
+N = 10000
+
+## For accept-reject, we need to find a value for M
+## we can use `optimize` to find the maximum of our target density
+maximum  = optimize(f = function(x){ dbeta(x, 2.7, 6.3) }, 
+                    interval = c(0, 2), maximum = TRUE ) ## obtain maximum
+
+## M here is basically random guess
+M = maximum$objective  ## something smaller like 1.5 works too!
+curve(expr = dbeta(x, 2.7, 6.3), 
+      from = 0, to = 2, col = "blue",
+      main = "Beta(2.7, 6.3)", xlab = "X", ylab = "Density")
+abline(h = M, lty = 2, lwd = 2, col = "red")
+
+f = function(x){
+  dbeta(x, 2.7, 6.3)
+}
+
+g = function(x){
+  #dnorm(x, mean = maximum$maximum, sd = 0.25)
+  dexp(x, rate = 1)
+}
+
+
+#N = 100000
+X = numeric(N)
+i = 0
+while(i < N){
+  #Y = abs(rnorm(n = 1, mean = maximum$maximum, sd = 0.25))
+  Y = rexp(n = 1, rate = 1)
+  U = runif(1)
+  if(U*M <= f(Y)/g(Y)){
+    i = i + 1
+    X[i] = Y
+  }
+}
+
+
+
+print("sample mean from direct samples")
+mean(rbeta(n = 1000, shape1 = 2.7, shape2 = 6.3))
+print("sample mean from Accept-Reject samples")
+mean(X)
+
+
+## see how samples from chain compare to Beta(2.7, 6.3) density
+hist(X, main = "Histogram of MCMC samples", prob = TRUE)
+curve(expr = dbeta(x, 2.7, 6.3), 
+      from = 0, to = 2, add = TRUE, col = "blue")
+
+```
+
+
+
+
+Below is the Metropolis-Hastings implementation for this problem. 
+
+```{r}
+## Metropolis Hastings
+## now compare results with Beta(2.7, 6.3)
+
+N = 10000
+X = numeric(N)
+X[1] = rbeta(n = 1, shape1 = 2.7, shape2 = 6.3) ## initial value
+for(i in 1:N){
+  Y = rexp(n = 1, rate = X[i])
+  rho = (dbeta(x = Y, 2.7, 6.3) * dexp(x = X[i], rate = Y)) / 
+    (dbeta(x = X[i], 2.7, 6.3) * dexp(x = Y, rate = X[i])) 
+  
+  if(runif(1) < rho){
+    X[i+1] = Y
+  } else{
+    X[i+1] = X[i]
+  }
+  
+}
+
+print("sample mean from direct samples")
+mean(rbeta(n = 1000, shape1 = 2.7, shape2 = 6.3))
+print("sample mean from M-H samples")
+mean(X)
+
+## see chain transitions
+plot(X, type = "o", main = "MCMC samples",
+     xlim = c(500,1000),
+     xlab = "iterations", ylab = "X (samples obtained)")
+
+## see how samples from chain compare to Beta(2.7, 6.3) density
+hist(X, main = "Histogram of MCMC samples", prob = TRUE)
+curve(expr = dbeta(x, 2.7, 6.3), 
+      from = 0, to = 2, add = TRUE, col = "blue")
+
+
+```
+
+
+
+
+
+
+Here is a varition of the M-H algorithm used previously, except we do not let the candidate distribution depend on previous values of the chain. The candidate distribution depends only on present values of the chain, in effect $q(y | x) = q(y)$.
+
+```{r}
+
+## Metropolis Hastings
+## now compare results with Beta(2.7, 6.3)
+
+N = 10000
+X = numeric(N)
+X[1] = rbeta(n = 1, shape1 = 2.7, shape2 = 6.3)
+for(i in 1:N){
+  Y = rexp(n = 1, rate = 1)
+  rho = (dbeta(x = Y, 2.7, 6.3) * dexp(x = X[i], rate = 1)) / 
+    (dbeta(x = X[i], 2.7, 6.3) * dexp(x = Y, rate = 1)) 
+  
+  if(runif(1) < rho){
+    X[i+1] = Y
+  } else{
+    X[i+1] = X[i]
+  }
+  
+}
+
+
+
+print("sample mean from direct samples")
+mean(rbeta(n = 1000, shape1 = 2.7, shape2 = 6.3))
+print("sample mean from M-H samples")
+mean(X)
+
+
+## see chain transitions
+plot(X, type = "o", main = "MCMC samples",
+     xlim = c(500,1000),
+     xlab = "iterations", ylab = "X (samples obtained)")
+
+## see how samples from chain compare to Beta(2.7, 6.3) density
+hist(X, main = "Histogram of MCMC samples", prob = TRUE)
+curve(expr = dbeta(x, 2.7, 6.3), 
+      from = 0, to = 2, add = TRUE, col = "blue")
+
+
+
+```
+
+
+
+
+
+This version of the M-H algorithm is known as the **Independent Metropolis-Hastings**. This method appears a generalization of the accept-reject algorithm in the sense that the instrumental distribution is the same density $g$ as in the accept-reject algorithm. Thus, the proposed values $Y_i$ are the same, if not the accepted ones.
+
+
+
+
+
+The **Independent Metropolis-Hastings algorithm** as described Robert & Casella goes as follows
+Given $x^{(t)}$
+\begin{enumerate}
+\item Generate $Y_t \sim g(y)$
+\item Take 
+$$
+X_{t+1} = 
+  \begin{cases}
+    Y_t       & \quad  \text{with probability }\ \rho(x^{(t)}, Y_t) \\
+    x^{(t)}   & \quad  \text{with probability }\ 1 - \rho(x^{(t)}, Y_t) \\
+  \end{cases}
+$$
+where 
+$$
+\displaystyle \rho(x^{(t)}, Y_t) = \text{min}\{ \frac{f(Y_t)}{f(x^{(t)})} \frac{g(x^{(t)})}{g(Y_t)}, 1 \}
+$$
+\end{enumerate}
+
+
+In simpler terms, as we want to generate $X \sim f$, we first take an initial value $x^{(0)}$ (which can almost be any artibrary value in the support of $f$). 
+\begin{enumerate}
+\item We generate a value $Y_0 \sim q(y | x^{(0)})$. 
+\item We calculate $\rho(x^{(t)}, Y_t)$
+\item Generate a random value $U \sim Unif(0,1)$ 
+\item If $U < \rho(x^{(t)}, Y_t)$, then we accept $X^{(1)} = Y_t$;
+else we take $X^{(1)} = X^{(0)}$
+\item Repeate steps 1-4 until you've satisfied the number of samples needed
+\end{enumerate}
+
+
+
+
+
+
+
+
+
 ### Example: Gamma(4.3, 6.2)
 
-As of now, we've covered multiple ways of generating random samples from a target density. Here we will compare the Accept-Reject algorithm against the Metropolis-Hastings. Generate *N* random variables $X \sim Gamma(4.3, 6.2)$.
+Here we will compare again the Accept-Reject algorithm against the Metropolis-Hastings. Generate *N* random variables $X \sim Gamma(4.3, 6.2)$.
 
 
 ```{r}
@@ -186,114 +418,57 @@ curve(expr = dgamma(x = x, shape = 4.3, rate = 6.2),
 
 
 
-### Example 6.1: Beta(2.7, 6.3)
-
-Let us compare the accept-reject algorithm once more with the Metropolis-Hastings algorithm. Generate *N* samples from $Beta(2.7, 6.3)$
-
-
-
-
-```{r}
-## potential instumential distributions
-curve(expr = dbeta(x, 2.7, 6.3), from = 0, to = 2)
-curve(expr = dbeta(x, 3, 6), from = 0, to = 2, add = TRUE, col = 2, lty = 2)
-curve(expr = dexp(x, rate = 3), from = 0, to = 2, add = TRUE, col = 3, lty = 2)
-curve(expr = dnorm(x, mean = 1, sd = 1), from = 0, to = 2, add = TRUE, col = 4, lty = 2)
-
-```
 
 
 
 
 
+
+### Example 3: Rayleigh distribution
+
+
+Use the M-H algorithm to generate samples from a Rayleigh distrubition. The Rayleigh density is 
+$$
+f(x) = \frac{x}{\sigma^2} e^{-x^2 / (2 \sigma^2)} \text{ , given that }\ x \geq 0,\ \sigma > 0
+$$
+
+We will use the $\chi^2$ distribution as a candidate distribution to sample from.
 
 ```{r}
+
+dRayleigh = function(x, sigma = 4){
+  ## any needed for `curve`
+  if(any(x < 0)){
+    out = 0
+  } else{
+  out = (x/sigma^2) * exp(-x^2 / (2 * sigma^2))
+  }
+  return(out)
+}
+
 N = 10000
 
-## For accept-reject, we need to find a value for M
-## we can use `optimize` to find the maximum of our target density
-maximum  = optimize(f = function(x){ dbeta(x, 2.7, 6.3) }, 
-                    interval = c(0, 2), maximum = TRUE ) ## obtain maximum
-
-M = maximum$objective
-curve(expr = dbeta(x, 2.7, 6.3), 
-      from = 0, to = 2, col = "blue",
-      main = "Beta(2.7, 6.3)", xlab = "X", ylab = "Density")
-abline(h = M, lty = 2, lwd = 2, col = "red")
-
-f = function(x){
-  dbeta(x, 2.7, 6.3)
-}
-
-g = function(x){
-  #dnorm(x, mean = maximum$maximum, sd = 1)
-  dexp(x, rate = 3)
-}
-
-
-#N = 100000
 X = numeric(N)
-i = 0
-while(i < N){
-  #Y = abs(rnorm(n = 1, mean = maximum$maximum, sd = 1))
-  Y = rexp(n = 1, rate = 3)
+X[1] = 2 ## some random value
+
+for(i in 1:N){
+  Y = rchisq(n = 1, df = X[i])
   U = runif(1)
-  if(U*M <= f(Y)/g(Y)){
-    i = i + 1
-    X[i] = Y
-  }
-}
-
-## see how samples from chain compare to Beta(2.7, 6.3) density
-hist(X, main = "Histogram of MCMC samples", prob = TRUE)
-curve(expr = dbeta(x, 2.7, 6.3), 
-      from = 0, to = 2, add = TRUE, col = "blue")
-
-```
-
-
-
-
-
-
-
-
-
-
-```{r}
-
-## Metropolis Hastings
-## now compare results with Beta(2.7, 6.3)
-
-N = 10000
-X = numeric(N)
-X[1] = rbeta(n = 1, shape1 = 2.7, shape2 = 6.3)
-for(i in 1:N){
-  Y = rexp(n = 1, rate = 3)
-  rho = (dbeta(x = Y, 2.7, 6.3) * dexp(x = X[i], rate = 3)) / 
-    (dbeta(x = X[i], 2.7, 6.3) * dexp(x = Y, rate = 3)) 
-  
-  if(runif(1) < rho){
+  rho = (dRayleigh(Y) * dchisq(x = X[i], df = Y)) / 
+        (dRayleigh(X[i]) * dchisq(x = Y, df = X[i]))
+  if(U < rho){
     X[i+1] = Y
-  } else{
+  } else {
     X[i+1] = X[i]
   }
-  
 }
 
 
-mean(rbeta(n = 1000, shape1 = 2.7, shape2 = 6.3))
-mean(X)
 
-## see chain transitions
-plot(X, type = "o", main = "MCMC samples",
-     xlim = c(500,1000),
-     xlab = "iterations", ylab = "X (samples obtained)")
-
-## see how samples from chain compare to Beta(2.7, 6.3) density
+## see how samples from chain compare to Gamma density
 hist(X, main = "Histogram of MCMC samples", prob = TRUE)
-curve(expr = dbeta(x, 2.7, 6.3), 
-      from = 0, to = 2, add = TRUE, col = "blue")
+curve(expr = dRayleigh, 
+      from = 0, to = 20, add = TRUE, col = "blue")
 
 
 
@@ -304,42 +479,13 @@ curve(expr = dbeta(x, 2.7, 6.3),
 
 
 
-```{r}
-## Metropolis Hastings
-## now compare results with Beta(2.7, 6.3)
-
-N = 10000
-X = numeric(N)
-X[1] = rbeta(n = 1, shape1 = 2.7, shape2 = 6.3)
-for(i in 1:N){
-  Y = rexp(n = 1, rate = 3)
-  rho = (dbeta(x = Y, 2.7, 6.3) * dexp(x = X[i], rate = Y)) / 
-    (dbeta(x = X[i], 2.7, 6.3) * dexp(x = Y, rate = X[i])) 
-  
-  if(runif(1) < rho){
-    X[i+1] = Y
-  } else{
-    X[i+1] = X[i]
-  }
-  
-}
 
 
-mean(rbeta(n = 1000, shape1 = 2.7, shape2 = 6.3))
-mean(X)
-
-## see chain transitions
-plot(X, type = "o", main = "MCMC samples",
-     xlim = c(500,1000),
-     xlab = "iterations", ylab = "X (samples obtained)")
-
-## see how samples from chain compare to Beta(2.7, 6.3) density
-hist(X, main = "Histogram of MCMC samples", prob = TRUE)
-curve(expr = dbeta(x, 2.7, 6.3), 
-      from = 0, to = 2, add = TRUE, col = "blue")
 
 
-```
+
+
+
 
 
 
