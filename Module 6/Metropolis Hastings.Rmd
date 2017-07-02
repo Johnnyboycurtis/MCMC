@@ -477,7 +477,93 @@ curve(expr = dRayleigh,
 
 
 
+We will use the $Gamma(X_t, 1)$ distribution as a candidate distribution to sample from.
 
+```{r}
+
+dRayleigh = function(x, sigma = 4){
+  ## any needed for `curve`
+  if(any(x < 0)){
+    out = 0
+  } else{
+  out = (x/sigma^2) * exp(-x^2 / (2 * sigma^2))
+  }
+  return(out)
+}
+
+N = 10000
+
+X = numeric(N)
+X[1] = 2 ## some random value
+
+for(i in 1:N){
+  Y = rgamma(n = 1, shape = X[i], rate = 1)
+  U = runif(1)
+  rho = (dRayleigh(Y) * dgamma(x = X[i], shape = Y, rate = 1)) / 
+        (dRayleigh(X[i]) * dgamma(x = Y, shape = X[i], rate = 1))
+  if(U < rho){
+    X[i+1] = Y
+  } else {
+    X[i+1] = X[i]
+  }
+}
+
+
+
+## see how samples from chain compare to Gamma density
+hist(X, main = "Histogram of MCMC samples", prob = TRUE)
+curve(expr = dRayleigh, 
+      from = 0, to = 20, add = TRUE, col = "blue")
+
+
+
+```
+
+
+
+
+Now we implement an independent M-H version. We will use the $Gamma(2, 1)$ distribution as a candidate distribution to sample from.
+
+```{r}
+
+dRayleigh = function(x, sigma = 4){
+  ## any needed for `curve`
+  if(any(x < 0)){
+    out = 0
+  } else{
+  out = (x/sigma^2) * exp(-x^2 / (2 * sigma^2))
+  }
+  return(out)
+}
+
+
+N = 10000
+
+X = numeric(N)
+X[1] = 2 ## some random value
+
+for(i in 1:N){
+  Y = rgamma(n = 1, shape = 2, rate = 1)
+  U = runif(1)
+  rho = (dRayleigh(Y) * dgamma(x = X[i], shape = 2, rate = 1)) / 
+        (dRayleigh(X[i]) * dgamma(x = Y, shape = 2, rate = 1))
+  if(U < rho){
+    X[i+1] = Y
+  } else {
+    X[i+1] = X[i]
+  }
+}
+
+
+
+## see how samples from chain compare to Gamma density
+hist(X, main = "Histogram of MCMC samples", prob = TRUE)
+curve(expr = dRayleigh, 
+      from = 0, to = 20, add = TRUE, col = "blue")
+
+
+
+```
 
 
 
