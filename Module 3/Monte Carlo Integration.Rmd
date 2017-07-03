@@ -649,6 +649,155 @@ contour(a, b, post, add = TRUE)
 
 
 
+\newpage
+\clearpage
+
+
+
+
+
+
+### Normal-Cauchy Bayes estimator
+
+For a single Normal observation $x = 2.5$, where $x \sim N(\theta, 1)$ with a Cauchy prior on its mean, $\theta \sim C(0,1)$, estimate the posterior distribution and mean.
+
+
+The Bayes formula to obtain the posterior distribution is given by
+$$
+\displaystyle \pi(\theta | x) = \frac{f(x|\theta) \times \pi(\theta)}{m(x)}
+$$
+where $f(x | \theta)$ is the likelihood function, $\pi(\theta)$ is the prior distribution and $m(x)$ is the marginal distribution of $x$. We calculate $\displaystyle m(x) = \int_{-\infty}^{\infty} f(x|\theta) \times \pi(\theta) d \theta$. The standard Cauchy distribution has pdf
+$$
+\pi(\theta) = \frac{1}{\pi \times 1 + \theta^2}
+$$
+
+The likelihood is obtained by the following
+$$
+f(x | \theta) = \frac{1}{\sqrt{2 \pi}} exp(-\frac{1}{2} (x - \theta)^2)
+$$
+
+Therefore,
+$$
+\begin{aligned}
+f(x|\theta) \times \pi(\theta) & = \frac{1}{\sqrt{2 \pi}} exp(-\frac{1}{2} (x - \theta)^2) \times \frac{1}{\pi \times 1 + \theta^2} \\
+\ & = (2 \pi)^{-1/2} \pi^{-1} exp(-\frac{1}{2} (x - \theta)^2) ( 1 + \theta^2)^{-1} \\
+\ & \propto exp(-\frac{1}{2} (x - \theta)^2) ( 1 + \theta^2)^{-1} \\
+\end{aligned}
+$$
+
+Next, we obtain our marginal distribution $m(x)$
+$$
+\begin{aligned}
+\displaystyle m(x) & = \int_{-\infty}^{\infty} f(x|\theta) \times \pi(\theta) d \theta \\
+\ & = \int_{-\infty}^{\infty} exp(-\frac{1}{2} (x - \theta)^2) \times ( 1 + \theta^2)^{-1} d \theta \\
+\end{aligned}
+$$
+where the first component of that integral is proportional to $N(x, 1)$. Therefore, we can estimate the $m(x)$, and posterior distribution, by sampling $\theta \sim N(x,1)$ and weighting the values through a Cauchy density function.
+
+
+
+```{r}
+## importance sampling example
+## Normal with Cauchy prior
+
+N = 10^5
+X = 2.5
+
+thetas = rnorm(N, X, sd = 1)
+
+weights = dcauchy(x = thetas, location = 0, scale = 1) ## 1/(pi * (1 + s^2))
+sumOfWeights = sum(weights)
+
+posteriorDist =  (weights )/(sumOfWeights)
+hist(posteriorDist, probability = TRUE, 
+    main = "Posterior Distribution of thetas",
+    xlab = "theta", ylab = "density")
+
+```
+
+
+The mean of the posterior distribution is calcaulated by
+$$
+E(\theta | x) = \int_{-\infty}^{\infty} \theta \times \frac{ exp(-\frac{1}{2} (x - \theta)^2) \times ( 1 + \theta^2)^{-1}}{m(x)} d \theta \\
+$$
+
+
+
+```{r}
+## The expectation of the posterior distribution
+posteriorThetaEst = sum((thetas * weights)/ sumOfWeights)
+print(posteriorThetaEst)
+
+
+## Effective Sample Size
+ESS = 1 / sum( (weights / sumOfWeights)^2)
+print("Effective Sample Size")
+print(ESS)
+
+
+posteriorTheta = cumsum(thetas * weights) / cumsum(weights)
+
+plot(posteriorTheta, type = "l", main = "posterior theta estimates",
+    ylim = c(1.6, 1.85))
+
+```
+
+
+
+
+
+
+```{r}
+X = 2.5
+N = 10^4
+M = 1000
+thetas = matrix(data = rnorm(N*M), ncol = M) + X ## N(0,1) + 2.5
+weights = dcauchy(x = thetas, location = 0, scale = 1)
+posteriorTheta = apply(thetas * weights, 2, cumsum) / apply(weights, 2, cumsum)
+
+## look at the first column estimates
+plot(posteriorTheta[,1], main = "posterior theta estimates",
+    ylim = c(1, 2.5), type = "l")
+## grab the 2.5 and 97.5 quantiles for a 95% CI
+confInts = apply(posteriorTheta, 1, quantile, c(0.025, 0.975)) 
+polygon(x = c(1:N, N:1), y = c(confInts[1,], rev(confInts[2,])))
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 [1]: http://www.math.uah.edu/stat/sample/Mean.html
