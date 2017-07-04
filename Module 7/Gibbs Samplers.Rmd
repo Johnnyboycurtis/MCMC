@@ -43,8 +43,7 @@ X,Y \sim N_2 (
   \sigma_{YX}^2 & \sigma_{Y}^2  \\
  \end{pmatrix}
  )
- $$
-
+$$
 
 
 The marginal distributions of $X$ and $Y$ are $N(\mu_X, \sigma_X)$ and $N(\mu_X, \sigma_X)$. The conditional distributions of $Y$ and $X$ are 
@@ -99,19 +98,62 @@ colMeans(MVN)
 ## correlation
 cor(MVN)
 
-
 ```
 
 
 
 
+### Beta-Binomial revisited
+
+In the introduction to these notes, we saw a Bayesian example of the Beta-Binomial distribution. From Casella's paper *Explaining the Gibbs Sampler*, we revisit this example.
+
+$$
+X | \theta \sim Bin(n, \theta), \text{ and }\ \theta \sim Beta(a, b)
+$$
+have joint density
+$$
+f(x, \theta) = \binom{n}{x}\frac{\Gamma(a + b)}{\Gamma(a) \Gamma(b)} \theta^{x + a - 1} (1 - \theta)^{n - x + b -1}
+$$
+is the a $Beta(x+a, n-x+b)$ distribution.
+
+Suppose we are interested in calculating some characteristics of the marginal distributions of $X | \theta$ and $\theta | a, b, x, n$. 
+
+$$
+f(x | \theta ) \text{ is } Bin(n, \theta) \\
+f(\theta | x) \text{ is } Beta(x + a, n - x + b) 
+$$
+
+Therefore, we follow an iterative algorithm of 
+$$
+X_i \sim f(x | \theta) \\
+Y_{i+1} \sim f(y | X_i = x_i)
+$$
 
 
 
+```{r}
 
+N = 10^5
+n = 16
+a = 2
+b = 4
+X = numeric(N)
+Y = numeric(N)
 
+## initial values
+X[1] = 0.2
+Y[1] = 0.34 ## theta values
 
+for(i in 1:N){
+  X[i+1] = rbinom(n = 1, size = n, prob = Y[i])
+  Y[i+1] = rbeta(1, a + X[i+1], n - X[i+1]+b)
+}
 
+par(mfrow = c(1,2))
+hist(X, main = "Marginal Dist: X", probability = TRUE)
+hist(Y, main = "Marginal Dist: X", probability = TRUE)
+
+```
 
 
 
