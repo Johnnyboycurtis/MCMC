@@ -815,9 +815,11 @@ beta.mh <- mh.out[,2]
 
 
 
-
+**Summaries: **
 
 ```{r}
+
+summary(mh.out) ## summary of parameters
 
 
 par(mfrow = c(1,2))
@@ -831,4 +833,20 @@ lines(1:N, cumsum(beta.mh)/(1:N))
 
 
 ```
+
+
+
+**Predictions: **
+
+```{r}
+p65 <- 1 - 1 / (1 + exp(alpha.mh + beta.mh * 65))
+p45 <- 1 - 1 / (1 + exp(alpha.mh + beta.mh * 45))
+
+hist(p65, freq=FALSE, col="gray", border="white", xlab="p(65)", main="")
+hist(p45, freq=FALSE, col="gray", border="white", xlab="p(45)", main="")
+
+
+
+```
+
 
