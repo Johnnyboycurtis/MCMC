@@ -702,9 +702,11 @@ $$
 
 and as a prior Robert & Casella choose
 $$
-\pi_{\alpha}(\alpha | b) \times \pi_{\beta}(\beta) = \frac{1}{b} e^{\alpha} e^{- e^{\alpha/b}}
+\pi_{\alpha}(\alpha | b) \times \pi_{\beta}(\beta) = \frac{1}{b} e^{\alpha} e^{- e^{\alpha} / b}
 $$
-which puts an exponential prior on $log(\alpha)$ and a flat prior on $\beta$ (uniform), and insures a proper posterior distribution. 
+which puts an exponential prior on $log(\alpha)$ and a flat prior on $\beta$ (uniform), and insures a proper posterior distribution. Note that priors on $\alpha$ and $\beta$ are independent. This will be important for computational purposes in the M-H algorithm.
+
+The prior above is a typical exponential distribution with $Exp(\lambda)$, where $\lambda =  \frac{1}{b} e^{\alpha}$
 
 
 ```{r}
@@ -713,12 +715,16 @@ a.mle <- as.numeric(fit$coefficients[1])
 b.mle <- as.numeric(fit$coefficients[2])
 var.a.mle <- summary(fit)$cov.scaled[1, 1]
 var.b.mle <- summary(fit)$cov.scaled[2, 2]
-b.mme <- exp(a.mle + 0.577216)
+
+b.hyper <- exp(a.mle + 0.577216) ## hyper parameter
+## 0.577216 is "Euler’s constant"
 
 
 ```
 
 
+
+Let's set up the posterior and proposal distributions
 
 ```{r}
 ## setting up functions
@@ -730,7 +736,7 @@ dpost <- function(theta, y = failure, x = temperature){
     b <- theta[2]
     p <- 1 - 1 / (1 + exp(a + b * x)) ## logistic CDF
     lik <- exp(sum(dbinom(y, size=1, prob=p, log=TRUE)))
-    dprior <- exp(a) * exp(-exp(a) / b.mme) * 1/ b.mme ## density of prior
+    dprior <- exp(a) * exp(-exp(a) / b.hyper) * 1/b.hyper ## density of prior
     return(lik * dprior)
 }
 
@@ -740,7 +746,9 @@ dprop <- function(theta){
     ## ignore theta0
     a <- theta[1]
     b <- theta[2]
-    pr1 <- exp(a) * exp(-exp(a) / b.mme) / b.mme
+    # a <- log(rexp(1, 1 / b.hyper)) ## remember, log for computational purposes
+    # try: exp(rexp(1, 1/b.hyper)) ## Inf
+    pr1 <- exp(a) * exp(-exp(a) / b.hyper) * 1/b.hyper
     pr2 <- dnorm(b, b.mle, sqrt(var.b.mle))
     return(pr1 * pr2)
 }
@@ -750,8 +758,8 @@ dprop <- function(theta){
 
 rprop <- function(theta0){
     ## independent proposals for a and b
-    #a <- log(rexp(1, 1 / b.mme))
-    a <- log(rexp(1, 1 / b.mme)) ## log for computational purposes
+    #a <- log(rexp(1, 1 / b.hyper))
+    a <- log(rexp(1, 1 / b.hyper)) ## log for computational purposes
     b <- rnorm(1, b.mle, sqrt(var.b.mle))
     return(c(a, b))
 }
@@ -761,7 +769,7 @@ rprop <- function(theta0){
 ```
 
 
-
+Now we run the M-H algorithm
 
 ```{r}
 ## Metropolis-Hastings set up to run
@@ -785,16 +793,16 @@ x <- matrix(NA, nrow = N + B, ncol = length(x0))
 fx <- rep(NA, N + B)
 x[1,] <- x0 ## add the initializing values
 fx[1] <- dpost(x0) ## initiate the M-H algorithm
-ct <- 0 ## counter for acceptance
+accept <- 0 ## counter for acceptance
 
 for(i in 2:(N + B)){
     u <- rprop(x[i-1,])
     fu <- dpost(u)
     ## use log values for computational purposes
     r <- log(fu) + log(dprop(x[i-1,])) - log(fx[i-1]) - log(dprop(u))
-    R <- min(exp(r), 1)
-    if(runif(1) <= R){
-        ct <- ct + 1 ## update counter
+    Rho <- min(exp(r), 1)
+    if(runif(1) <= Rho){
+        accept <- accept + 1 ## update counter
         x[i,] <- u
         fx[i] <- fu
     } else {
@@ -803,6 +811,8 @@ for(i in 2:(N + B)){
     }
 }
 
+print("acceptance rate: ")
+print(accept/(N+B))
 
 mh.out <- x[-(1:B), ]
 alpha.mh <- mh.out[,1]
