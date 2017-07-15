@@ -157,6 +157,68 @@ hist(Y, main = "Marginal Dist: X", probability = TRUE)
 
 
 
+\newpage
+\clearpage
+
+
+### Bayesian Analysis with Normal Data
+
+Suppose we have a random sample $y_1, ..., y_n | \mu, \tau \sim N(\mu, 1/\tau)$. Here we use a precision parameter $\tau$ instead of $\sigma$ for standard devation (or $\sigma^2$ for variance) .
+Place two independent priors on the unkown parameters $\mu$ and $\tau$.
+
+$$
+\mu \sim N(a, 1/b) \perp \tau \sim Gamma(c,d)
+$$
+
+The posterior is given by
+$$
+p(\mu, \tau | \mathbf{y} ) = \frac{L(\mu, \tau | \mathbf{y}) \times p(\mu, \tau) }{m(\mathbf{y})}
+$$
+
+where $p(\mu, \tau) = p(\mu) \times p(\tau)$ and $m(\mathbf{y}) = \int L(\mu, \tau | \mathbf{y}) \times p(\mu, \tau)$
+  
+
+The likelihood is 
+$$
+  \begin{aligned}
+L(\mu, \tau | \mathbf{y} ) & = \prod_{i=1}^{n} f(y_i | \mu, \tau) \\
+\ & = \frac{\tau}{2\pi}^{n/2} exp(\frac{\tau}{2} \sum (y_i - \mu)^2 ) \\
+\ & = \frac{\tau}{2\pi}^{n/2} exp{ \frac{\tau}{2} (n-1)s^2 - \frac{\tau}{2}(\bar{y} - \mu)^2 } \text{ ( obtained after some algebra )}  \\ 
+\ & \propto \tau^{n/2} exp{ \frac{\tau}{2} (n-1)s^2 - \frac{\tau}{2}(\bar{y} - \mu)^2 } \text{ ( drop unimportant constants ) }  \\
+\end{aligned}
+$$
+  
+
+
+The posterior is then given by
+$$
+\begin{aligned}
+p(\mu, \tau) & \propto  L(\mu, \tau | \mathbf{y}) \times p(\mu, \tau) \\
+\ & = \tau^{n/2} exp( \frac{\tau}{2} (n-1)s^2 - \frac{\tau}{2} (\bar{y} - \mu)^2 ) \times \frac{d^c}{ \Gamma(c) } \tau^{c-1} exp(-b \tau) \times \sqrt{\frac{b}{2 \pi}} exp(- \frac{b}{2} (\mu - a)^2 ) \\
+\ & \text{ ( next, drop unimportant constants ) } \\
+\ & \propto \tau^{n/2} exp( \frac{\tau}{2} (n-1)s^2 - \frac{\tau}{2} (\bar{y} - \mu)^2 ) \times \tau^{c-1} exp(-b \tau) \times \ exp(- \frac{b}{2} (\mu - a)^2 ) \\
+\ & = \tau^{n/2 + c - 1} exp( \frac{\tau}{2} (n-1)s^2 - \frac{\tau}{2} (\bar{y} - \mu)^2 ) \times exp(-b \tau) \times \ exp(- \frac{b}{2} (\mu - a)^2 ) \\
+\end{aligned}
+$$
+  
+And the final result is some function that is not recognizable as any commonly known distribution. Hence, we're stuck if we are to try to sample from this distribution directly!
+
+However, if we are too look at the conditional posteriors, $\mu | \tau, \mathbf{y}$ 
+$$
+p(\mu | \tau, \mathbf{y}) \propto exp(1 \frac{1}{2} (n \tau + b) (\mu - \hat{\mu}_{\tau} )^2 )
+$$
+and $\tau | \mu,\mathbf{y}$ 
+$$
+p(\tau | \mu, \mathbf{y}) \propto \tau^{(n/2 + c) - 1} exp(- \tau (d + \frac{n (\bar{y} - \mu)^2 + (n-1)s^2 }{2} ))
+$$
+we find that there are recognizable distributions. They are $N(\hat\mu, \frac{1}{n \tau + b})$ and $Gamma(\frac{n}{2} + c, d +  \frac{n (\bar{y} - \mu)^2 + (n-1)s^2 }{2})$
+
+Given that we can sample from the conditional distributions, we can utilize a Gibbs sampler to sample from the posterior distribution $p(\mu, \tau | \mathbf{y})$.
+
+
+
+
+
 
 
 
