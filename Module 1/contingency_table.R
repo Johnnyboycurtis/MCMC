@@ -45,3 +45,28 @@ w = chisq.test(study, simulate.p.value=TRUE)
 print(w)
 
 
+
+
+
+
+library(DescTools)
+
+GTest(study)
+
+GStat <- function(x){
+  ## x should be a matrix
+  n = sum(x)
+  O = x
+  SC = colSums(O)
+  SR = rowSums(O)
+  E = outer(SR, SC, "*") / n ## order of sr, sc matters
+  G = 2*( (O[1,1]*log(O[1,1]/E[1,1])) + 
+            (O[1,2]*log(O[1,2]/E[1,2])) + 
+            (O[2,1]*log(O[2,1]/E[2,1])) + 
+            (O[2,2]*log(O[2,2]/E[2,2]))  )
+  #G = GTest(m)$statistic
+  return(G)
+}
+
+
+GStat(study)
