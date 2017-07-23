@@ -9,7 +9,7 @@ output: pdf_document
 
 Monte Carlo methods are methods for generating random variables directly or indirectly from target distributions. We generate random variables to estimate p-values or parameters.
 
-Applications of monte carlo methods are in financial engineering and Bayesian computation.
+Applications of monte carlo methods are in hypothesis testing and Bayesian computation.
 
 
 
@@ -28,6 +28,7 @@ Imagine a gambler on a roulete table. Say the gambler starts with \$10. In this 
 
 
 ```{r}
+set.seed(678)
 N = 200
 income = 10
 games = 2*(runif(N)<0.473) - 1 ## generate 1s and -1s
@@ -70,6 +71,107 @@ sum(out[,2] == 20 )
 
 
 
+\newpage
+\clearpage
+
+
+
+## Hypothesis Testing
+
+There are two ways that the Chi-squared test is used:
+
+1. comparing the observed distribution to some theoretical distribution pre-specified ahead of time: to test the *Goodness of fit* of the theoretical distribution to the observations;
+
+2. testing for *independence* between different factors (which, technically, is just a specific theoretical distribution, with some extra parameters that must be estimated from the data).
+
+To review the Chi-squared test, follow the [*link*](https://en.wikipedia.org/wiki/Pearson%27s_chi-squared_test#Assumptions)
+
+
+\begin{center}
+\begin{tabular}{l*{6}{c} r}
+\hline
+Data        & Cancer Controlled   & Cancer not Controlled   & Total \\
+\hline
+Surgery     & 21                  & 2                       & 23 \\
+Radiation   & 15                  & 3                       & 18 \\
+\hline
+\hline
+Total       & 36                  & 5                       & 41 \\
+\end{tabular}
+\end{center}
+
+However, a disadvantage of the chi-square test is that it requires a sufficient sample size in order for the chi-square approximation to be valid. When cell counts are low, say, below 5 asymptotic properties do not hold well. Therefore, a simple chi-squred test may report an invalid p-value which would increase a **Type I error** rate. A solution is to use Monte Carlo simulation to generate samples from the null distribution in order to estimate a more accurate p-value to our hypothesis. 
+
+
+```{r}
+study = matrix(data = c(21, 2,
+                        15, 3), nrow = 2, ncol = 2, byrow = TRUE,
+               dimnames = list(c("surgery", "radiation"), 
+                               c("controlled", "not controlled")))
+
+print(study)
+```
+
+
+Set up some functions in order to generate our Chi-squared statistic and Monte Carlo p-value.
+
+```{r}
+## set up
+
+## function will generate chi-squared statistics 
+## using the expected distribution of the data
+simulateChisq <- function(B, E, sr, sc){
+    results = numeric(B)
+    for(i in 1:B){
+        dat = unlist(r2dtable(1, sr, sc))
+        M = matrix(dat, ncol = length(sc), nrow = length(sr))
+        val = sum( sort( (M - E)^2 / E, decreasing = TRUE))
+        results[i] = val
+    }
+    return(results)
+}
+
+## this will produce chi-squared test
+ChisqTest <- function(data, Simulations){
+    ## data should be a 2X2 matrix
+    x = data
+    B = Simulations
+    n <- sum(x)
+    sr <- rowSums(x)
+    sc <- colSums(x)
+    E <- outer(sr, sc, "*")/n ## ORDER MATTERS
+    dimnames(E) <- dimnames(study)
+    tmp <- simulateChisq(B, E, sr, sc)
+    Stat <- sum(sort((x - E)^2/E, decreasing = TRUE))
+    pval <- (1 + sum(tmp >=  Stat))/(B + 1)
+    df = 2 ## only option for this example
+    rawPVal = pchisq(q = Stat, df = df, lower.tail = FALSE)
+    out = list(PearsonStat = Stat, MonteCarloPVal = pval, rawPVal = rawPVal)
+    return(out)
+}
+
+```
+
+
+We then generate our test statistics.
+
+```{r}
+set.seed(123)
+
+results <- ChisqTest(study, 10000)
+
+print(results)
+
+## compare against chisq.test()
+
+```
+
+Though our ultimate decision to support the null hypothesis of dependence is not a surprise, our results show that the Monte Carlo p-value is greater than the raw p-value obtained from the calculated $\chi^2$ statistic indicating more support for the null hypothesis. Readers should compare these results against R's `chisq.test` function.
+
+
+
+\newpage
+\clearpage
 
 
 ## Bayesian Example
