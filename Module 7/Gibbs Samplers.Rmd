@@ -161,6 +161,64 @@ hist(Y, main = "Marginal Dist: X", probability = TRUE)
 \clearpage
 
 
+
+### Poisson-Gamma Model
+
+Consider a random sample $y_i | \theta \sim Poisson(\theta t)$ where $\theta \sim Gamma(\alpha, \beta)$ for $i \in {1, ..., k}$. Assume $t$ and $\alpha$ are known constants, but that $\beta$ has an Inverse-Gamma, $IG(c, d)$, hyperprior with known hyperparameters $c$ and $d$. This represents a three stage model where the likelihood, prior and hyperprior are defined as
+
+$$
+\begin{aligned}
+f(y_i | \theta) & = \frac{(\theta t)^{y_i}}{y_i !} e^{- \theta t}, y_i \geq 0, \theta_i > 0
+\end{aligned}
+$$
+
+
+
+$$
+\begin{aligned}
+g(\theta | \beta) & = \frac{ \beta^{\alpha} }{\Gamma(\alpha)} \theta^{\alpha-1} e^{-\beta \theta }, \alpha > 0, \beta > 0
+\end{aligned}
+$$
+
+
+
+$$
+\begin{aligned}
+h( \beta) & = \frac{ 1 }{\Gamma(c) \beta^{c-1}  } \beta^{- (c-1)} e^{-1/ (d \beta) }, c > 0, d > 0
+\end{aligned}
+$$
+
+
+Suppose our interest is in generating samples from the marginal posterior distributions of $\theta_i$, $p(\theta_i | \mathbf{y})$. Note that while the gamma prior is conjugate with the Poisson likelihood and the inverse gamma hyperprior is conjugate with the gamma prior, no closed for for $p(\theta_i | \mathbf{y})$ exists. However, the full conditional distributions of $\beta$ and the $\theta_i$ needed to implement the Gibbs sampler can be extracted from the full conditional $p(\theta | \mathbf{y})$
+
+$$
+\begin{aligned}
+p(\theta | \mathbf{y}, \beta) & \propto f(y_i | \theta ) g(\theta | beta) \\
+\ & \propto \theta^{y_i + \alpha - 1} e^{- \theta (t + 1) \beta)} \\
+\ & \propto Gamma(\theta | y_i + \alpha, \beta ( t + 1 ))
+\end{aligned}
+$$
+
+while for $\beta$ we have
+
+$$
+\begin{aligned}
+p(\beta | \theta, \mathbf{y}) & \propto \prod_{i = 1}^{n} g(\theta | \beta) h(\beta) \\
+\ & \propto \prod_{i = 1}^{n} \beta^{\alpha} e^{- \theta \beta} \times \beta^{- (c - 1)} e^{-1/(\beta d)} \\
+\ & \propto \beta^{n \times \alpha + c + 1} e^{\beta \times (\sum_{i = 1}^n \theta_i + 1/d )} \\ 
+\ & \propto IG(\beta | n \times \alpha + c, (\sum_{i = 1}^n \theta_i + 1/d)^{-1})
+\end{aligned}
+$$
+
+
+\newpage
+\clearpage
+
+
+
+
+
+
 ### Bayesian Analysis with Normal Data
 
 Suppose we have a random sample $y_1, ..., y_n | \mu, \tau \sim N(\mu, 1/\tau)$. Here we use a precision parameter $\tau$ instead of $\sigma$ for standard devation (or $\sigma^2$ for variance) .
