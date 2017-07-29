@@ -72,7 +72,7 @@ def dprop(theta):
     a = theta[0]
     b = theta[1]
     pr1 = np.exp(a) * np.exp(-np.exp(a) / b_mme) / b_mme
-    pr2 = dnorm(b, b_mle, np.sqrt(var_b_mle))
+    pr2 = dnorm(b, b_mle, 1/10)
     return (pr1 * pr2)
 
 
@@ -80,7 +80,7 @@ def dprop(theta):
 
 def rprop(theta0):
     a = np.log(np.random.exponential(1/b_mme))
-    b = np.random.normal(b_mle, np.sqrt(var_b_mle), 1)
+    b = np.random.normal(b_mle, 1/10, 1)
     return (a, b)
 
 
