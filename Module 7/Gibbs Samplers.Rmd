@@ -21,12 +21,12 @@ We introduce the Gibbs sampler with  a two-stage example. The **two-state Gibbs 
 For $t = 1, 2, ...$, `generate`
 
 \begin{enumerate}
-\item $Y_t \sim f_{Y|X}(\cdot | x_{t-1})$
+\item $y_i \sim f_{Y|X}(\cdot | x_{t-1})$
 \item $X_t \sim f_{X| Y}(\cdot | y_{t})$
 \end{enumerate}
 
 
-The *two-stage* Gibbs sampler creates a Markov chain from a joint distribution in the following way. If two random variables $X$ and $Y$ have joint density $f(x,y)$, with corresponding conditional densities $f_{Y|X}$ and $f_{X|Y}$, the two stage Gibbs sampler generates a Markov chain $(X_t, Y_t)$ by generating $Y_t$ from conditional density $f_{Y|X}$ and then generating $X_t$ from conditional density $f_{X|Y}$.
+The *two-stage* Gibbs sampler creates a Markov chain from a joint distribution in the following way. If two random variables $X$ and $Y$ have joint density $f(x,y)$, with corresponding conditional densities $f_{Y|X}$ and $f_{X|Y}$, the two stage Gibbs sampler generates a Markov chain $(X_t, y_i)$ by generating $y_i$ from conditional density $f_{Y|X}$ and then generating $X_t$ from conditional density $f_{X|Y}$.
 
 
 We illustrate the implementation of the Gibbs sampler with a simple example. Consider a bivariate Normal distribution where
@@ -230,153 +230,6 @@ $$
 
 
 
-### Bayesian Analysis with Normal Data
-
-Suppose we have a random sample $y_1, ..., y_n | \mu, \tau \sim N(\mu, 1/\tau)$. Here we use a precision parameter $\tau$ instead of $\sigma$ for standard devation (or $\sigma^2$ for variance) .
-Place two independent priors on the unkown parameters $\mu$ and $\tau$.
-
-$$
-\mu \sim N(a, 1/b) \perp \tau \sim Gamma(c,d)
-$$
-
-The posterior is given by
-$$
-p(\mu, \tau | \mathbf{y} ) = \frac{L(\mu, \tau | \mathbf{y}) \times p(\mu, \tau) }{m(\mathbf{y})}
-$$
-
-where $p(\mu, \tau) = p(\mu) \times p(\tau)$ and $m(\mathbf{y}) = \int L(\mu, \tau | \mathbf{y}) \times p(\mu, \tau)$
-  
-
-The likelihood is 
-$$
-  \begin{aligned}
-L(\mu, \tau | \mathbf{y} ) & = \prod_{i=1}^{n} f(y_i | \mu, \tau) \\
-\ & = \frac{\tau}{2\pi}^{n/2} exp(\frac{\tau}{2} \sum (y_i - \mu)^2 ) \\
-\ & = \frac{\tau}{2\pi}^{n/2} exp{ \frac{\tau}{2} (n-1)s^2 - \frac{\tau}{2}(\bar{y} - \mu)^2 } \text{ ( obtained after some algebra )}  \\ 
-\ & \propto \tau^{n/2} exp{ \frac{\tau}{2} (n-1)s^2 - \frac{\tau}{2}(\bar{y} - \mu)^2 } \text{ ( drop unimportant constants ) }  \\
-\end{aligned}
-$$
-  
-
-
-The posterior is then given by
-$$
-\begin{aligned}
-p(\mu, \tau) & \propto  L(\mu, \tau | \mathbf{y}) \times p(\mu, \tau) \\
-\ & = \tau^{n/2} exp( \frac{\tau}{2} (n-1)s^2 - \frac{\tau}{2} (\bar{y} - \mu)^2 ) \times \frac{d^c}{ \Gamma(c) } \tau^{c-1} exp(-b \tau) \times \sqrt{\frac{b}{2 \pi}} exp(- \frac{b}{2} (\mu - a)^2 ) \\
-\ & \text{ ( next, drop unimportant constants ) } \\
-\ & \propto \tau^{n/2} exp( \frac{\tau}{2} (n-1)s^2 - \frac{\tau}{2} (\bar{y} - \mu)^2 ) \times \tau^{c-1} exp(-b \tau) \times \ exp(- \frac{b}{2} (\mu - a)^2 ) \\
-\ & = \tau^{n/2 + c - 1} exp( \frac{\tau}{2} (n-1)s^2 - \frac{\tau}{2} (\bar{y} - \mu)^2 ) \times exp(-b \tau) \times \ exp(- \frac{b}{2} (\mu - a)^2 ) \\
-\end{aligned}
-$$
-  
-And the final result is some function that is not recognizable as any commonly known distribution. Hence, we're stuck if we are to try to sample from this distribution directly!
-
-However, if we are too look at the conditional posteriors, $\mu | \tau, \mathbf{y}$ 
-$$
-p(\mu | \tau, \mathbf{y}) \propto exp(- \frac{1}{2} (n \tau + b) (\mu - \hat{\mu}_{\tau} )^2 )
-$$
-and $\tau | \mu,\mathbf{y}$ 
-$$
-p(\tau | \mu, \mathbf{y}) \propto \tau^{(n/2 + c) - 1} exp(- \tau (d + \frac{n (\bar{y} - \mu)^2 + (n-1)s^2 }{2} ))
-$$
-we find that there are recognizable distributions. They are $N(\hat\mu, \frac{1}{n \tau + b})$ and $Gamma(\frac{n}{2} + c, d +  \frac{n (\bar{y} - \mu)^2 + (n-1)s^2 }{2})$
-
-Given that we can sample from the conditional distributions, we can utilize a Gibbs sampler to sample from the posterior distribution $p(\mu, \tau | \mathbf{y})$.
-
-
-
-
-
-
-```{r}
-
-y = mtcars$mpg
-
-plot(density(y), main = "Density of MPG", 
-     lty = 2, xlab = "MPG")
-
-
-
-# This function takes the prior mean and a percentile and returns the corresponding hyperparameter values for the normal prior
-find.normal <- function(prior.mean, percentile, p=0.95){
-  prior.sd <- (qnorm(p) / (percentile - prior.mean))^{-1}
-  return(list(mean=prior.mean, sd=prior.sd, precision=1/prior.sd^2)) 
-}
-
-
-# This function takes the prior mode and a percentile of sigma and returns the corresponding parameters of the Gamma distribution for tau 
-find.tau.gamma <- function(prior.sigma.mode, sigma.percentile, p=0.95, start.a=1, end.a=1000, increment=0.01){
-  a <- seq(from=start.a, to=end.a,  by=increment)
-  b <- prior.sigma.mode^2 * (a + 1)
-  i <- which.max(qgamma(1-p, a, b) > 1/sigma.percentile^2)
-  return(list(a=a[i], b=b[i])) 
-}
-
-
-```
-
-
-```{r}
-
-N = 3 * 10^3
-n = length(y)
-ybar = mean(y)
-s = sd(y)
-mu = numeric(N)
-tau = numeric(N)
-
-## initial values
-mu = ybar
-tau = 1/sd(y)
-
-
-## Normal hyper parameters
-a <- find.normal(prior.mean=21, percentile = 24, p=0.95)$mean
-b <- find.normal(prior.mean=21, percentile = 24, p=0.95)$precision
-
-## Gamma Hyper parameters
-gamma_HyperParams <- find.tau.gamma(prior.sigma.mode= 1.2, sigma.percentile = 2.462, p=0.95) # Returns shape and rate parameters for the Gamma distribution of tau
-gamma_HyperParams
-
-c = gamma_HyperParams$a ## arbitrary
-d = gamma_HyperParams$b ## arbitrary
-
-for(i in 2:N){
-  SHAPE = c + n/2
-  RATE = d + 0.5*( n*(ybar - mu[i-1])^2 + (n-1)*s^2  )
-  tau[i]  = rgamma(n = 1, shape = SHAPE, rate = RATE)
-  
-  MU = mu[i-1]
-  SD = 1/(n*tau[i] + b)
-  mu[i] = rnorm(n = 1, mean = MU, sd = SD)  
-}
-
-B = 10^2
-
-muPosterior = mu[-(1:B)]
-tauPosterior = tau[-(1:B)]
-
-plot(density(mu), main = "Density of mu", 
-     lty = 2, xlab = "mu")
-
-
-
-
-plot(density(tau), main = "Density of tau", 
-     lty = 2, xlab = "tau")
-
-
-
-```
-
-
-
-
-
-
-
-
 
 
 ### Example: Inferring patterns in UK coal mining disasters
@@ -389,7 +242,7 @@ safety regulations.
 
 ```{r}
 
-data_array = c(4, 5, 4, 0, 1, 4, 3, 4, 0, 6, 3, 3, 4, 0, 2, 6,
+data_vector = c(4, 5, 4, 0, 1, 4, 3, 4, 0, 6, 3, 3, 4, 0, 2, 6,
                     3, 3, 5, 4, 5, 3, 1, 4, 4, 1, 5, 5, 3, 4, 2, 5,
                     2, 2, 3, 4, 2, 1, 3, 2, 2, 1, 1, 1, 1, 3, 0, 0,
                     1, 0, 1, 1, 0, 0, 3, 1, 0, 3, 2, 2, 0, 1, 1, 1,
@@ -397,7 +250,7 @@ data_array = c(4, 5, 4, 0, 1, 4, 3, 4, 0, 6, 3, 3, 4, 0, 2, 6,
                     3, 3, 1, 1, 2, 1, 1, 1, 1, 2, 4, 2, 0, 0, 1, 4,
                     0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1)
 
-disasters = ts(data_array, freq=1, start = 1851)
+disasters = ts(data_vector, freq=1, start = 1851)
 
 plot(disasters, type = "o", lty = 2)
 
@@ -416,112 +269,194 @@ $$
 
 The modeling problem revolves around estimating the values of the $\lambda$ parameters. 
 Looking at the time series above, it appears that the rate declines later in the time series.
-A changepoint model identifies a point (year) during the observation period (call it $\tau$) after which the 
+A changepoint model identifies a point (year) during the observation period (call it $k$) after which the 
 parameter $\lambda$ drops to a lower value. So we are estimating two $\lambda$ parameters: 
 one for the early period and another for the late period.
+
 $$
 \lambda = 
 \begin{cases}
-\lambda_1  \text{ if } t < \tau \\
-\lambda_2  \text{ if } t \geq \tau \\
+\theta  \text{ if } i < k \\
+\lambda  \text{ if } i \geq k \\
 \end{cases}
 $$
-We need to assign prior probabilities to both $\lambda$ parameters. 
+
+We need to assign prior probabilities to both $\theta$ and $\lambda$ parameters. 
 The gamma distribution not only provides a continuous density function for positive numbers, 
 but it is also conjugate with the Poisson sampling distribution.
 
 
-
-
-
-
-We will specify suitably vague hyperparameters $\alpha$ and $\beta$ for both priors.
+We will specify suitably vague hyperparameters, letting $\alpha = 1$ and allowing $\beta$s to vary.
 $$
 \begin{aligned}
-&\lambda_1 \sim \text{Gamma}( 1, \beta_1 ) \\\
-&\lambda_2 \sim \text{Gamma}( 1, \beta_2 )
+&\theta \sim \text{Gamma}( 1, b_1 ) \\\
+&\lambda \sim \text{Gamma}( 1, b_2 )
 \end{aligned}
 $$
+
+
 Since we do not have any intuition about the location of the changepoint (prior to viewing the data), we will assign a discrete uniform prior over all years 1851-1962.
 $$
 \begin{aligned}
-\ & \tau \sim \text{DiscreteUniform(1851,1962) }\\\\
-\ & \Rightarrow P( \tau = k ) = \frac{1}{111}
+\ & k \sim \text{Unif(1851,1962) }\\\\
+\ & \Rightarrow p( K = k ) = \frac{1}{111}
 \end{aligned}
 $$
 
 
-
-
-
 Implementing Gibbs sampling
-We are interested in estimating the joint posterior of $\lambda_1, \lambda_2$ and $\tau$ given the array of annnual disaster counts $\mathbf{y}$. This gives:
+We are interested in estimating the joint posterior of $\theta, \lambda$ and $k$ given the array of annnual disaster counts $\mathbf{y}$. This gives:
 $$
-P( \lambda_1, \lambda_2, \tau | \mathbf{y} ) \propto P(\mathbf{y} | \lambda_1, \lambda_2, \tau ) P(\lambda_1, \lambda_2, \tau) 
+p( \theta, \lambda, k | \mathbf{y} ) \propto p(\mathbf{y} | \theta, \lambda, k ) p(\theta, \lambda, k) 
 $$
 
 To employ Gibbs sampling, we need to factor the joint posterior into the product of conditional expressions:
 
 $$
-P( \lambda_1, \lambda_2, \tau | \mathbf{y} ) \propto P(y_{t < \tau} | \lambda_1, \tau) P(y_{t\ge \tau} | \lambda_2, \tau) P(\lambda_1) P(\lambda_2) P(\tau)
+\displaystyle p( \theta, \lambda, k | \mathbf{y} ) \propto p(y_{i < k} | \theta, k) p(y_{i \geq k} | \lambda, k) p(\theta) p(\lambda) p(k)
 $$
 
 which we have specified as:
 
 $$
 \begin{aligned}
-P( \lambda_1, \lambda_2, \tau | \mathbf{y} ) & \propto \left[\prod_{t=1851}^{\tau} \text{Poi}(y_t|\lambda_1) \prod_{t=\tau+1}^{1962} \text{Poi}(y_t|\lambda_2) \right] \text{Gamma}(\lambda_1|\alpha,\beta) \text{Gamma}(\lambda_2|\alpha, \beta) \frac{1}{111} \\
-\ & \propto \left[\prod_{t=1851}^{\tau} e^{-\lambda_1}\lambda_1^{y_t} \prod_{t=\tau+1}^{1962} e^{-\lambda_2} \lambda_2^{y_t} \right] \lambda_1^{\alpha-1} e^{-\beta\lambda_1} \lambda_2^{\alpha-1} e^{-\beta\lambda_2} \\
-\ & \propto \lambda_1^{\sum_{t=1851}^{\tau} y_t +\alpha-1} e^{-(\beta+\tau)\lambda_1} \lambda_2^{\sum_{t=\tau+1}^{1962} y_i + \alpha-1} e^{-\beta\lambda_2}
+p( \theta, \lambda, k | \mathbf{y} ) & \propto \left[\prod_{t=1851}^{k} \text{Poi}(y_i|\theta) \prod_{t=k+1}^{1962} \text{Poi}(y_i|\lambda) \right] \text{Gamma}(\theta|\alpha,\beta) \text{Gamma}(\lambda|\alpha, \beta) \frac{1}{111} \\
+\ & \propto \left[\prod_{t=1851}^{k} e^{-\theta}\theta^{y_i} \prod_{t=k+1}^{1962} e^{-\lambda} \lambda^{y_i} \right] \theta^{\alpha-1} e^{-\beta\theta} \lambda^{\alpha-1} e^{-\beta\lambda} \\
+\ & \propto \theta^{\sum_{t=1851}^{k} y_i +\alpha-1} e^{-(\beta+k)\theta} \lambda^{\sum_{t=k+1}^{1962} y_i + \alpha-1} e^{-\beta\lambda}
 \end{aligned}
 $$
 
 So, the full conditionals are known, and critically for Gibbs, can easily be sampled from.
 $$
-\lambda_1 \sim \text{Gamma}(\sum_{t=1851}^{\tau} y_t +\alpha, \tau+\beta)
+\theta \sim \text{Gamma}(\sum_{t=1851}^{k} y_i +\alpha, k+\beta)
 $$
 
 
 
 $$
-\lambda_2 \sim \text{Gamma}(\sum_{t=\tau+1}^{1962} y_i + \alpha, 1962-\tau+\beta)
+\lambda \sim \text{Gamma}(\sum_{t=k+1}^{1962} y_i + \alpha, 1962-k+\beta)
 $$
 
+
 $$
-\tau \sim \text{Categorical}\left( \frac{\lambda_1^{\sum_{t=1851}^{\tau} y_t +\alpha-1} e^{-(\beta+\tau)\lambda_1} \lambda_2^{\sum_{t=\tau+1}^{1962} y_i + \alpha-1} e^{-\beta\lambda_2}}{\sum_{k=1851}^{1962} \lambda_1^{\sum_{t=1851}^{\tau} y_t +\alpha-1} e^{-(\beta+\tau)\lambda_1} \lambda_2^{\sum_{t=\tau+1}^{1962} y_i + \alpha-1} e^{-\beta\lambda_2}} \right)
+\begin{aligned}
+p(k | \mathbf{y}, \theta, \lambda, b_1, b_2) & = \frac{L(\mathbf{y} | \theta, \lambda, b_1, b_2) }{\sum_{j=1}^n L(\mathbf{y} | \theta, \lambda, b_1, b_2 ) }
+\end{aligned}
+$$
+where the likelihood is defined as
+
+$$
+\displaystyle L(\mathbf{y} | \theta, \lambda, b_1, b_2) = e^{(\lambda - \theta)} (\frac{\theta}{\lambda})^{\sum_1^k y_i}
 $$
 
-Implementing this in Python requires random number generators for both the gamma and discrete uniform distributions. We can leverage NumPy for this:
-
-
-Function to draw random gamma variate
 
 
 ```{r}
-alpha = 1.0
-beta = 10
+y = data_vector
+# Gibbs sampler for the coal mining change point
+# initialization
+n <- length(y)
+ #length of the data
+m <- 10^4
+ #length of the chain
+mu <- numeric(m)
+lambda <- numeric(m)
+k <- numeric(m)
+L <- numeric(n)
+k[1] <- sample(1:n, 1) ## tau
+mu[1] <- 1
+lambda[1] <- 1
+b1 <- 1
+b2 <- 1
 
-# Specify number of iterations
-N = 10^4
-B = 1000
-
-# Initialize trace of samples
-lambda1 = numeric(N+1)
-lambda2 = numeric(N+1)
-tau = numeric(N+1)
+```
 
 
-## initialize values
-lambda1[1] = 6
-lambda2[1] = 2
-tau[1] = 50
+The algorithm explained by Carlin et al is simple. For $t \in \{1, 2, ..., m \}$
+
+1. Sample $\displaystyle \theta_t \sim Gamma(a_1 + \sum_1^{k} y_i, k_{t-1} + b_{1, t-1})$
+
+2. Sample $\displaystyle \lambda_t \sim Gamma(a_2 + \sum_{k+1}^n y_i, n - k_{t-1} + b_{2, t-1} )$
+
+3. Sample $\displaystyle b_1 \sim Gamma(a_1 + c_1, (\theta_t + d_1))$
+
+4. Sample $\displaystyle b_1 \sim Gamma(a_2 + c_2, (\lambda_t + d_2))$
+
+5. For $j \in {1, ..., n}$ calculate $L(\mathbf{y} | \theta, \lambda, b_1, b_2)$, from there you'll obtain $p(k | \mathbf{y}, \theta, \lambda, b_1, b_2)$
 
 
-n_count_data = length(disasters)
 
-DGamma = function(lambda, a, b){
-  lambda**(a-1) * exp(-b*lambda)
+
+
+
+```{r}
+
+
+# run the Gibbs sampler
+for (i in 2:m){
+    kt <- k[i-1]
+    #generate mu
+    r <- .5 + sum(y[1:kt])
+    mu[i] <- rgamma(1, shape = r, rate = kt + b1)
+    #generate lambda
+    if (kt + 1 > n) r <- .5 + sum(y) else
+    r <- .5 + sum(y[(kt+1):n])
+    lambda[i] <- rgamma(1, shape = r, rate = n - kt + b2)
+    #generate b1 and b2
+    b1 <- rgamma(1, shape = .5, rate = mu[i]+1)
+    b2 <- rgamma(1, shape = .5, rate = lambda[i]+1)
+
+
+    for (j in 1:n) {
+        L[j] <- exp((lambda[i] - mu[i]) * j) * 
+                (mu[i] / lambda[i])^sum(y[1:j])
+    }
+
+    L <- L / sum(L)
+    #generate k from discrete distribution L on 1:n
+    k[i] <- sample(1:n, prob=L, size=1)
 }
+
+```
+
+
+
+
+```{r}
+## set burn in
+burn_in <- 1000
+
+j <- k[burn_in:m]
+
+print(mean(k[burn_in:m]))
+#[1] 39.935
+
+print(mean(lambda[burn_in:m]))
+#[1] 0.9341033
+
+print(mean(mu[burn_in:m]))
+#[1] 3.108575
+
+
+
+## Code for Figure 9.12 on page 276
+# histograms from the Gibbs sampler output
+par(mfrow=c(2,3))
+labelk <- "changepoint"
+label1 <- paste("mu", round(mean(mu[burn_in:m]), 1))
+label2 <- paste("lambda", round(mean(lambda[burn_in:m]), 1))
+
+hist(mu[burn_in:m], main="", xlab=label1,
+breaks = "scott", prob=TRUE) #mu posterior
+
+hist(lambda[burn_in:m], main="", xlab=label2,
+breaks = "scott", prob=TRUE) #lambda posterior
+
+hist(j, breaks=min(j):max(j), prob=TRUE, main="",
+xlab = labelk)
+
+par(mfcol=c(1,1), ask=FALSE) #restore display
+
 
 
 ```
@@ -535,55 +470,8 @@ DGamma = function(lambda, a, b){
 
 ```{r}
 disasters_array = disasters
-# Sample from conditionals
-for(i in 1:N){
-  # Sample early mean
-  sumDisasters = sum(disasters_array[1:tau[i]])  ## disasters_array[tau[i]:].sum()
-  lambda1[i+1] = rgamma(n = 1, shape = sumDisasters + alpha, scale = 1/(tau[i] + beta))
-
-  # Sample late mean
-  lambda2[i+1] = rgamma(n = 1, shape = sumDisasters + alpha, scale = 1/ (n_count_data - tau[i] + beta))
-
-  # Sample changepoint: first calculate probabilities (conditional)
-  p = numeric(n_count_data)
-  for(t in 1:n_count_data){
-   G1 = DGamma(lambda1[i+1], sum(disasters_array[1:t]) + alpha, t + beta)
-   G2 = DGamma(lambda2[i+1], sum(disasters_array[(t+1):111]) + alpha, n_count_data - t + beta)
-   p[t] = s1*s2
-  }
-  # # ... then draw sample
- tau[i+1] = sample(x = 1:111, size = 1, prob = p/sum(p))
-  #runif(n = 1, min = 1, max = 111)  #rcategorical(p/p.sum())
-}
 
 ```
-
-
-
-
-
-```{r}
-
-tauPost = tau[-(1:B)]
-lambdaPost1 = lambda1[-(1:B)]
-lambdaPost2 = lambda2[-(1:B)]
-
-plot(density(tauPost))
-
-plot(density(lambdaPost1))
-
-plot(density(lambdaPost2))
-
-
-```
-
-
-
-
-
-
-
-
 
 
 
