@@ -28,7 +28,7 @@ mu <- numeric(m)
 lambda <- numeric(m)
 k <- numeric(m)
 L <- numeric(n)
-k[1] <- sample(1:n, 1)
+k[1] <- sample(1:n, 1) ## tau
 mu[1] <- 1
 lambda[1] <- 1
 b1 <- 1

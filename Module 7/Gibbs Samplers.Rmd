@@ -227,15 +227,39 @@ $$
 
 
 
+## The multistage Gibbs sampler
+
+There is a natural extension from the two-stage Gibs sampler to the general multistage Gibbs sampler. Suppose that, for some $p > 1$, the random variable $\mathbf{X} \in X$ can be written as $\mathbf{X} = (X_1, ..., X_p)^T$ where the $X_i$'s are either unidimensional or multidimensional components. Suppose that we can simulate from the corresponding conditional densities, $f_1, f_2, ..., f_p$ that is, we can simulate
+
+$$
+X_i | x_1, ..., x_{i-1}, x_{i+1}, ..., x_{p} \sim f(x_i | x_1, ..., x_{i-1}, x_{i+1}, ..., x_{p})
+$$
+
+for $i$ in 1, 2, ..., $p$. THe associated Gibbs sampler is giben as
 
 
 
+At iteration $t =  1, 2, ...$, given $\mathbf{x^{(t)}} = (x^{(1)}, ..., x^{(p)})$, generate
 
 
-### Example: Inferring patterns in UK coal mining disasters
-Let's try to model a more interesting example, a time series of recorded coal mining disasters in the UK from 1851 to 1962.
-Occurrences of disasters in the time series is thought to be derived from a Poisson process with a large rate parameter in the early part of the time series, 
-and from one with a smaller rate in the later part. We are interested in locating the change point in the series, which perhaps is related to changes in mining 
+1. $X_1^{(t+1)} \sim f_1(x_1 | x_2^{(t)}, ..., x_p^{(t)})$
+2.  $X_2^{(t+1)} \sim f_2(x_2 | x_1^{(t+1)}, x_3^{(t)} ..., x_p^{(t)})$
+...
+p. $X_p^{(t+1)} \sim f_p(x_p | x_1^{(t+1)}, ..., x_{p-1}^{(t+1)})$.
+
+The densities $f_1, ..., f_p$ are called the *full conditionals*, and a particular feature of teh Gibbs sampler is that these are the only densities used for simulation. Thus, even in a high-dimensional problem, all of the simulations *may* be univariate, which can be a huge advantage!
+
+
+
+\newpage
+\clearpage
+
+
+### Bayesian Change-Point Analysis
+
+
+Let's try to model a more interesting example, a time series of recorded coal mining disasters in the UK from 1851 to 1962, for $n = 111$ years of data.
+Occurrences of disasters in the time series is thought to be derived from a Poisson process with a large rate parameter in the early part of the time series, and from one with a smaller rate in the later part. We are interested in locating the change point in the series, which perhaps is related to changes in mining 
 safety regulations.
 
 
@@ -249,6 +273,7 @@ data_vector = c(4, 5, 4, 0, 1, 4, 3, 4, 0, 6, 3, 3, 4, 0, 2, 6,
                     0, 1, 0, 1, 0, 0, 0, 2, 1, 0, 0, 0, 1, 1, 0, 2,
                     3, 3, 1, 1, 2, 1, 1, 1, 1, 2, 4, 2, 0, 0, 1, 4,
                     0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1)
+n = length(data_vector)
 
 disasters = ts(data_vector, freq=1, start = 1851)
 
@@ -262,7 +287,7 @@ plot(disasters, type = "h", lty = 6, lwd = 2)
 
 We are going to use Poisson random variables for this type of count data. Denoting year $i$'s accident count by $y_i$,
 $$
-y_i \sim \text{Poisson}(\lambda)
+y_i \sim \text{Poisson}(\Lambda)
 $$
 
 
@@ -274,7 +299,7 @@ parameter $\lambda$ drops to a lower value. So we are estimating two $\lambda$ p
 one for the early period and another for the late period.
 
 $$
-\lambda = 
+\Lambda = 
 \begin{cases}
 \theta  \text{ if } i < k \\
 \lambda  \text{ if } i \geq k \\
@@ -352,6 +377,8 @@ $$
 
 
 ```{r}
+set.seed(123)
+
 y = data_vector
 # Gibbs sampler for the coal mining change point
 # initialization
@@ -366,6 +393,7 @@ L <- numeric(n)
 k[1] <- sample(1:n, 1) ## tau
 mu[1] <- 1
 lambda[1] <- 1
+a = 0.5
 b1 <- 1
 b2 <- 1
 
@@ -384,6 +412,7 @@ The algorithm explained by Carlin et al is simple. For $t \in \{1, 2, ..., m \}$
 
 5. For $j \in {1, ..., n}$ calculate $L(\mathbf{y} | \theta, \lambda, b_1, b_2)$, from there you'll obtain $p(k | \mathbf{y}, \theta, \lambda, b_1, b_2)$
 
+6. Sample $k_t \sim p(k | \mathbf{y}, \theta, \lambda, b_1, b_2)$
 
 
 
@@ -391,30 +420,32 @@ The algorithm explained by Carlin et al is simple. For $t \in \{1, 2, ..., m \}$
 
 ```{r}
 
-
 # run the Gibbs sampler
-for (i in 2:m){
-    kt <- k[i-1]
+for (t in 2:m){
+    kt <- k[t-1]
     #generate mu
-    r <- .5 + sum(y[1:kt])
-    mu[i] <- rgamma(1, shape = r, rate = kt + b1)
+    r <- a + sum(y[1:kt])
+    mu[t] <- rgamma(1, shape = r, rate = kt + b1)
     #generate lambda
-    if (kt + 1 > n) r <- .5 + sum(y) else
-    r <- .5 + sum(y[(kt+1):n])
-    lambda[i] <- rgamma(1, shape = r, rate = n - kt + b2)
+    if (kt + 1 > n){ 
+      r <- a + sum(y) 
+      }else{
+        r <- a + sum(y[(kt+1):n])
+      }
+    lambda[t] <- rgamma(1, shape = r, rate = n - kt + b2)
     #generate b1 and b2
-    b1 <- rgamma(1, shape = .5, rate = mu[i]+1)
-    b2 <- rgamma(1, shape = .5, rate = lambda[i]+1)
+    b1 <- rgamma(1, shape = a, rate = mu[t]+1)
+    b2 <- rgamma(1, shape = a, rate = lambda[t]+1)
 
 
     for (j in 1:n) {
-        L[j] <- exp((lambda[i] - mu[i]) * j) * 
-                (mu[i] / lambda[i])^sum(y[1:j])
+        L[j] <- exp((lambda[t] - mu[t]) * j) * 
+                (mu[t] / lambda[t])^sum(y[1:j])
     }
 
     L <- L / sum(L)
     #generate k from discrete distribution L on 1:n
-    k[i] <- sample(1:n, prob=L, size=1)
+    k[t] <- sample(1:n, prob=L, size=1)
 }
 
 ```
@@ -446,14 +477,17 @@ labelk <- "changepoint"
 label1 <- paste("mu", round(mean(mu[burn_in:m]), 1))
 label2 <- paste("lambda", round(mean(lambda[burn_in:m]), 1))
 
-hist(mu[burn_in:m], main="", xlab=label1,
-breaks = "scott", prob=TRUE) #mu posterior
+hist(mu[burn_in:m], main="", xlab=label1, 
+     col="gray", border="white",
+     breaks = "scott", prob=TRUE) #mu posterior
 
 hist(lambda[burn_in:m], main="", xlab=label2,
-breaks = "scott", prob=TRUE) #lambda posterior
+     col="gray", border="white",
+     breaks = "scott", prob=TRUE) #lambda posterior
 
 hist(j, breaks=min(j):max(j), prob=TRUE, main="",
-xlab = labelk)
+     col="gray", border="white",
+     xlab = labelk)
 
 par(mfcol=c(1,1), ask=FALSE) #restore display
 
@@ -465,13 +499,6 @@ par(mfcol=c(1,1), ask=FALSE) #restore display
 
 
 
-
-
-
-```{r}
-disasters_array = disasters
-
-```
 
 
 
