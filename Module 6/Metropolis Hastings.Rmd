@@ -30,7 +30,7 @@ X_{t+1} =
 $$
 where 
 $$
-\displaystyle \rho(x^{(t)}, Y_t) = \text{min}\{ \frac{f(Y_t)}{f(x^{(t)})} \frac{q(x^{(t)} | Y_t)}{q(Y_t | x^{(t)})} , 1\}
+\displaystyle \rho(x^{(t)}, Y_t) = \text{min} \left\{ \frac{f(Y_t)}{f(x^{(t)})} \frac{q(x^{(t)} | Y_t)}{q(Y_t | x^{(t)})} , 1 \right\}
 $$
 \end{enumerate}
 
@@ -256,7 +256,7 @@ X_{t+1} =
 $$
 where 
 $$
-\displaystyle \rho(x^{(t)}, Y_t) = \text{min}\{ \frac{f(Y_t)}{f(x^{(t)})} \frac{g(x^{(t)})}{g(Y_t)}, 1 \}
+\displaystyle \rho(x^{(t)}, Y_t) = \text{min} \left\{ \frac{f(Y_t)}{f(x^{(t)})} \frac{g(x^{(t)})}{g(Y_t)}, 1 \right\}
 $$
 \end{enumerate}
 
@@ -697,7 +697,7 @@ Y_i \sim Bernoulli(p(x_i)), \text{ where } p(x_i) = \frac{exp(\alpha + x_i \beta
 $$
 where $p(x_i)$ is the probability of O-ring failure at temperature $x_i$. The likelihood is
 $$
-L(\alpha, \beta | \mathbf{y}) \propto \prod^n_{i = 1} (\frac{exp(\alpha + x_i \beta)}{1 + exp(\alpha + x_i \beta)})^{y_i} \times (\frac{ 1 }{1 + exp(\alpha + x_i \beta)})^{1 - y_i}
+L(\alpha, \beta | \mathbf{y}) \propto \prod^n_{i = 1} \left(\frac{exp(\alpha + x_i \beta)}{1 + exp(\alpha + x_i \beta)} \right)^{y_i} \times \left(\frac{ 1 }{1 + exp(\alpha + x_i \beta)} \right)^{1 - y_i}
 $$
 
 and as a prior Robert & Casella choose
