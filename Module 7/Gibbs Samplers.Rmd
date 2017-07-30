@@ -32,7 +32,7 @@ The *two-stage* Gibbs sampler creates a Markov chain from a joint distribution i
 We illustrate the implementation of the Gibbs sampler with a simple example. Consider a bivariate Normal distribution where
 $$
 \displaystyle
-X,Y \sim N_2 (
+X,Y \sim N_2 \left(
 \begin{pmatrix}
   \mu_X \\
   \mu_Y
@@ -42,17 +42,17 @@ X,Y \sim N_2 (
   \sigma_{X}^2 & \sigma_{XY}^2  \\
   \sigma_{YX}^2 & \sigma_{Y}^2  \\
  \end{pmatrix}
- )
+ \right)
 $$
 
 
 The marginal distributions of $X$ and $Y$ are $N(\mu_X, \sigma_X)$ and $N(\mu_X, \sigma_X)$. The conditional distributions of $Y$ and $X$ are 
 $$ 
-Y | X = x \sim N(\mu_Y + \frac{\rho \sigma_Y}{\sigma_X}(x - \mu_X), (1 - \rho^2) \sigma_Y^2  )
+Y | X = x \sim N \left( \mu_Y + \frac{\rho \sigma_Y}{\sigma_X}(x - \mu_X), (1 - \rho^2) \sigma_Y^2  \right)
 $$
 and 
 $$
-X |Y = y \sim N(\mu_X + \frac{\rho \sigma_X}{\sigma_Y}(y - \mu_Y), (1 - \rho^2) \sigma_X^2  )
+X |Y = y \sim N \left(\mu_X + \frac{\rho \sigma_X}{\sigma_Y}(y - \mu_Y), (1 - \rho^2) \sigma_X^2  \right)
 $$
 
 $\rho$ is the correlation between $X$ and $Y$, and $(1 - \rho^2) \sigma_X^2$ is the variance.
@@ -320,7 +320,7 @@ which we have specified as:
 
 $$
 \begin{aligned}
-p( \theta, \lambda, k | \mathbf{y} ) & \propto \left[\prod_{t=1851}^{k} \text{Poi}(y_i|\theta) \prod_{t=k+1}^{1962} \text{Poi}(y_i|\lambda) \right] \text{Gamma}(\theta|\alpha,\beta) \text{Gamma}(\lambda|\alpha, \beta) \frac{1}{111} \\
+p( \theta, \lambda, k | \mathbf{y} ) & \propto \left[\prod_{t=1851}^{k} \text{Poisson}(y_i|\theta) \times \prod_{t=k+1}^{1962} \text{Poisson}(y_i|\lambda) \right] \times \text{Gamma}(\theta|\alpha,\beta) \times \text{Gamma}(\lambda|\alpha, \beta) \frac{1}{111} \\
 \ & \propto \left[\prod_{t=1851}^{k} e^{-\theta}\theta^{y_i} \prod_{t=k+1}^{1962} e^{-\lambda} \lambda^{y_i} \right] \theta^{\alpha-1} e^{-\beta\theta} \lambda^{\alpha-1} e^{-\beta\lambda} \\
 \ & \propto \theta^{\sum_{t=1851}^{k} y_i +\alpha-1} e^{-(\beta+k)\theta} \lambda^{\sum_{t=k+1}^{1962} y_i + \alpha-1} e^{-\beta\lambda}
 \end{aligned}
@@ -328,13 +328,13 @@ $$
 
 So, the full conditionals are known, and critically for Gibbs, can easily be sampled from.
 $$
-\theta \sim \text{Gamma}(\sum_{t=1851}^{k} y_i +\alpha, k+\beta)
+\theta \sim \text{Gamma} \left(\sum_{t=1851}^{k} y_i +\alpha, k+\beta \right)
 $$
 
 
 
 $$
-\lambda \sim \text{Gamma}(\sum_{t=k+1}^{1962} y_i + \alpha, 1962-k+\beta)
+\lambda \sim \text{Gamma} \left(\sum_{t=k+1}^{1962} y_i + \alpha, 1962-k+\beta \right)
 $$
 
 
@@ -346,7 +346,7 @@ $$
 where the likelihood is defined as
 
 $$
-\displaystyle L(\mathbf{y} | \theta, \lambda, b_1, b_2) = e^{(\lambda - \theta)} (\frac{\theta}{\lambda})^{\sum_1^k y_i}
+\displaystyle L(\mathbf{y} | \theta, \lambda, b_1, b_2) = e^{(\lambda - \theta)} \left( \frac{\theta}{\lambda} \right)^{\sum_1^k y_i}
 $$
 
 
