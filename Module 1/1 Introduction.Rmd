@@ -1,0 +1,358 @@
+---
+title: 'Introduction: Monte Carlo Methods'
+author: "Jonathan Navarrete"
+date: "July 30, 2017"
+output:
+  ioslides_presentation: 
+    df_print: tibble
+    widescreen: true
+    transition: faster
+    smaller: true
+    css: style.css
+    theme: simplex
+---
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  CommonHTML: {
+    scale: 110
+  }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+## Introduction to Monte Carlo
+
+Monte Carlo methods are methods for generating random variables directly 
+or indirectly from target distributions. We generate random variables to 
+estimate p-values or parameters.
+
+Applications of monte carlo methods are in hypothesis testing and 
+Bayesian computation.
+  
+
+
+## Simulation: Gambler's ruin
+
+
+Consider two gamblers, persons A and B, who start to gamble in a zero-sum game with stakes \$$x$ and \$($b-x$), respectively.
+
+- At each round, each gambler puts up a stake of \$h. The probability that A wins a round is $p$, while the probability that B wins a round is $q = 1 - p$. We wish to compute the probability that A ultimately wins the game. 
+
+- Define $v(x,t)$ to the probability that A ultimately wins the game starting with capital \$$x$ on or before the $t$th round. 
+
+- Then, $u(x,t)$ is the probability that B wins the game with their stake of $b-x$ on or before the $t$th round. 
+
+- Each of three variables $v,u$, and $w$ is bounded below by zero and above by 1. 
+
+Moreover, $u$ and $v$ are nondecreasing in $t$. $w$ is nonincreasing in $t$. Thus we can take limits of each of these as t goes to infinity. We shall call these limits $v(x)$, $u(x)$, and $w(x)$, respectively.
+
+
+## Gambler's ruin, pt.2
+
+
+
+Gambler's ruin (fallacy) is the belief that a certain event is $more$ likely to occur given the past history. In an experiment where there is a coin toss with probability of seeing heads as 0.5. Each flip of a coin has the same probability of landing on heads regardless of what the previous lands were. 
+
+Imagine a gambler on a roulete table. Say the gambler starts with \$10. In this game, the gambler "wins" when they earn a total of \$20 (that is they must play the game until they've earned $10 on top of their starting \$10). For each game, there is a probability of winning, p = 0.473. Then, can we  see how many turns until he/she wins (or loses)?
+
+
+
+
+
+## Gambler's ruin, pt.3
+
+
+```{r, echo=TRUE, fig.width=5, fig.height=3, fig.align='center'}
+set.seed(678)
+N = 200
+income = 10
+games = 2*(runif(N)<0.473) - 1 ## generate 1s and -1s
+out = cumsum(games) + income
+
+par(mar = c(4,4,2,2))
+plot(1:N, out, type = "l", 
+     xlab = "games", ylab = "income",
+     lty = 3)
+abline(h = 0, lty = 2, col = "red")
+
+```
+
+
+
+## Gambler's ruin, pt.4
+
+
+```{r, echo=FALSE}
+GamblersRuin = function(i){
+  income = 10
+  n = 0
+  while(!(income %in% c(0,20))){
+    n = n + 1 ## number of runs till ruin or success
+    x = runif(1)
+    if(x <= 0.473){
+      income = income + 1
+    } else{
+      income = income - 1
+    }
+  }
+  return(c(n,income))
+}
+
+GamblersRuin()
+
+out = lapply(X = 1:100, FUN = GamblersRuin)
+out = do.call(rbind, out)
+
+## percentage of success
+sum(out[,2] == 20 )
+
+
+
+```
+
+
+
+
+
+## Simulation for p-values
+
+It has become commonplace in the statistical analysis to use Monte Carlo procedures to calculate
+empirical P values. The reasons for this include the following:
+
+1. many test statistics do not have a standard asymptotic distribution;
+
+2. even if a standard asymptotic distribution does exist, it may not be reliable in realistic sample sizes; and 
+
+3.  calculation of the exact sampling distribution through exhaustive enumeration of all possible samples may be too computationally intensive to be feasible. 
+
+In contrast, Monte Carlo methods can be used to obtain an empirical $P$ value that approximates the exact $P$ value without relying on asymptotic distributional theory or exhaustive enumeration.
+
+North BV, Curtis D, Sham PC. A Note on the Calculation of Empirical P Values from Monte Carlo Procedures. 
+*American Journal of Human Genetics*. 2002;71(2):439-441.
+
+
+## Monte Carlo Hypothesis Testing
+
+The contingency table below is from a study (citation needed) where patients who underwent cancer treatment either saw their cancer controlled or not. The two treatments are surgery or radiation. The question we are interested in is if radiation treatment is associated with control of cancer.
+
+
+```{r}
+study = matrix(data = c(21, 2,
+                        15, 3), nrow = 2, ncol = 2, byrow = TRUE,
+               dimnames = list(c("surgery", "radiation"), 
+                               c("controlled", "not controlled")))
+
+print(study)
+```
+
+A Chi-squared test would usually be used for this type of analyses.
+
+
+## Monte Carlo Hypothesis Testing, pt. 2
+
+
+There are two ways that the Chi-squared test is used:
+
+1. comparing the observed distribution to some theoretical distribution pre-specified ahead of time: to test the *Goodness of fit* of the theoretical distribution to the observations;
+
+2. testing for *independence* between different factors (which, technically, is just a specific theoretical distribution, with some extra parameters that must be estimated from the data).
+
+To review the Chi-squared test, follow the [*link*](https://en.wikipedia.org/wiki/Pearson%27s_chi-squared_test#Assumptions)
+
+## Monte Carlo Hypothesis Testing, pt. 3
+
+
+However, a disadvantage of the chi-square test is that it requires a sufficient sample size in order for the chi-square approximation to be valid. When cell counts are low, say, below 5 asymptotic properties do not hold well. Therefore, a simple chi-squred test may report an invalid p-value which would increase a [Type I error](http://support.minitab.com/en-us/minitab/17/topic-library/basic-statistics-and-graphs/hypothesis-tests/basics/type-i-and-type-ii-error/) rate. 
+
+
+Set up some functions in order to generate our Chi-squared statistic and Monte Carlo p-value.
+
+## Monte Carlo Hypothesis Testing, pt. 4
+
+
+```{r, echo=TRUE}
+## set up
+
+## function will generate chi-squared statistics 
+## using the expected distribution of the data
+simulateChisq <- function(B, E, sr, sc){
+    results = numeric(B)
+    for(i in 1:B){
+      ## review r2dtable documentation
+        dat = unlist(r2dtable(1, sr, sc))
+        M = matrix(dat, ncol = length(sc), nrow = length(sr))
+        val = sum( sort( (M - E)^2 / E, decreasing = TRUE))
+        results[i] = val
+    }
+    return(results)
+}
+
+```
+
+- [`r2dtable`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/r2dtable.html)
+
+- [Random generation of a table ](http://people.sc.fsu.edu/~jburkardt/f_src/asa159/asa159.html)
+
+
+## Monte Carlo Hypothesis Testing, pt. 5
+
+
+```{r, echo=TRUE}
+ChisqTest <- function(data, Simulations){
+    x = data
+    B = Simulations
+    n <- sum(x)
+    sr <- rowSums(x)
+    sc <- colSums(x)
+    E <- outer(sr, sc, "*")/n ## ORDER MATTERS
+    dimnames(E) <- dimnames(study)
+    tmp <- simulateChisq(B, E, sr, sc)
+    Stat <- sum(sort((x - E)^2/E, decreasing = TRUE))
+    pval <- (1 + sum(tmp >=  Stat))/(B + 1)
+    rawPVal = pchisq(q = Stat, df = 2, lower.tail = FALSE)
+    out = list(PearsonStat = Stat, 
+               MonteCarloPVal = pval, 
+               rawPVal = rawPVal)
+    return(out)
+}
+
+```
+
+
+
+## Monte Carlo Hypothesis Testing, pt. 6
+
+We then generate our test statistics.
+
+```{r}
+set.seed(123)
+
+results <- ChisqTest(study, 10000)
+
+print(results)
+
+## compare against chisq.test()
+
+```
+
+
+
+## Monte Carlo Hypothesis Testing, pt. 7
+
+Though our ultimate decision to support the null hypothesis of dependence is not a surprise, our results show that the Monte Carlo p-value is greater than the raw p-value obtained from the calculated $\chi^2$ statistic indicating more support for the null hypothesis. Readers should compare these results against R's `chisq.test` function.
+
+
+
+
+
+## Bayesian Example
+
+Here is an example taken from *Bayesian Ideas and Data Analysis* by Christensen et al.
+
+$$
+y | \theta \sim Bin(2430, \theta)
+\
+and 
+\
+\theta \sim Beta(12.05, 116.06)
+\
+$$
+
+- This is a binomial-beta data model problem. 
+
+- There is a beta prior distribution on $\theta$. 
+
+- Beta is conjugate to the binomial distribution, see: [Conjugate priors](https://en.wikipedia.org/wiki/Conjugate_prior#Discrete_distributions). 
+
+Bayesian anaysis uses prior information combined with observed data to update a probability distribution, posterior distribution, from which we can obtain a probability value. 
+
+The new probability distribution, posterior, describes knowledge about the unkown parameter $\theta$ from historical beliefs (e.g. previous experiments, reports, etc.) and current observed data.
+
+
+## Bayesian Example, pt. 2 | Calculating the posterior distribution
+
+For $y \sim Bin(n, \theta)$ and $\theta \sim Beta(a,b)$ , 
+
+$$
+\begin{aligned}
+\displaystyle p(\theta | y) & = \frac{f(y | \theta) \times p(\theta)}{ m(\mathbf{y})}  \\
+\ & \propto f(y | \theta) \times p(\theta)   \\
+\ & = \binom{n}{y} \theta^{y} (1 - \theta)^{n - y} \times \frac{\Gamma(a) \Gamma(b)}{\Gamma(a + b)} \theta^{a - 1} (1 - \theta)^{b - 1} \\
+\ & \propto \theta^{y} (1 - \theta)^{n - y} \times  \theta^{a - 1} (1 - \theta)^{b - 1} \\
+\ & \propto \theta^{(y + a) - 1} (1 - \theta)^{(n - y + b) -1 } \\
+\ & \propto Beta(y + a, n - y + b) \\
+\end{aligned}
+$$
+where $\displaystyle m(\mathbf{y}) = \int f(y | \theta) \times p(\theta) d \theta$.
+
+## Bayesian Example, pt. 3
+The Bayesian data model is then 
+
+$$
+y | \theta \sim Bin(n, \theta)
+\
+and
+\
+\theta \sim Beta(a, b)
+$$ 
+
+The resulting posterior distribution is then
+$$
+\theta | y \sim Beta(y + a, n -y + b)
+$$
+
+
+
+## Bayesian Example, pt. 3
+
+We can now simulate the posterior distribution
+
+```{r cars, fig.height=4, fig.width=5, fig.align='center', echo=FALSE}
+N = 10^4
+set.seed(123)
+x = rbeta(n = N, shape1 = 219 + 12.05, shape2 = 2430 - 219 + 116.06)
+d = density(x)
+hist(x = x, probability = TRUE, 
+      main = "Beta Posterior Distribution",
+     xlab = "x (posterior values)", ylab = "Density",
+     ylim = c(0,80), col = "gray", border = "white")
+lines(x = d$x , y = d$y, type = "l", col = 2)
+abline(v = median(x), lty = 3, col = "3")
+
+print("Median: ")
+print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))
+
+
+```
+
+
+## Bayesian Example, pt. 4
+
+
+We can tell the VP that the true probability lies between 7.9% and 10.2%, with median probability of 9%.
+
+
+Code: 
+
+
+```{r, eval=FALSE}
+N = 10^4
+set.seed(123)
+x = rbeta(n = N, shape1 = 219 + 12.05, shape2 = 2430 - 219 + 116.06)
+d = density(x)
+hist(x = x, probability = TRUE, 
+      main = "Beta Posterior Distribution",
+     xlab = "x (posterior values)", ylab = "Density",
+     ylim = c(0,80), col = "gray", border = "white")
+lines(x = d$x , y = d$y, type = "l", col = 2)
+abline(v = median(x), lty = 3, col = "3")
+
+print("Median: ")
+print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))
+
+
+```
+
