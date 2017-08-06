@@ -6,13 +6,14 @@ output:
   ioslides_presentation:
     theme: simple
     smaller: true
+    wide: true
     
 ---
 
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   CommonHTML: {
-    scale: 105
+    scale: 100
   }
 });
 </script>
@@ -73,10 +74,23 @@ acf(u) ## autocorrelation of random number generation
 
 ## Generation uniform samples, pt. 2
 
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  CommonHTML: {
+    scale: 100
+  }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
 Now, say we could only simulate $u \sim Unif(0,1)$. How could we simulate $v \sim Unif(0,10)$? Well, we could simply include a multiplicative constant such that $v = 10 \times u$.
 
 
 ```{r}
+par(mfrow = c(1,2))
 v = 10 * runif(1000, 0, 1) ## v ~ unif(0, 10)
 hist(v)
 
@@ -84,13 +98,9 @@ w = runif(1000, 0, 10) ## unif(0, 10)
 hist(w)
 
 
-## z = unif(0,8) + 8
-z = runif(1000, 0, 8) + 2 ## v ~ unif(2, 10)
-hist(z)
 ```
 
-\newpage
-\clearpage
+
 
 
 
@@ -116,6 +126,10 @@ and therefore $F_X^{-1}(U)$ has the same distribution as $X$.
 
 
 
+
+## Inverse Transform Method, pt. 2
+
+
 Steps:
 1. For target probability distribution function (pdf) f(x), calculate the inverse of the CDF by setting F(x) = U, then solving for X, for which $U \sim Unif(0,1)$.
 
@@ -124,7 +138,8 @@ Steps:
 3. Plug in $u$ observed values in $F^{-1}(U)$ to obtain N $x$ values for which $X \sim f(x)$
 
 
-### Example: Exponential distribution
+
+## Example: Exponential distribution
 
 Suppose we are interested in generating 10,000 random values from an Exponential distribution 
 
@@ -136,6 +151,7 @@ Suppose we are interested in generating 10,000 random values from an Exponential
 
 If we set $\lambda = 5$, then
 
+
 ```{r cars}
 N = 10^4
 u = runif(N)
@@ -146,7 +162,13 @@ fInv = function(u){
 
 outSamples = fInv(u)
 
+```
 
+## Example: Exponential distribution, pt. 2
+
+
+```{r}
+par(mfrow = c(1,2))
 hist(outSamples, probability = TRUE)
 lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5), 
       col = "blue")
@@ -154,21 +176,12 @@ hist(rexp(n = N, rate = 5), probability = TRUE)
 lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5), 
       col = "blue")
 
-
-
-qqplot(qunif(ppoints(500)), outSamples,
-      main = expression("Q-Q plot for" ~~ {Exp(5)}))
-qqline(outSamples, distribution = qexp,
-      prob = c(0.1, 0.9), col = 2)
-
-
-
 ```
 
 
 
 
-### Example: Pareto Distribution
+## Example: Pareto Distribution
 
 For information on the Pareto distribution, please see: [Pareto Distribution][3]
 
@@ -195,23 +208,26 @@ x = b \times (1 - U)^{-1/a}
 $$
 
 
+## Example: Pareto Distribution, pt. 2
+
 
 ```{r}
-
 n = 1000
-
 U =runif(n)
-
 a = 3
 b = 2
-
 X = b*(1-U)^(-1/a)
-
-hist(X, probability = TRUE, breaks = 25, xlim =c(0, 45),main = "Inverse Transform: Pareto(3,2)")
-
 pareto = function(x){(a*(b^a)/x^(a+1))}
-curve(pareto(x), from = 0, to = 40, add = TRUE, col = "blue")
 
+```
+
+
+## Example: Pareto Distribution, pt. 3
+
+```{r}
+par(mfrow = c(1,2))
+hist(X, probability = TRUE, breaks = 25, xlim =c(0, 45),main = "Inverse Transform: Pareto(3,2)")
+curve(pareto(x), from = 0, to = 40, add = TRUE, col = "blue")
 plot(density(X), main = "Density Plot of Inverse Transform: Pareto(3, 2)")
 curve(pareto(x), from = 0, to = 40, add = TRUE, col = "blue")
 
@@ -223,7 +239,7 @@ curve(pareto(x), from = 0, to = 40, add = TRUE, col = "blue")
 
 
 
-### Inverse Transform Discrete scenario
+## Inverse Transform Discrete scenario
 For a given an ordered discrete random sample $... < x_{i-1} < x_{i} < x_{i+1} < ...$ from a distribution $f(X)$, with CDF $F(x)$. Then, the inverse transformation $F_X^{-1}(u) = x_i$, where $F_X(x_{i-1}) < u \leq F_X(x_i)$. Then for each random variable desired,
 
 1. Generate a random variable $u \sim Unif(0,1)$
@@ -231,9 +247,8 @@ For a given an ordered discrete random sample $... < x_{i-1} < x_{i} < x_{i+1} <
 2. Deliver $x_i$ where $F(x_{i-1}) < u \leq F(x_{i})$
 
 
-## Example 
 
-Given the following distribution $P(X = 0) = 0.1$, $P(X = 1) = 0.2$, $P(X = 2) = 0.2$, $P(X = 3) = 0.2$, and $P(X = 4) = 0.3$, use the inverse transform method to generate a random sample of size 1000 from the distribution.
+As an example take the following distribution $P(X = 0) = 0.1$, $P(X = 1) = 0.2$, $P(X = 2) = 0.2$, $P(X = 3) = 0.2$, and $P(X = 4) = 0.3$, use the inverse transform method to generate a random sample of size 1000 from the distribution.
 
 $$
 F(X \leq x) = 
@@ -248,6 +263,9 @@ $$
 
 
 
+## Inverse Transform Discrete scenario, pt. 2
+
+
 ```{r}
 cdf = c(0.0, 0.1, 0.3, 0.5, 0.7, 1.0)
 results = numeric(length = 1000) ## creates a vector of zeros
@@ -259,16 +277,17 @@ for(i in 2:6){
 
 table(results) / 1000
 
+```
+
+
+## Inverse Transform Discrete scenario, pt. 3
+
+```{r}
 
 hist(results, probability = TRUE)
 
 ```
 
-
-
-
-\newpage
-\clearpage
 
 
 
@@ -284,7 +303,9 @@ $$
 $$
 for all t such that $f(t) > 0$. If we'd like to simulate from the target density $f(t)$, then the following algorithm can be applied to generate the random variable $X$.
 
-### The Accept-Reject Algorithm
+
+
+## The Accept-Reject Algorithm
 
 1. Generate $Y \sim g_Y(t)$ and $U \sim Unif(0,1)$
 
@@ -302,7 +323,7 @@ In order for the algorithm to work we require the following constraings:
 
 
 
-### Example: Beta(2,2)
+## Example: Beta(2,2)
 
 Supposed we'd like to generate 1,000 samples from $Beta(2,2)$, $f$. The density function for $Beta(2,2)$ is simply $f(x) = 6x(1 - x)$ for $0 < x < 1$. Since our domain is between 0 and 1, we can use a simple $Unif(0,1)$ density as our instrumental density, $g$. Then, by the accept-reject algorithm we can simulate a random variable $Y \sim g$, and a random variable $U \sim Unif(0,1)$. Then, if 
 $$
@@ -310,7 +331,7 @@ U \leq \frac{f(Y)}{M \times g(Y)}
 $$
 we accept the candidate variable $Y \sim g$ as $X$, $X = Y$. Otherwise, we reject $Y$ and simulate again until we get an appropriate sample size. Note that the target density $f$ has a maximum of 1.5, so we can set M = 1.5; see: [Max of Beta(2,2)](http://www.wolframalpha.com/input/?i=max+6x(1+-+x))
 
-First, we'll generate 5 samples
+
 ```{r}
 ## Accept-Reject
 M = 1.5
@@ -319,26 +340,31 @@ set.seed(123)
 f <- function(x){ 6*x*(1 - x)} ## pdf of Beta(2,2)
 g <- function(x){ 1 } ## pdf of Unif(0,1) is just 1
 
+```
+
+
+## Example: Beta(2,2), pt. 2
+
+First, we'll generate 5 samples
+```{r}
+
 for(i in 1:5){
   print(paste("Run: ", i))
   u = runif(1)
-  print(u)
   y = runif(1)
-  print(y)
+  print(paste("U: ", u, "and Y:", y))
   accept <- u <= f(y)/(M* g(y))
   print(paste("Accept? ", accept))
   if(accept){
     X[i] <- y
   }
-  
 }
-
-print(X)
-
-
 
 ```
 
+
+
+## Example: Beta(2,2), pt. 3
 
 
 Now, say we needed 10,000 samples from $Beta(2,2)$, then a better implementation would be
@@ -358,6 +384,12 @@ while(sum(is.na(X))){
   }
 }
 
+```
+
+
+## Example: Beta(2,2), pt. 4
+
+```{r}
 
 hist(X, xlab = "X", main = "Beta(2,2) from Accept-Reject algorithm", 
      probability = TRUE)
@@ -367,6 +399,7 @@ curve(expr = beta, from = 0, to = 1, add = TRUE)
 ```
 
 
+## Example: Beta(2,2), pt. 5
 
 
 ```{r}
@@ -398,12 +431,12 @@ par(mfrow=c(1,1))
 
 
 
+## Example: Beta(2,2), pt. 6
+
+
 
 ```{r}
-N = 10000
-U = runif(N)
-Y = runif(N)
-M = 1.5
+N = 10000; U = runif(N); Y = runif(N); M = 1.5
 
 f <- function(x){ 6*x*(1 - x)} ## pdf of Beta(2,2)
 g <- function(x){ 1 } ## pdf of Unif(0,1) is just 1
@@ -449,7 +482,7 @@ Now that we've covered how to simulate random variables from an $Exp(\theta)$ di
 
 We'll cover the following:
 
-1. $Y = \sum^N_{i=1} X$ where $Y \sim Chi\ Square(2N)$ ($2N$ degress of freedom)
+1. $Y = \sum^N_{i=1} X$ where $Y \sim \chi^2_{2N}$ ($2N$ degress of freedom)
 
 See: [Chi-Square distribution][5]
 
@@ -464,7 +497,7 @@ See: [Beta distribution][7]
 4. $Y = \sum_{i = 0}^{N} X_i$ where $X ~ Bernoulli(p)$ such that $Y \sim Bin(n,p)$
 
 
-### Example: Binomial trials:
+## Example: Binomial trials:
 
 ```{r}
 ## let's simulate 10,000 samples from bin(n=10, p = 0.3)
@@ -488,7 +521,7 @@ par(mfrow=c(1,1))
 
 
 
-### Example: Generate R ~  Rayleigh
+## Example: Generate R ~  Rayleigh
 
 First attempt the Inverse Transform Method and see why it won't work.
 
@@ -532,6 +565,8 @@ $$
 x = \sqrt{ - 2\sigma^2 \times log(1 - U) }
 $$
 
+## Example: Generate R ~  Rayleigh
+
 From the last equation, we see that we'd be taking the square root of negative values which would be problematic. Therefore, we need an alternative algorithm. 
 
 From information on the Rayleigh distribution, we know that given two i.i.d. random variables $Z_1, Z_2 \sim N(0, \sigma)$ then $R = \sqrt{ Z_1^2 + Z_2^2 } \sim Rayleigh(\sigma)$. Therefore, in order to simulate 1 random variable from $Rayleigh(\sigma)$, we first generate 2 random variables from a Normal distribution with mean 0 and standard deviation $\sigma$.
@@ -541,6 +576,8 @@ To generate $N$ Rayleigh random variables, our algorithm would be:
 1. Generate $2 \times N$ random variables $Z_i \sim N(0,\sigma)$ for $i \in (0, 2N)$
 2. For each pair of $Z_i \sim N(0,\sigma)$ use the transformation $R = \sqrt{ Z_1^2 + Z_2^2 }$ to obtain $N$ random variables from $Rayleigh(\sigma)$.
 
+
+## Example: Generate R ~  Rayleigh
 
 ```{r}
 
