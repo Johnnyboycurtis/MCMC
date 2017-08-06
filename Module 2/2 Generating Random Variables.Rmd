@@ -476,28 +476,24 @@ It should be noted that the probability of acceptance is given by $\frac{1}{M}$.
 
 ## Transformation Methods
 
-Now we look at transformation methods for generating random variables. Distributions sometimes share relationships, and if the relationship is relatively simple, we can exploit this to generate random variables from a "simple to simulate" distribution and transform those random variables to generate samples from a "harder to simulate" distribution. I'll give some examples below. First, see the following Wikipedia page for some relationships: [Relationships among probability distributions][4]
+- Distributions sometimes share relationships, and if the relationship is simple we can exploit it to generate random variables from a "simple to simulate" distribution and transform those random variables to generate samples from a "harder to simulate" distribution. I'll give some examples below. 
+
+- First, see the following Wikipedia page for some relationships: [Relationships among probability distributions][4]
 
 Now that we've covered how to simulate random variables from an $Exp(\theta)$ distribution ("simple to simulate"), I'll cover how to generate some random variables from "harder to simulate" distributions.
 
 We'll cover the following:
 
-1. $Y = \sum^N_{i=1} X$ where $Y \sim \chi^2_{2N}$ ($2N$ degress of freedom)
+1. $Y = \sum^N_{i=1} X$ where $Y \sim \chi^2_{2N}$ ($2N$ degress of freedom). See: [Chi-Square distribution][5]
 
-See: [Chi-Square distribution][5]
+2. $Y = \beta \sum^\alpha_{i = 1} X$ where $Y \sim Gamma(\alpha, \beta)$. See: [Gamma distribution][6]
 
-2. $Y = \beta \sum^\alpha_{i = 1} X$ where $Y \sim Gamma(\alpha, \beta)$
-
-See: [Gamma distribution][6]
-
-3. $Y = \frac{\sum^a_{i = 1} X}{\sum^{a + b}_{i = 1} X}$ where $Y \sim Beta(a, b)$
-
-See: [Beta distribution][7]
+3. $Y = \frac{\sum^a_{i = 1} X}{\sum^{a + b}_{i = 1} X}$ where $Y \sim Beta(a, b)$. See: [Beta distribution][7]
 
 4. $Y = \sum_{i = 0}^{N} X_i$ where $X ~ Bernoulli(p)$ such that $Y \sim Bin(n,p)$
 
 
-## Example: Binomial trials:
+## Example: Binomial trials
 
 ```{r}
 ## let's simulate 10,000 samples from bin(n=10, p = 0.3)
@@ -507,7 +503,12 @@ p = 0.3
 x = as.numeric(runif(n = (n*N)) <= p) ## convert bools to 1 and 0
 m = matrix(data = x, nrow = N, ncol = n)
 Binom_samples = rowSums(m) 
+```
 
+
+## Example: Binomial trials, pt. 2
+
+```{r}
 par(mfrow = c(1,2))
 hist(Binom_samples, probability = TRUE, main = "Binom(10,0.3) from Unif(0,1)", 
      col = "blue")
@@ -527,42 +528,21 @@ First attempt the Inverse Transform Method and see why it won't work.
 
 For information on the Rayleigh distribution follow the link: [Rayleigh Distribution][2]
 
-PDF: $f(x | \sigma) = \frac{x}{\sigma^2} exp(\frac{-x^2}{2\sigma^2})$ for $x \geq 0, \ \sigma > 0$ 
-
 CDF: $F(X \leq x) = 1 - exp(\frac{-x^2}{2\sigma^2})$
 
 
 Inverse Transform:
 Set $F(x) = U$, where $U \sim Unif(0,1)$.
 
-1. 
 $$
-1 - exp(\frac{-x^2}{2\sigma^2}) = U \\
-$$
-
-2. 
-$$
-exp(\frac{-x^2}{2\sigma^2}) = 1 - U
-$$
-
-
-3. 
-$$
-log(exp(\frac{-x^2}{2\sigma^2})) = log(1 - U)
-$$
-4. 
-$$
-\frac{-x^2}{2\sigma^2} = log(1 - U)
-$$
-
-5. 
-$$
--x^2 = 2\sigma^2 \times log(1 - U)
-$$
-
-6. 
-$$
-x = \sqrt{ - 2\sigma^2 \times log(1 - U) }
+\begin{aligned}
+1 - exp(\frac{-x^2}{2\sigma^2}) & =  U \\
+\ exp(\frac{-x^2}{2\sigma^2}) & = 1 - U \\
+\ log(exp(\frac{-x^2}{2\sigma^2})) & = log(1 - U) \\
+\ \frac{-x^2}{2\sigma^2} & = log(1 - U)  \\
+\ -x^2 & = 2\sigma^2 \times log(1 - U)  \\
+\ x & = \sqrt{ - 2\sigma^2 \times log(1 - U) } \\
+\end{aligned}
 $$
 
 ## Example: Generate R ~  Rayleigh
