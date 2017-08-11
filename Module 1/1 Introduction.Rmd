@@ -248,9 +248,48 @@ Though our ultimate decision to support the null hypothesis of dependence is not
 
 
 
-## Bayesian Example
+## Bayesian Example | Inference on a single proportion
 
-Here is an example taken from *Bayesian Ideas and Data Analysis* by Christensen et al.
+Here is an example taken from [*OpenIntro Statistics*](https://www.openintro.org/stat/textbook.php?stat_book=os) textbook.
+
+A simple random sample of 1,028 US adults in March 2013 found that 56% support nuclear arms reduction. Does this provide convincing evidence that a majority of Americans supported nuclear arms reduction at the 5% significance level?
+
+Using a Pearson-frequentist perspective, we might simply do the following:
+
+meaning the observations are independent. In a one-proportion hypothesis test, the
+success-failure condition is checked using the null proportion, which is $H_0: p = 0.5$ and 
+$H_A: p > 0.5$.
+
+Under the null hypothesis $n \times p = n \times (1-p) = 1028 \times 0.5 = 514 > 10$. With these conditions verified,
+the normal model may be applied to $\hat{p}$.
+
+Next the standard error can be computed. The null hypothesis $p_0 = 0.5$ is used again here,
+because this is a hypothesis test for a single proportion.
+
+$$
+SE = \displaystyle \sqrt{\frac{p (1 - p)}{n}} = \sqrt{\frac{0.5 (1 - 0.5)}{1028}} = 0.016
+$$
+
+## Bayesian Example | Inference on a single proportion
+
+Based on the normal model, the test statistic can be computed as
+the Z-score of the point estimate:
+
+$$
+Z = \frac{\hat{p} - p_0}{SE} = = \frac{0.56 - 0.5}{0.016} = 3.75
+$$
+
+```{r}
+print(1 - pnorm(q = 3.75)) ## p-value
+```
+
+We can then look up the upper tail area, the p-value, and see that it is less than 0.001. With a p-value < 0.05, we can reject the null hypothesis and conclude that the poll provides evidence that a majority (greater than 50%) of Americans supported the nuclear arms reduction efforst in March 2013.
+
+
+## Bayesian Example | Inference on a single proportion
+
+Another perspective on this problem is that of a Bayesian. Assume that $p  = \theta \sim Beta(1,1)$, then
+
 
 $$
 y | \theta \sim Bin(2430, \theta)
@@ -313,7 +352,7 @@ We can now simulate the posterior distribution
 ```{r cars, fig.height=4, fig.width=5, fig.align='center', echo=FALSE}
 N = 10^4
 set.seed(123)
-x = rbeta(n = N, shape1 = 219 + 12.05, shape2 = 2430 - 219 + 116.06)
+x = rbeta(n = N, shape1 = 1028 + 1, shape2 = 1028 - 576 + 1)
 d = density(x)
 hist(x = x, probability = TRUE, 
       main = "Beta Posterior Distribution",
