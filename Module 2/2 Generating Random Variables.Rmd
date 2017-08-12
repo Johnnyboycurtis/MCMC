@@ -13,7 +13,7 @@ output:
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   CommonHTML: {
-    scale: 100
+    scale: 95
   }
 });
 </script>
@@ -22,10 +22,8 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
 
 
+
 ## Introduction
-
-One of the fundamental tools required in monte carlo methods is the ability to generate pseudo-random variables from a specified probability distribution. We explore some of these methods starting with the Inverse Transform Method. One of the most fundamental number generation is the uniform random generation. Pseudo random number genrators rely on the assumption that computational methods can consistently generate uniform random numbers. Though, these notes do not dive deep into the mechanics of random number generation, they do provide an overview of some topics. After having the ability to generate simple random numbers transformations are used to simulate other random processes.
-
 
 In this section we'll cover the following methods for generating random numbers from a target distribution.
 
@@ -38,58 +36,105 @@ In this section we'll cover the following methods for generating random numbers 
 4. Sums and Mixture distributions
 
 
+## Pseu-random numbers
 
+One of the fundamental tools required in Monte Carlo methods is the ability to generate consistent *pseudo*-random variables from a specified probability distribution. 
+
+- One of the most fundamental number generation is the uniform random number generation
+
+- Can sample from many distributions with the help of uniform random numbers
+
+- Pseudo random number genrators rely on the assumption that computational methods can consistently generate uniform random numbers.
+
+In R, we can control how random variables are generated. For example, we can specify seed for random number generation, see the function [`set.seed`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Random.html)
+
+- `set.seed` allows us to control the start and flow (*state*) of random number generation with a numeric "seed"
+
+- Useful for reproducibility
+
+- On StackOverflow: [Reasons for using the set.seed function](https://stackoverflow.com/questions/13605271/reasons-for-using-the-set-seed-function)
 
 
 ## Generation uniform samples
 
 Random number generation heavily relies on being able to obtain reliable samples from a Uniform distribution. There is a long history of work that has gone into this. Computers on their own can't generate *randomness*, but they can simulate what *random* may look like.
 
-```{r}
 
+```{r, eval = FALSE}
 u = runif(2000)
 
-#par(mfrow=c(1,2))
 hist(u, probability=TRUE)
 lines(density(u), xlim=c(0,1))
-#par(mfrow=c(1,1))
 
 ## Q-Q plot for `runif` data against true theoretical distribution:
-qqplot(qunif(ppoints(500)), u,
-      main = expression("Q-Q plot for" ~~ {Unif(0,1)}))
-qqline(u, distribution = qunif,
-      prob = c(0.1, 0.6), col = 2)
-
-
-qqplot(u,1-u)
-qqline(u, distribution = qunif)
-
-hist(1-u, probability = TRUE) ## also follows a uniform dist
-lines(density(1-u), xlim=c(0,1))
-
-acf(u) ## autocorrelation of random number generation
+qqplot(qunif(ppoints(500)), u,  main = expression("Q-Q plot for Unif(0,1)"))
+qqline(u, distribution = qunif, prob = c(0.1, 0.6), col = 2)
 
 ```
 
 
+
+```{r, fig.height=2, fig.width=6, echo=FALSE}
+u = runif(2000)
+
+par(pin = c(2,1), mfrow = c(1,2))
+hist(u, probability=TRUE)
+lines(density(u), xlim=c(0,1))
+
+## Q-Q plot for `runif` data against true theoretical distribution:
+qqplot(qunif(ppoints(500)), u,  main = expression("Q-Q plot for Unif(0,1)"))
+qqline(u, distribution = qunif, prob = c(0.1, 0.6), col = 2)
+
+
+```
+
+
+## Generation uniform samples
+
+If $u \sim Unif(0,1)$, then $(1 - u) \sim Unif(0,1)$
+
+```{r, fig.height=3.2, fig.width=6, echo=FALSE}
+require(graphics)
+palette(value = rainbow(6))
+
+par(pin = c(2,2), mfrow = c(1,2))
+qqplot(qunif(ppoints(500)),1-u, main = "U against 1 - U")
+qqline(u, distribution = qunif, col = 2)
+
+acf(u, main = "autocorrelation of samples") 
+
+
+```
+
+
+```{r, eval = FALSE}
+qqplot(qunif(ppoints(500)),1-u, main = "U against 1 - U")
+qqline(u, distribution = qunif, col = 2)
+
+acf(u, main = "autocorrelation of samples") 
+
+```
+
+It is important to generate samples that are not correlated with each other!
+
+
+
 ## Generation uniform samples, pt. 2
 
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  CommonHTML: {
-    scale: 100
-  }
-});
-</script>
-<script type="text/javascript" async
-src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
+Once we can simulate $u \sim Unif(0,1)$, we can begin generating samples from other target distributions. How could we simulate $v \sim Unif(0,10)$? Well, we could simply include a multiplicative constant such that $v = 10 \times u$.
+
+```{r, eval=FALSE}
+v = 10 * runif(1000, 0, 1) ## v ~ unif(0, 10)
+hist(v)
+
+w = runif(1000, 0, 10) ## unif(0, 10)
+hist(w)
 
 
-Now, say we could only simulate $u \sim Unif(0,1)$. How could we simulate $v \sim Unif(0,10)$? Well, we could simply include a multiplicative constant such that $v = 10 \times u$.
+```
 
 
-```{r}
+```{r, fig.height=3.2, fig.width=6, echo=FALSE}
 par(mfrow = c(1,2))
 v = 10 * runif(1000, 0, 1) ## v ~ unif(0, 10)
 hist(v)
@@ -112,14 +157,14 @@ hist(w)
 General idea: only using a uniform distribution, generate random values and use an inverse CDF of the target distribution for which you wish to simulate. See the following link for further discussion: [How does the inverse transform method work?][1]
 
 ### Theorem (Probability Integral Transformation): 
-If X is a continuous random variable with CDF $F_X(X)$, then $U = F_X(X) \sim Uniform(0,1)$. If $U \sim Uniform(0,1)$, then for all $x \in \mathbb R$
+If $X$ is a continuous random variable with CDF $F_X(X)$, then $U = F_X(X) \sim Unif(0,1)$. If $U \sim Unif(0,1)$, then for all $x \in \mathbb R$
 
 $$
 \begin{aligned}
 P(F_X^{-1}(U) \leq x) & = P(\inf\{t: F_X(t) = U\} \leq x)\\
 \\ & = P(U \leq F_X(x))\\
 \\ & =F_U(F_X(x)) \\
-\\ & = F_X(x)
+\\ & = F_X(x) = P(X \leq x)
 \end{aligned}
 $$
 and therefore $F_X^{-1}(U)$ has the same distribution as $X$.
@@ -131,23 +176,24 @@ and therefore $F_X^{-1}(U)$ has the same distribution as $X$.
 
 
 Steps:
-1. For target probability distribution function (pdf) f(x), calculate the inverse of the CDF by setting F(x) = U, then solving for X, for which $U \sim Unif(0,1)$.
+
+1. For target probability density function (*pdf*) $f(x)$, calculate the inverse of the CDF by setting $F(x) = U$, then solving for $X$, for which $U \sim Unif(0,1)$.
 
 2. Generate N random numbers from $U \sim Unif(0,1)$
 
-3. Plug in $u$ observed values in $F^{-1}(U)$ to obtain N $x$ values for which $X \sim f(x)$
+3. Plug in $U$ observed values in $F^{-1}(U)$ to obtain $n$ $x$ values for which $X \sim f(x)$
 
 
 
 ## Example: Exponential distribution
 
-Suppose we are interested in generating 10,000 random values from an Exponential distribution 
+Suppose we are interested in generating $n = 10,000$ random values from an Exponential distribution 
 
 1. $f(X) = \lambda e^{- \lambda X}$
 
 2. $F(X) = 1 - e^{- \lambda X} = U$
 
-3. $F^{-1}(U) = - 1/\lambda \ log(1 - U)$; can use (1-u) or u, since both are uniformly distributed.
+3. $F^{-1}(U) = - 1/\lambda \ log(1 - U)$; can use $(1-u)$ or $u$, since both are uniformly distributed.
 
 If we set $\lambda = 5$, then
 
@@ -167,17 +213,28 @@ outSamples = fInv(u)
 ## Example: Exponential distribution, pt. 2
 
 
-```{r}
-par(mfrow = c(1,2))
-hist(outSamples, probability = TRUE)
+```{r, eval=FALSE}
+hist(outSamples, probability = TRUE, main = "Inv Trans")
 lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5), 
       col = "blue")
-hist(rexp(n = N, rate = 5), probability = TRUE)
+hist(rexp(n = N, rate = 5), probability = TRUE, main = "rexp")
 lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5), 
       col = "blue")
 
 ```
 
+
+```{r, fig.height=3, fig.width=6, echo=FALSE}
+## not for show
+## echo = FALSE
+par(mfrow = c(1,2), mar = c(3, 4, 1, 2))
+hist(outSamples, probability = TRUE, main = "Inv Trans")
+lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5), 
+      col = "blue")
+hist(rexp(n = N, rate = 5), probability = TRUE, main = "rexp")
+lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5), 
+      col = "blue")
+```
 
 
 
@@ -188,30 +245,25 @@ For information on the Pareto distribution, please see: [Pareto Distribution][3]
 The $Pareto(a,b)$ distribution has CDF $F(X \leq x) = 1 - (\frac{b}{x})^a$ for $x \geq b > 0, \ a > 0$
 
 
-1. First set $F(x) = U$, where $U \sim Unif(0,1)$
+1. First set $F(x) = U$, where $U \sim Unif(0,1)$, then solve for $X$
 $$
-1 - (\frac{b}{x})^2 = 0
-$$
-
-2. Solve for X
-$$
-(\frac{b}{x})^a = 1 - U
-$$
-3. 
-$$
-\frac{b}{x} = (1 - U)^{1/a}
+\displaystyle
+\begin{aligned}
+1 - \left( \frac{b}{x} \right)^2 & = U \\
+\ \left(\frac{b}{x} \right)^a & = 1 - U \\
+\  \frac{b}{x} & = (1 - U)^{1/a} \\
+\ x & = b \times (1 - U)^{-1/a} \\
+\ & = F_X^{-1}(U) \\
+\end{aligned}
 $$
 
-4. 
-$$
-x = b \times (1 - U)^{-1/a}
-$$
 
 
 ## Example: Pareto Distribution, pt. 2
 
 
 ```{r}
+set.seed(123)
 n = 1000
 U =runif(n)
 a = 3
@@ -219,18 +271,18 @@ b = 2
 X = b*(1-U)^(-1/a)
 pareto = function(x){(a*(b^a)/x^(a+1))}
 
+summary(X)
+
 ```
 
 
 ## Example: Pareto Distribution, pt. 3
 
 ```{r}
-par(mfrow = c(1,2))
-hist(X, probability = TRUE, breaks = 25, xlim =c(0, 45),main = "Inverse Transform: Pareto(3,2)")
+hist(X, probability = TRUE, breaks = 25, xlim =c(0, 20),
+     col = "gray", border = "white",
+     main = "Inverse Transform: Pareto(3,2)", xlab = "x")
 curve(pareto(x), from = 0, to = 40, add = TRUE, col = "blue")
-plot(density(X), main = "Density Plot of Inverse Transform: Pareto(3, 2)")
-curve(pareto(x), from = 0, to = 40, add = TRUE, col = "blue")
-
 
 ```
 
@@ -282,9 +334,12 @@ table(results) / 1000
 
 ## Inverse Transform Discrete scenario, pt. 3
 
-```{r}
+```{r, fig.height=3, fig.width=5}
 
-hist(results, probability = TRUE)
+hist(results, probability = TRUE,
+     main = "Inverse Transform Results",
+     ylim = c(0,1),
+     col = "gray", border = "white")
 
 ```
 
@@ -340,6 +395,8 @@ set.seed(123)
 f <- function(x){ 6*x*(1 - x)} ## pdf of Beta(2,2)
 g <- function(x){ 1 } ## pdf of Unif(0,1) is just 1
 
+n = 10000
+
 ```
 
 
@@ -367,44 +424,40 @@ for(i in 1:5){
 ## Example: Beta(2,2), pt. 3
 
 
-Now, say we needed 10,000 samples from $Beta(2,2)$, then a better implementation would be
+Now, say we needed $n = 10,000$ samples from $Beta(2,2)$, then a better implementation would be
 
 ```{r}
-X = rep(NA, 10000)
-M = 1.5
+X = rep(NA, n); M = 1.5
 i = 0 ## index set to start at 0
 while(sum(is.na(X))){
-  U = runif(1)
-  Y = runif(1)
+  U = runif(1); Y = runif(1)
   accept <- U <= f(Y)/(M*g(Y))
-  #print(paste("Accept? ", accept))
   if(accept){
     i = i+1 ## update the index
     X[i] <- Y
   }
 }
 
+round(summary(X), 4)
+round(summary(rbeta(n = n, shape1 = 2, shape2 = 2)), 4)
 ```
 
 
 ## Example: Beta(2,2), pt. 4
 
-```{r}
 
+```{r, echo = FALSE, fig.height=3, fig.width=9}
+
+par(mfrow = c(1,3), mar = c(3, 4, 1, 2))
+
+## plot 1
 hist(X, xlab = "X", main = "Beta(2,2) from Accept-Reject algorithm", 
      probability = TRUE)
 beta <- function(x) 6*x*(1-x)
 curve(expr = beta, from = 0, to = 1, add = TRUE)
 
-```
 
-
-## Example: Beta(2,2), pt. 5
-
-
-```{r}
-
-par(mfrow=c(1,2))
+## plot 2
 curve(expr = beta, from = 0, to = 1, 
       xlim = c(-0.5, 1.5), ylim = c(0,2),
       main = "Beta(2,2) Density with Unif(0,1)",
@@ -414,7 +467,7 @@ x = seq(from = -1, to = 2, by = 0.01)
 Unif1 = function(x){ ifelse(x >= 0 & x <= 1, 1, 0) }
 polygon(x, Unif1(x), lty = 9)
 
-
+## plot 3
 curve(expr = beta, from = 0, to = 1, 
       xlim = c(-0.2, 1.2), ylim = c(0,2),
       main = "Beta(2,2) with M*Unif(0,1)",
@@ -428,6 +481,42 @@ par(mfrow=c(1,1))
 
 
 ```
+
+- The success of the Accept-Reject algorithm is to choose $M$ to be as small as possible while still maintaining an envelop over the target distribution
+
+
+## Example: Beta(2,2), pt. 5
+
+Code
+
+
+```{r, echo = TRUE, eval=FALSE}
+
+## plot 1
+hist(X, xlab = "X", main = "Beta(2,2) from Accept-Reject algorithm", 
+     probability = TRUE)
+beta <- function(x) 6*x*(1-x)
+curve(expr = beta, from = 0, to = 1, add = TRUE)
+
+## plot 2
+curve(expr = beta, from = 0, to = 1, 
+      xlim = c(-0.5, 1.5), ylim = c(0,2),
+      main = "Beta(2,2) Density with Unif(0,1)", xlab = "x", ylab = "density")
+
+x = seq(from = -1, to = 2, by = 0.01)
+Unif1 = function(x){ ifelse(x >= 0 & x <= 1, 1, 0) }
+polygon(x, Unif1(x), lty = 9)
+
+## plot 3
+curve(expr = beta, from = 0, to = 1, 
+      xlim = c(-0.2, 1.2), ylim = c(0,2),
+      main = "Beta(2,2) with M*Unif(0,1)",  xlab = "x", ylab = "density")
+
+Unif2 = function(x){ ifelse(x >= 0 & x <= 1, 1*M, 0) }
+polygon(x, Unif2(x), lty = 2)
+
+```
+
 
 
 
@@ -446,11 +535,18 @@ accept <- U*M < f(Y)/(g(Y))
 mean(accept) ## acceptance rate
 print(1/M) ## probability of acceptance
 
+```
+
+Exercise: Change the value of M to see how the performance of the algorithm changes
+
+## Example: Beta(2,2), pt. 7
+
+```{r, echo=FALSE, fig.height=4, fig.width=5}
+par(mar = c(3, 4, 1, 2))
+
 plot(Y, U*M, col = as.numeric(accept)+3, 
      xlim = c(-0.2, 1.2), ylim = c(0,2),
      main = "Accept-Reject with M = 1.5")
-
-
 
 curve(expr = beta, from = 0, to = 1, 
       xlim = c(-0.5, 1.5), ylim = c(0,2),
@@ -468,9 +564,24 @@ It should be noted that the probability of acceptance is given by $\frac{1}{M}$.
 
 
 
+## Example: Beta(2,2), pt. 7 | Code
 
-\newpage
-\clearpage
+```{r, echo=TRUE, eval=FALSE}
+plot(Y, U*M, col = as.numeric(accept)+3, 
+     xlim = c(-0.2, 1.2), ylim = c(0,2),
+     main = "Accept-Reject with M = 1.5")
+
+curve(expr = beta, from = 0, to = 1, 
+      xlim = c(-0.5, 1.5), ylim = c(0,2),
+      main = "Beta(2,2) with M*Unif(0,1)",
+      xlab = "x", ylab = "density", add = TRUE,
+      lwd = 4)
+
+Unif2 = function(x){ ifelse(x >= 0 & x <= 1, 1*M, 0) }
+polygon(x, Unif2(x), lty = 2, lwd = 2)
+
+```
+
 
 
 
@@ -522,7 +633,7 @@ par(mfrow=c(1,1))
 
 
 
-## Example: Generate R ~  Rayleigh
+## Example: Generate Rayleigh samples
 
 First attempt the Inverse Transform Method and see why it won't work.
 
@@ -535,17 +646,21 @@ Inverse Transform:
 Set $F(x) = U$, where $U \sim Unif(0,1)$.
 
 $$
+\displaystyle
 \begin{aligned}
-1 - exp(\frac{-x^2}{2\sigma^2}) & =  U \\
-\ exp(\frac{-x^2}{2\sigma^2}) & = 1 - U \\
-\ log(exp(\frac{-x^2}{2\sigma^2})) & = log(1 - U) \\
+1 - exp \left(\frac{-x^2}{2\sigma^2} \right) & =  U \\
+\ exp \left(\frac{-x^2}{2\sigma^2} \right) & = 1 - U \\
+\ log \left(exp \left(\frac{-x^2}{2\sigma^2} \right) \right) & = log(1 - U) \\
 \ \frac{-x^2}{2\sigma^2} & = log(1 - U)  \\
 \ -x^2 & = 2\sigma^2 \times log(1 - U)  \\
 \ x & = \sqrt{ - 2\sigma^2 \times log(1 - U) } \\
 \end{aligned}
 $$
 
-## Example: Generate R ~  Rayleigh
+- can't take the square root of a negative value
+
+
+## Example: Generate Rayleigh samples
 
 From the last equation, we see that we'd be taking the square root of negative values which would be problematic. Therefore, we need an alternative algorithm. 
 
@@ -557,12 +672,10 @@ To generate $N$ Rayleigh random variables, our algorithm would be:
 2. For each pair of $Z_i \sim N(0,\sigma)$ use the transformation $R = \sqrt{ Z_1^2 + Z_2^2 }$ to obtain $N$ random variables from $Rayleigh(\sigma)$.
 
 
-## Example: Generate R ~  Rayleigh
+## Example: Generate Rayleigh samples
 
 ```{r}
-
-N = 1000
-
+N = 10000
 Z = rnorm(n = 2*N, mean = 0, sd = 1)
 Z = matrix(data = Z, nrow = N, ncol = 2)
 
@@ -572,20 +685,24 @@ transfromation <- function(vec){
   return(R)
 }
 
-
 R_Out = apply(X = Z, MARGIN = 1, FUN = transfromation)
 
-hist(R_Out)
-
-## compare with Rayleigh {VGAM}	
-
+summary(R_Out)
 sqrt(pi/2) ## theoretical mean
-mean(R_Out) ## calculated mean
 
 ```
 
 
 
+
+## Example: Generate Rayleigh samples, pt.2
+
+```{r, fig.height=3, fig.width=5}
+
+hist(R_Out, col = "gray", border = "white")
+## compare with Rayleigh {VGAM}	
+
+```
 
 
 
