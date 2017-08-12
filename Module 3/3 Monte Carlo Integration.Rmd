@@ -13,7 +13,7 @@ output:
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   CommonHTML: {
-    scale: 100
+    scale: 95
   }
 });
 </script>
@@ -63,8 +63,7 @@ If we now generate some $N = 1000$ random values from $f(x)$ and evaluate them a
 $$
 \begin{aligned}
 \ \theta &= \int_0^2 h(x) dx \\
-\ &= (\frac{2 - 0}{2 - 0}) \times \int_0^2 h(x) dx \\
-\ &= 2 \times \int_0^2 h(x) \frac{1}{2} dx \\
+\ &= (\frac{2 - 0}{2 - 0}) \times \int_0^2 h(x) dx = 2 \times \int_0^2 h(x) \frac{1}{2} dx \\
 \ &= 2 \times E[h(X)] = 2 \times \int_{- \infty}^{\infty} h(x) f(x) dx \\
 \ &\approx  2 \times \frac{1}{n} \displaystyle\sum_{i=1}^{n} h(x_i)  \\
 \ &= \hat{\theta} \approx \theta
@@ -189,7 +188,7 @@ SE = cumSE(h_values, N)
 
 ## Monte Carlo Integration, Variance Estimation
 
-```{r}
+```{r, fig.height=4, fig.width=6}
 plot(x = 1:N, y = thetas, type = "l", ylim = c(2, 10), xlab = "Number of Samples",
      ylab = "Estimate of theta",
      main = "Estimate of Theta with 95% CI")
@@ -288,7 +287,7 @@ However, what if $x <  0$? Well, then, again exploiting the symmetry property of
 
 For example, if $x = 2$, then we would calculate a MC estimate for $\Phi(X \leq 2)$.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=4, fig.width=6}
 x <- seq(from = -10, to = 10, by = 0.1)
 
 out = dnorm(x)
@@ -351,7 +350,7 @@ for $x > 0$ and $x_i \sim Unif(0,1)$.
 However, if $x < 0$ such as $x = -1$, then we would use the symmetry property of the Normal distribution to calculate $\Phi(-1)$ by $1 - \Phi(-(-1)) = 1 - \Phi(1)$
 
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=4, fig.width=6}
 x <- seq(from = -10, to = 10, by = 0.1)
 
 out = dnorm(x)
@@ -508,20 +507,32 @@ cumTheta = cumsum(w) / 1:N
 
 ##  Calculating tail probabilities
 
-```{r}
+```{r, fig.height=3, fig.width=5}
 plot(cumTheta, type = "l", main = "N(0,1) tail probabilities",
      xlab = "Number of samples", ylab = "p(X>=4)",
      ylim = c(2.5 * 10^(-5), 4 * 10^(-5)))
 abline(a = pnorm(t, lower.tail = FALSE), b = 0, col = "blue")
 
-print(pnorm(t, lower.tail = FALSE))
-print(theta) ## close results!
+## Exercise: Compare the results
+#print(pnorm(t, lower.tail = FALSE))
+#print(theta) 
+
+```
+
+
+
+
+##  Calculating tail probabilities
+
+```{r, fig.height=4, fig.width=6}
+
 
 plot(density(X, weights=w/sum(w)), main = "Density of samples * weights",
      xlab = "X", ylab = "Density",
      xlim = c(0,16)) ## plot density of samples from Exp(x - 4) * weights
 
 ```
+
 
 
 
