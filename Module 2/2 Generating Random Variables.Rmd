@@ -619,8 +619,8 @@ Binom_samples = rowSums(m)
 
 ## Example: Binomial trials, pt. 2
 
-```{r}
-par(mfrow = c(1,2))
+```{r, fig.height=4, fig.width=7}
+par(mfrow = c(1,2), mar = c(3, 4, 1, 2))
 hist(Binom_samples, probability = TRUE, main = "Binom(10,0.3) from Unif(0,1)", 
      col = "blue")
 hist(rbinom(n = N, size = n, prob = p), probability = TRUE, main = "rbinom(10,0.3)",
