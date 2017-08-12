@@ -26,15 +26,26 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 ## Introduction to Monte Carlo
 
 Monte Carlo methods are methods for generating random variables directly 
-or indirectly from target distributions. We generate random variables to 
-estimate p-values or parameters.
+or indirectly from a target distribution(s). 
 
-Applications of monte carlo methods are in hypothesis testing and 
-Bayesian computation.
-  
+- Applications of monte carlo methods are in hypothesis testing and Bayesian computation
+
+- Monte Carlo methods well known for their applications in Bayesian methods
+
+- Monte Carlo is not strictly Bayesian
+
+- Monte Carlo is not strictly frequentist (Neyman-Pearson hypothesis testing)
+
+- Parametric sampling (target distribution part of a family of distributions)
+
+- Non-parametric sampling (functional form of target distribution not specified)
+
+- MC methods also known as parametric Bootstrap
+
+Monte Carlo methods are a method of statistical simulation. Simulation can help us understand reality without needing to run multiple experiments or costly calculations.
 
 
-## Simulation: Gambler's ruin
+## Simulation: Gambler's ruin | Example of Simulation
 
 
 Consider two gamblers, persons A and B, who start to gamble in a zero-sum game with stakes \$$x$ and \$($b-x$), respectively.
@@ -281,9 +292,13 @@ $$
 
 ```{r}
 print(1 - pnorm(q = 3.75)) ## p-value
+
+0.56 + c(-1,1)*1.96*0.016
 ```
 
 We can then look up the upper tail area, the p-value, and see that it is less than 0.001. With a p-value < 0.05, we can reject the null hypothesis and conclude that the poll provides evidence that a majority (greater than 50%) of Americans supported the nuclear arms reduction efforst in March 2013.
+
+- The 95% CI for $\hat{p} = 0.56$ is $(0.52864, 0.59136)$
 
 
 ## Bayesian Example | Inference on a single proportion
@@ -296,11 +311,13 @@ y | \theta \sim Bin(2430, \theta)
 \
 and 
 \
-\theta \sim Beta(12.05, 116.06)
+\theta \sim Beta(1, 1)
 \
 $$
 
 - This is a binomial-beta data model problem. 
+
+- $Beta(1,1)$ is equivalent to $Unif(0,1)$, this is a noninformative prior
 
 - There is a beta prior distribution on $\theta$. 
 
@@ -352,7 +369,7 @@ We can now simulate the posterior distribution
 ```{r cars, fig.height=4, fig.width=5, fig.align='center', echo=FALSE}
 N = 10^4
 set.seed(123)
-x = rbeta(n = N, shape1 = 1028 + 1, shape2 = 1028 - 576 + 1)
+x = rbeta(n = N, shape1 = 576 + 1, shape2 = 1028 - 576 + 1)
 d = density(x)
 hist(x = x, probability = TRUE, 
       main = "Beta Posterior Distribution",
@@ -364,14 +381,13 @@ abline(v = median(x), lty = 3, col = "3")
 print("Median: ")
 print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))
 
-
 ```
 
 
 ## Bayesian Example, pt. 4
 
 
-We can tell the VP that the true probability lies between 7.9% and 10.2%, with median probability of 9%.
+We can conclude that the true probability lies between 53.00% and 59.05%, with median probability of 56.03%.
 
 
 Code: 
@@ -380,7 +396,7 @@ Code:
 ```{r, eval=FALSE}
 N = 10^4
 set.seed(123)
-x = rbeta(n = N, shape1 = 219 + 12.05, shape2 = 2430 - 219 + 116.06)
+x = rbeta(n = N, shape1 = 576 + 1, shape2 = 1028 - 576 + 1)
 d = density(x)
 hist(x = x, probability = TRUE, 
       main = "Beta Posterior Distribution",
@@ -394,4 +410,23 @@ print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))
 
 
 ```
+
+
+
+
+
+
+
+## Monte Carlo Simulation
+
+The previous example focused on direct simulation from a posterior distribution that was well-defined. However, there are some posteriors that will not be as easily identifiable. In general, Monte Carlo methods will prove useful for generating samples from *difficult to sample* target distributions.
+
+The next section will delve into topics of random number generation from target distributions through direct methods and transformations.
+
+
+
+
+
+
+
 
