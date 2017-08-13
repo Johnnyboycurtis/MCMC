@@ -1,0 +1,45 @@
+---
+title: "Prerequisites"
+author: "Jonathan Navarrete"
+date: "August 13, 2017"
+output: 
+  ioslides_presentation:
+    theme: simple
+    smaller: true
+    wide: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Welcome | set up
+
+Before getting started there are a few things you'll need in order to be successful in the course
+
+1. A recent version of [R](https://cran.r-project.org/)
+
+I am currently using version 3.4.0 on Ubuntu
+
+2. A recent version of [RStudio](https://www.rstudio.com/products/rstudio/download/)
+
+I am currently using version 1.0.143
+
+3. A web browser like Firefox (any OS), Chrome (any OS) or Microsoft Edge (Windows 10)
+
+4. (Optional) StackExchange [Cross Validated](https://stats.stackexchange.com/) account
+
+Feel free to ask lookup, ask and answer questions on Cross Validated
+
+
+## Optional | References
+
+No textbook is necessary to follow with the course!
+
+1. For Monte Carlo methods: [Introducing Monte Carlo Methods with R](https://www.amazon.com/Introducing-Monte-Carlo-Methods-Use/dp/1441915753)
+  - Read reviews before making any purchases!
+  
+2. For statistics and probability review: [Introduction to Probability Models, Tenth Edition](https://www.amazon.com/Introduction-Probability-Models-Tenth-Sheldon/dp/0123756863/ref=sr_1_9?s=books&ie=UTF8&qid=1502653034&sr=1-9)
+
+The course follows the layout of work by Christian Robert & George Casella.
+
