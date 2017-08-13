@@ -4,7 +4,7 @@ author: "Jonathan Navarrete"
 date: "May 20, 2017"
 output:   
   ioslides_presentation:
-    theme: simple
+    theme: simplex
     smaller: true
     wide: true
     
@@ -723,66 +723,6 @@ A random variable $X$ drawn with the SIR algorithm has a distribution that conve
 
 
 
-## Example Beta(a,b) posterior
-
-Suppose we have $x_i \sim Beta(a,b)$ with priors on both *a* and *b*. There exists a family of conjugate priors of the form
-$$
-\pi(a,b) \propto \{ \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \}^\lambda x_0^a y_0^b
-$$
-where $\lambda, x_0, y_0$ are hyperparameters; See: [Does the beta distribution have a conjugate prior?](https://stats.stackexchange.com/questions/67443/does-the-beta-distribution-have-a-conjugate-prior) . The posterior is then equal to
-$$
-\pi(a,b | x) \propto \{ \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \}^{\lambda+1} [xx_0]^a [(1 - x)y_0]^b
-$$
-
-
-
-## Example Beta(a,b) posterior
-
-This family of distributions is intractable if only because of the difficulty of dealing with the gamma functions. Simulating directly from $\pi(a,b | x)$ is therefore impossible. We thus need to use a subsitute distribution $g(a,b)$, and we can get a preliminary idea by looking at an image representation of $\pi(a,b | x)$. If we take $\lambda = 1$, $x_0 = 0.5$, $y_0 = 0.5$, and $x = 0.6$.
-
-$$
-\begin{aligned}
-\pi(a,b | x) & \propto \{ \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \}^{2} [0.6 \times 0.5]^a [(1 - 0.6) \times 0.5]^b \\
-\ & \propto \{ \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \}^{2} [0.3]^a [0.2]^b \\
-\end{aligned}
-$$
-Now, for computational purposes, we will use a log-transform then exponential transform.
-
-$$
-\begin{aligned}
-\ & \propto \{ \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \}^{2} [0.3]^a [0.2]^b \\
-\ & \propto exp\{ \{ 2 \times ( \Gamma(a+b) - \Gamma(a) - \Gamma(b) ) + (a \times 0.3) +  (b \times 0.2)  \}\\
-\end{aligned}
-$$
-
-
-
-## Example Beta(a,b) posterior
-
-```{r}
-
-posterior = function(a,b){
-  x = exp(2*(lgamma(a+b) - lgamma(a) - lgamma(b)) + 
-            a*log(0.3) + b* log(0.2))
-  return(x)
-}
-
-a = 1:150
-b = 1:100
-post = outer(a,b,posterior)
-image(a, b, post,
-      xlab = expression(alpha), ylab = expression(beta),
-      main = paste("Controur plot of the ", expression(Pi), "(a,b|x)", sep = ""))
-contour(a, b, post, add = TRUE)
-
-
-
-```
-
-
-
-
-
 
 
 ## Normal-Cauchy Bayes estimator
@@ -829,14 +769,42 @@ where the first component of that integral is proportional to $N(x, 1)$. Therefo
 
 
 
+## Normal-Cauchy Bayes estimator
+
+$$
+\displaystyle
+p(\theta | \mathbf{x}) = \frac{1}{(1 + \theta^2)} e^{-(x - \theta)^2 / 2} \big/ \int_{-\infty}^{\infty} \frac{1}{( 1 + \theta^2)} e^{ (x - \theta)^2) /2}  d \theta
+$$
+
+Note that the posterior can also be interpreted as a self-normalized importance sampling approximation with the importance function being the normal density and the importance ratio being equal to $\frac{1}{(1 + \theta^2)}$
+
+
+
 
 ## Normal-Cauchy Bayes estimator
 
 
+```{r, eval = FALSE, echo = TRUE}
+N = 10^5
+X = 2.5
 
-```{r}
-## importance sampling example
-## Normal with Cauchy prior
+thetas = rnorm(N, X, sd = 1)
+weights = dcauchy(x = thetas, location = 0, scale = 1) ## 1/(pi * (1 + s^2))
+sumOfWeights = sum(weights)
+
+posteriorDist =  (weights )/(sumOfWeights)
+hist(posteriorDist, probability = TRUE, 
+     col = "gray", border = "white",
+    main = "Posterior Distribution of thetas",
+    xlab = "theta", ylab = "density")
+
+```
+
+
+
+```{r, echo = FALSE, fig.height=3, fig.width=6}
+
+par( mar = c(3, 4, 1, 2))
 
 N = 10^5
 X = 2.5
@@ -848,8 +816,9 @@ sumOfWeights = sum(weights)
 
 posteriorDist =  (weights )/(sumOfWeights)
 hist(posteriorDist, probability = TRUE, 
-    main = "Posterior Distribution of thetas",
-    xlab = "theta", ylab = "density")
+     col = "gray", border = "white",
+     main = "Posterior Distribution of thetas",
+     xlab = "theta", ylab = "density")
 
 ```
 
@@ -864,6 +833,23 @@ $$
 E(\theta | x) = \int_{-\infty}^{\infty} \theta \times \frac{ exp(-\frac{1}{2} (x - \theta)^2) \times ( 1 + \theta^2)^{-1}}{m(x)} d \theta \\
 $$
 
+where
+
+$$
+\begin{aligned}
+\displaystyle m(x) & = \int_{-\infty}^{\infty} exp(-\frac{1}{2} (x - \theta)^2) \times ( 1 + \theta^2)^{-1} d \theta \\
+\end{aligned}
+$$
+
+## Normal-Cauchy Bayes estimator
+
+
+Therefore the expectation of the mean of $\theta$ is given by
+
+$$
+\displaystyle
+E(\theta | x) \approx \sum_{i=1}^n \frac{\theta_i}{(1 + \theta_i^2)} e^{-(x - \theta_i)^2 / 2} \big/ \sum_{i=1}^n \frac{1}{( 1 + \theta_i^2)} e^{ (x - \theta_i)^2) /2} 
+$$
 
 
 ## Normal-Cauchy Bayes estimator
@@ -919,9 +905,8 @@ polygon(x = c(1:N, N:1), y = c(confInts[1,], rev(confInts[2,])), border = "gray"
 ```
 
 
-## Normal-Cauchy Bayes estimator
+## Normal-Cauchy Bayes estimator | Code
 
-**Code:**
 
 ```{r, eval=FALSE}
 ## look at the first column estimates
