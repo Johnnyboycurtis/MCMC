@@ -4,7 +4,7 @@ author: "Jonathan Navarrete"
 date: "August 13, 2017"
 output: 
   ioslides_presentation:
-    theme: simple
+    theme: readable
     smaller: true
     wide: true
 ---
