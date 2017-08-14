@@ -1,37 +1,28 @@
 
-.emphasized {
-          font-size: 0.9em;
-      }
 
-
-
-pre {
-      width: 100%; /* 106%; */
-        left: 0; /* -60px; */
-          padding: 1px 1px 1px 1px; /* 10px 0 10px 60px; */
-      } 
-
-.MathJax {
-    font-size: 0.5em;
+.selectable {
+    -webkit-touch-callout: text;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
 }
 
-.reveal .sourceCode.r .kw, .sourceCode.r .er {
-  color:inherit;
-  font-weight: normal;
+
+.slick-slider {
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
-.reveal .sourceCode.r .co {
-  font-style: normal;
+.slick-list.draggable {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
-.reveal .slides {
-  text-align: inherit;
-}
 
-.reveal .slide.level2 h1 {
-  font-size: 48px;
-}
-
-.reveal pre code {
-  font-size: 20px;
-  line-height: 1.3;
-}

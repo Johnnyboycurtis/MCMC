@@ -7,7 +7,7 @@ output:
     theme: simple
     smaller: true
     wide: true
-    
+    css: slides.css
 ---
 
 <script type="text/x-mathjax-config">
@@ -20,6 +20,8 @@ MathJax.Hub.Config({
 <script type="text/javascript" async
 src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
+
+
 
 
 
@@ -55,7 +57,7 @@ In R, we can control how random variables are generated. For example, we can spe
 - On StackOverflow: [Reasons for using the set.seed function](https://stackoverflow.com/questions/13605271/reasons-for-using-the-set-seed-function)
 
 
-## Generation uniform samples
+## Generation uniform samples { .selectable }
 
 Random number generation heavily relies on being able to obtain reliable samples from a Uniform distribution. There is a long history of work that has gone into this. Computers on their own can't generate *randomness*, but they can simulate what *random* may look like.
 
@@ -89,7 +91,7 @@ qqline(u, distribution = qunif, prob = c(0.1, 0.6), col = 2)
 ```
 
 
-## Generation uniform samples
+## Generation uniform samples { .selectable }
 
 If $u \sim Unif(0,1)$, then $(1 - u) \sim Unif(0,1)$
 
@@ -119,7 +121,7 @@ It is important to generate samples that are not correlated with each other!
 
 
 
-## Generation uniform samples, pt. 2
+## Generation uniform samples, pt. 2 { .selectable }
 
 Once we can simulate $u \sim Unif(0,1)$, we can begin generating samples from other target distributions. How could we simulate $v \sim Unif(0,10)$? Well, we could simply include a multiplicative constant such that $v = 10 \times u$.
 
@@ -152,7 +154,7 @@ hist(w)
 
 
 
-## Inverse Transform Method
+## Inverse Transform Method { .selectable }
 
 General idea: only using a uniform distribution, generate random values and use an inverse CDF of the target distribution for which you wish to simulate. See the following link for further discussion: [How does the inverse transform method work?][1]
 
@@ -172,7 +174,7 @@ and therefore $F_X^{-1}(U)$ has the same distribution as $X$.
 
 
 
-## Inverse Transform Method, pt. 2
+## Inverse Transform Method, pt. 2 { .selectable }
 
 
 Steps:
@@ -185,7 +187,7 @@ Steps:
 
 
 
-## Example: Exponential distribution
+## Example: Exponential distribution { .selectable }
 
 Suppose we are interested in generating $n = 10,000$ random values from an Exponential distribution 
 
@@ -210,7 +212,7 @@ outSamples = fInv(u)
 
 ```
 
-## Example: Exponential distribution, pt. 2
+## Example: Exponential distribution, pt. 2 { .selectable }
 
 
 ```{r, eval=FALSE}
@@ -238,7 +240,7 @@ lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5),
 
 
 
-## Example: Pareto Distribution
+## Example: Pareto Distribution { .selectable }
 
 For information on the Pareto distribution, please see: [Pareto Distribution][3]
 
@@ -259,7 +261,7 @@ $$
 
 
 
-## Example: Pareto Distribution, pt. 2
+## Example: Pareto Distribution, pt. 2 { .selectable }
 
 
 ```{r}
@@ -276,7 +278,7 @@ summary(X)
 ```
 
 
-## Example: Pareto Distribution, pt. 3
+## Example: Pareto Distribution, pt. 3 { .selectable }
 
 ```{r}
 hist(X, probability = TRUE, breaks = 25, xlim =c(0, 20),
@@ -291,7 +293,8 @@ curve(pareto(x), from = 0, to = 40, add = TRUE, col = "blue")
 
 
 
-## Inverse Transform Discrete scenario
+## Inverse Transform Discrete scenario { .selectable }
+
 For a given an ordered discrete random sample $... < x_{i-1} < x_{i} < x_{i+1} < ...$ from a distribution $f(X)$, with CDF $F(x)$. Then, the inverse transformation $F_X^{-1}(u) = x_i$, where $F_X(x_{i-1}) < u \leq F_X(x_i)$. Then for each random variable desired,
 
 1. Generate a random variable $u \sim Unif(0,1)$
@@ -315,7 +318,7 @@ $$
 
 
 
-## Inverse Transform Discrete scenario, pt. 2
+## Inverse Transform Discrete scenario, pt. 2 { .selectable }
 
 
 ```{r}
@@ -332,7 +335,7 @@ table(results) / 1000
 ```
 
 
-## Inverse Transform Discrete scenario, pt. 3
+## Inverse Transform Discrete scenario, pt. 3 { .selectable }
 
 ```{r, fig.height=3, fig.width=5}
 
@@ -346,7 +349,7 @@ hist(results, probability = TRUE,
 
 
 
-## Accept-Reject
+## Accept-Reject  { .selectable }
 
 
 For notes on the Accept-Rejection algorithm see [Accept-Reject](http://www.columbia.edu/~ks20/4703-Sigman/4703-07-Notes-ARM.pdf)
@@ -360,7 +363,7 @@ for all t such that $f(t) > 0$. If we'd like to simulate from the target density
 
 
 
-## The Accept-Reject Algorithm
+## The Accept-Reject Algorithm { .selectable }
 
 1. Generate $Y \sim g_Y(t)$ and $U \sim Unif(0,1)$
 
@@ -378,7 +381,7 @@ In order for the algorithm to work we require the following constraings:
 
 
 
-## Example: Beta(2,2)
+## Example: Beta(2,2) { .selectable }
 
 Supposed we'd like to generate 1,000 samples from $Beta(2,2)$, $f$. The density function for $Beta(2,2)$ is simply $f(x) = 6x(1 - x)$ for $0 < x < 1$. Since our domain is between 0 and 1, we can use a simple $Unif(0,1)$ density as our instrumental density, $g$. Then, by the accept-reject algorithm we can simulate a random variable $Y \sim g$, and a random variable $U \sim Unif(0,1)$. Then, if 
 $$
@@ -400,7 +403,7 @@ n = 10000
 ```
 
 
-## Example: Beta(2,2), pt. 2
+## Example: Beta(2,2), pt. 2 { .selectable }
 
 First, we'll generate 5 samples
 ```{r}
@@ -421,7 +424,7 @@ for(i in 1:5){
 
 
 
-## Example: Beta(2,2), pt. 3
+## Example: Beta(2,2), pt. 3 { .selectable }
 
 
 Now, say we needed $n = 10,000$ samples from $Beta(2,2)$, then a better implementation would be
@@ -443,7 +446,7 @@ round(summary(rbeta(n = n, shape1 = 2, shape2 = 2)), 4)
 ```
 
 
-## Example: Beta(2,2), pt. 4
+## Example: Beta(2,2), pt. 4 { .selectable }
 
 
 ```{r, echo = FALSE, fig.height=3, fig.width=9}
@@ -485,7 +488,7 @@ par(mfrow=c(1,1))
 - The success of the Accept-Reject algorithm is to choose $M$ to be as small as possible while still maintaining an envelop over the target distribution
 
 
-## Example: Beta(2,2), pt. 5
+## Example: Beta(2,2), pt. 5 { .selectable }
 
 Code
 
@@ -520,7 +523,7 @@ polygon(x, Unif2(x), lty = 2)
 
 
 
-## Example: Beta(2,2), pt. 6
+## Example: Beta(2,2), pt. 6 { .selectable }
 
 
 
@@ -539,7 +542,7 @@ print(1/M) ## probability of acceptance
 
 Exercise: Change the value of M to see how the performance of the algorithm changes
 
-## Example: Beta(2,2), pt. 7
+## Example: Beta(2,2), pt. 7 { .selectable }
 
 ```{r, echo=FALSE, fig.height=4, fig.width=5}
 par(mar = c(3, 4, 1, 2))
@@ -564,7 +567,7 @@ It should be noted that the probability of acceptance is given by $\frac{1}{M}$.
 
 
 
-## Example: Beta(2,2), pt. 7 | Code
+## Example: Beta(2,2), pt. 7 | Code { .selectable }
 
 ```{r, echo=TRUE, eval=FALSE}
 plot(Y, U*M, col = as.numeric(accept)+3, 
@@ -585,7 +588,7 @@ polygon(x, Unif2(x), lty = 2, lwd = 2)
 
 
 
-## Transformation Methods
+## Transformation Methods { .selectable }
 
 - Distributions sometimes share relationships, and if the relationship is simple we can exploit it to generate random variables from a "simple to simulate" distribution and transform those random variables to generate samples from a "harder to simulate" distribution. I'll give some examples below. 
 
@@ -604,7 +607,7 @@ We'll cover the following:
 4. $Y = \sum_{i = 0}^{N} X_i$ where $X ~ Bernoulli(p)$ such that $Y \sim Bin(n,p)$
 
 
-## Example: Binomial trials
+## Example: Binomial trials { .selectable }
 
 ```{r}
 ## let's simulate 10,000 samples from bin(n=10, p = 0.3)
@@ -633,7 +636,7 @@ par(mfrow=c(1,1))
 
 
 
-## Example: Generate Rayleigh samples
+## Example: Generate Rayleigh samples { .selectable }
 
 First attempt the Inverse Transform Method and see why it won't work.
 
@@ -660,7 +663,7 @@ $$
 - can't take the square root of a negative value
 
 
-## Example: Generate Rayleigh samples
+## Example: Generate Rayleigh samples { .selectable }
 
 From the last equation, we see that we'd be taking the square root of negative values which would be problematic. Therefore, we need an alternative algorithm. 
 
@@ -672,7 +675,7 @@ To generate $N$ Rayleigh random variables, our algorithm would be:
 2. For each pair of $Z_i \sim N(0,\sigma)$ use the transformation $R = \sqrt{ Z_1^2 + Z_2^2 }$ to obtain $N$ random variables from $Rayleigh(\sigma)$.
 
 
-## Example: Generate Rayleigh samples
+## Example: Generate Rayleigh samples { .selectable }
 
 ```{r}
 N = 10000
@@ -695,7 +698,7 @@ sqrt(pi/2) ## theoretical mean
 
 
 
-## Example: Generate Rayleigh samples, pt.2
+## Example: Generate Rayleigh samples, pt.2 { .selectable }
 
 ```{r, fig.height=3, fig.width=5}
 
