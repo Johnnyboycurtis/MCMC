@@ -8,7 +8,7 @@ output:
     widescreen: true
     transition: faster
     smaller: true
-    css: style.css
+    css: slides.css
     theme: simplex
 ---
 
@@ -23,7 +23,7 @@ MathJax.Hub.Config({
 src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
 
-## Introduction to Monte Carlo
+## Introduction to Monte Carlo  { .selectable }
 
 Monte Carlo methods are methods for generating random variables directly 
 or indirectly from a target distribution(s). 
@@ -45,10 +45,10 @@ or indirectly from a target distribution(s).
 Monte Carlo methods are a method of statistical simulation. Simulation can help us understand reality without needing to run multiple experiments or costly calculations.
 
 
-## Simulation: Gambler's ruin | Example of Simulation
+## Simulation: Gambler's ruin | Example of Simulation  { .selectable }
 
 
-Consider two gamblers, persons A and B, who start to gamble in a zero-sum game with stakes \$$x$ and \$($b-x$), respectively.
+Consider two gamblers, persons A and B, who start to gamble in a zero-sum game with stakes \$$x$ and $\$(b-x)$, respectively.
 
 - At each round, each gambler puts up a stake of \$h. The probability that A wins a round is $p$, while the probability that B wins a round is $q = 1 - p$. We wish to compute the probability that A ultimately wins the game. 
 
@@ -61,7 +61,7 @@ Consider two gamblers, persons A and B, who start to gamble in a zero-sum game w
 Moreover, $u$ and $v$ are nondecreasing in $t$. $w$ is nonincreasing in $t$. Thus we can take limits of each of these as t goes to infinity. We shall call these limits $v(x)$, $u(x)$, and $w(x)$, respectively.
 
 
-## Gambler's ruin, pt.2
+## Gambler's ruin, pt.2 { .selectable }
 
 
 
@@ -73,7 +73,7 @@ Imagine a gambler on a roulete table. Say the gambler starts with \$10. In this 
 
 
 
-## Gambler's ruin, pt.3
+## Gambler's ruin, pt.3 { .selectable }
 
 
 ```{r, echo=TRUE, fig.width=5, fig.height=3, fig.align='center'}
@@ -93,7 +93,7 @@ abline(h = 0, lty = 2, col = "red")
 
 
 
-## Gambler's ruin, pt.4
+## Gambler's ruin, pt.4 { .selectable }
 
 
 ```{r, echo=FALSE}
@@ -128,7 +128,7 @@ sum(out[,2] == 20 )
 
 
 
-## Simulation for p-values
+## Simulation for p-values { .selectable }
 
 It has become commonplace in the statistical analysis to use Monte Carlo procedures to calculate
 empirical P values. The reasons for this include the following:
@@ -145,7 +145,7 @@ North BV, Curtis D, Sham PC. A Note on the Calculation of Empirical P Values fro
 *American Journal of Human Genetics*. 2002;71(2):439-441.
 
 
-## Monte Carlo Hypothesis Testing
+## Monte Carlo Hypothesis Testing { .selectable }
 
 The contingency table below is from a study (citation needed) where patients who underwent cancer treatment either saw their cancer controlled or not. The two treatments are surgery or radiation. The question we are interested in is if radiation treatment is associated with control of cancer.
 
@@ -162,8 +162,9 @@ print(study)
 A Chi-squared test would usually be used for this type of analyses.
 
 
-## Monte Carlo Hypothesis Testing, pt. 2
 
+
+## Monte Carlo Hypothesis Testing, pt. 2 { .selectable }
 
 There are two ways that the Chi-squared test is used:
 
@@ -181,7 +182,7 @@ However, a disadvantage of the chi-square test is that it requires a sufficient 
 
 Set up some functions in order to generate our Chi-squared statistic and Monte Carlo p-value.
 
-## Monte Carlo Hypothesis Testing, pt. 4
+## Monte Carlo Hypothesis Testing, pt. 4 { .selectable }
 
 
 ```{r, echo=TRUE}
@@ -208,7 +209,7 @@ simulateChisq <- function(B, E, sr, sc){
 - [Random generation of a table ](http://people.sc.fsu.edu/~jburkardt/f_src/asa159/asa159.html)
 
 
-## Monte Carlo Hypothesis Testing, pt. 5
+## Monte Carlo Hypothesis Testing, pt. 5 { .selectable }
 
 
 ```{r, echo=TRUE}
@@ -234,7 +235,7 @@ ChisqTest <- function(data, Simulations){
 
 
 
-## Monte Carlo Hypothesis Testing, pt. 6
+## Monte Carlo Hypothesis Testing, pt. 6 { .selectable }
 
 We then generate our test statistics.
 
@@ -251,7 +252,7 @@ print(results)
 
 
 
-## Monte Carlo Hypothesis Testing, pt. 7
+## Monte Carlo Hypothesis Testing, pt. 7 { .selectable }
 
 Though our ultimate decision to support the null hypothesis of dependence is not a surprise, our results show that the Monte Carlo p-value is greater than the raw p-value obtained from the calculated $\chi^2$ statistic indicating more support for the null hypothesis. Readers should compare these results against R's `chisq.test` function.
 
@@ -259,7 +260,7 @@ Though our ultimate decision to support the null hypothesis of dependence is not
 
 
 
-## Bayesian Example | Inference on a single proportion
+## Bayesian Example | Inference on a single proportion { .selectable }
 
 Here is an example taken from [*OpenIntro Statistics*](https://www.openintro.org/stat/textbook.php?stat_book=os) textbook.
 
@@ -281,7 +282,7 @@ $$
 SE = \displaystyle \sqrt{\frac{p (1 - p)}{n}} = \sqrt{\frac{0.5 (1 - 0.5)}{1028}} = 0.016
 $$
 
-## Bayesian Example | Inference on a single proportion
+## Bayesian Example | Inference on a single proportion { .selectable }
 
 Based on the normal model, the test statistic can be computed as
 the Z-score of the point estimate:
@@ -301,7 +302,7 @@ We can then look up the upper tail area, the p-value, and see that it is less th
 - The 95% CI for $\hat{p} = 0.56$ is $(0.52864, 0.59136)$
 
 
-## Bayesian Example | Inference on a single proportion
+## Bayesian Example | Inference on a single proportion { .selectable }
 
 Another perspective on this problem is that of a Bayesian. Assume that $p  = \theta \sim Beta(1,1)$, then
 
@@ -328,7 +329,7 @@ Bayesian anaysis uses prior information combined with observed data to update a 
 The new probability distribution, posterior, describes knowledge about the unkown parameter $\theta$ from historical beliefs (e.g. previous experiments, reports, etc.) and current observed data.
 
 
-## Bayesian Example, pt. 2 | Calculating the posterior distribution
+## Bayesian Example, pt. 2 | Calculating the posterior distribution { .selectable }
 
 For $y \sim Bin(n, \theta)$ and $\theta \sim Beta(a,b)$ , 
 
@@ -344,7 +345,8 @@ $$
 $$
 where $\displaystyle m(\mathbf{y}) = \int f(y | \theta) \times p(\theta) d \theta$.
 
-## Bayesian Example, pt. 3
+## Bayesian Example, pt. 3 { .selectable }
+
 The Bayesian data model is then 
 
 $$
@@ -362,7 +364,7 @@ $$
 
 
 
-## Bayesian Example, pt. 3
+## Bayesian Example, pt. 3 { .selectable }
 
 We can now simulate the posterior distribution
 
@@ -384,7 +386,7 @@ print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))
 ```
 
 
-## Bayesian Example, pt. 4
+## Bayesian Example, pt. 4 { .selectable }
 
 
 We can conclude that the true probability lies between 53.00% and 59.05%, with median probability of 56.03%.
@@ -417,7 +419,7 @@ print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))
 
 
 
-## Monte Carlo Simulation
+## Monte Carlo Simulation { .selectable }
 
 The previous example focused on direct simulation from a posterior distribution that was well-defined. However, there are some posteriors that will not be as easily identifiable. In general, Monte Carlo methods will prove useful for generating samples from *difficult to sample* target distributions.
 
