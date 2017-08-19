@@ -15,7 +15,7 @@ output:
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   CommonHTML: {
-    scale: 110
+    scale: 95
   }
 });
 </script>
@@ -260,7 +260,7 @@ Though our ultimate decision to support the null hypothesis of dependence is not
 
 
 
-## Bayesian Example | Inference on a single proportion { .selectable }
+## Inference on a single proportion { .selectable }
 
 Here is an example taken from [*OpenIntro Statistics*](https://www.openintro.org/stat/textbook.php?stat_book=os) textbook.
 
@@ -282,13 +282,13 @@ $$
 SE = \displaystyle \sqrt{\frac{p (1 - p)}{n}} = \sqrt{\frac{0.5 (1 - 0.5)}{1028}} = 0.016
 $$
 
-## Bayesian Example | Inference on a single proportion { .selectable }
+## Inference on a single proportion { .selectable }
 
 Based on the normal model, the test statistic can be computed as
 the Z-score of the point estimate:
 
 $$
-Z = \frac{\hat{p} - p_0}{SE} = = \frac{0.56 - 0.5}{0.016} = 3.75
+Z = \frac{\hat{p} - p_0}{SE} =  \frac{0.56 - 0.5}{0.016} = 3.75
 $$
 
 ```{r}
@@ -302,21 +302,21 @@ We can then look up the upper tail area, the p-value, and see that it is less th
 - The 95% CI for $\hat{p} = 0.56$ is $(0.52864, 0.59136)$
 
 
-## Bayesian Example | Inference on a single proportion { .selectable }
+## Bayesian Example { .selectable }
 
-Another perspective on this problem is that of a Bayesian. Assume that $p  = \theta \sim Beta(1,1)$, then
+Another perspective on this problem is that of a Bayesian. Let $p  = \theta$, where $\theta \sim Beta(1,1)$, then
 
 
 $$
 y | \theta \sim Bin(2430, \theta)
 \
-and 
+\text{ and }
 \
 \theta \sim Beta(1, 1)
 \
 $$
 
-- This is a binomial-beta data model problem. 
+This is a binomial-beta data model problem. 
 
 - $Beta(1,1)$ is equivalent to $Unif(0,1)$, this is a noninformative prior
 
@@ -326,7 +326,15 @@ $$
 
 Bayesian anaysis uses prior information combined with observed data to update a probability distribution, posterior distribution, from which we can obtain a probability value. 
 
-The new probability distribution, posterior, describes knowledge about the unkown parameter $\theta$ from historical beliefs (e.g. previous experiments, reports, etc.) and current observed data.
+The new probability distribution, posterior, describes knowledge about the unkown parameter $\theta$ from historical beliefs (e.g. previous experiments, reports, etc.) and current observed data. We can then use this new probability distribution to create a 95% credible interval, where we assume that 
+
+$$
+P(l(\theta) \leq \theta \leq u(\theta)) = 0.95
+$$
+
+
+- [What's the difference between a confidence interval and a credible interval?](https://stats.stackexchange.com/questions/2272/whats-the-difference-between-a-confidence-interval-and-a-credible-interval)
+
 
 
 ## Bayesian Example, pt. 2 | Calculating the posterior distribution { .selectable }
@@ -364,19 +372,20 @@ $$
 
 
 
-## Bayesian Example, pt. 3 { .selectable }
+## Bayesian Example, pt. 4 { .selectable }
 
-We can now simulate the posterior distribution
+We can now simulate the posterior distribution, then choose $\hat\theta =$ median, and take the 0.025 and 0.975 percentiles to form a 95% credible interval. We can conclude that the true probability lies between 53.00% and 59.05%, with median probability of 56.03%.
 
-```{r cars, fig.height=4, fig.width=5, fig.align='center', echo=FALSE}
+
+```{r cars, fig.height=3, fig.width=4, fig.align='center', echo=FALSE}
 N = 10^4
 set.seed(123)
 x = rbeta(n = N, shape1 = 576 + 1, shape2 = 1028 - 576 + 1)
 d = density(x)
 hist(x = x, probability = TRUE, 
       main = "Beta Posterior Distribution",
-     xlab = "x (posterior values)", ylab = "Density",
-     ylim = c(0,80), col = "gray", border = "white")
+     xlab = expression(theta), ylab = "Density",
+     ylim = c(0,40), col = "gray", border = "white")
 lines(x = d$x , y = d$y, type = "l", col = 2)
 abline(v = median(x), lty = 3, col = "3")
 
@@ -386,13 +395,9 @@ print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))
 ```
 
 
-## Bayesian Example, pt. 4 { .selectable }
 
 
-We can conclude that the true probability lies between 53.00% and 59.05%, with median probability of 56.03%.
-
-
-Code: 
+## Bayesian Example, pt. 5 | Code { .selectable }
 
 
 ```{r, eval=FALSE}
@@ -402,8 +407,8 @@ x = rbeta(n = N, shape1 = 576 + 1, shape2 = 1028 - 576 + 1)
 d = density(x)
 hist(x = x, probability = TRUE, 
       main = "Beta Posterior Distribution",
-     xlab = "x (posterior values)", ylab = "Density",
-     ylim = c(0,80), col = "gray", border = "white")
+     xlab = expression(theta), ylab = "Density",
+     ylim = c(0,40), col = "gray", border = "white")
 lines(x = d$x , y = d$y, type = "l", col = 2)
 abline(v = median(x), lty = 3, col = "3")
 
@@ -412,6 +417,8 @@ print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))
 
 
 ```
+
+
 
 
 
