@@ -40,9 +40,7 @@ In this section we'll cover the following methods for generating random numbers 
 
 ## Pseu-random numbers
 
-One of the fundamental tools required in Monte Carlo methods is the ability to generate consistent *pseudo*-random variables from a specified probability distribution. 
-
-- One of the most fundamental number generation is the uniform random number generation
+One of the fundamental tools required in Monte Carlo methods is the ability to generate consistent *pseudo*-random variables from a specified probability distribution. One of the most fundamental number generation is the uniform random number generation
 
 - Can sample from many distributions with the help of uniform random numbers
 
@@ -59,7 +57,7 @@ In R, we can control how random variables are generated. For example, we can spe
 
 ## Generation uniform samples { .selectable }
 
-Random number generation heavily relies on being able to obtain reliable samples from a Uniform distribution. There is a long history of work that has gone into this. Computers on their own can't generate *randomness*, but they can simulate what *random* may look like.
+Random number generation for statistical purposes heavily relies on being able to obtain reliable samples from a Uniform distribution. There is a long history of work that has gone into this. Computers on their own can't generate *randomness*, but they can simulate what *random* may look like.
 
 
 ```{r, eval = FALSE}
@@ -177,13 +175,13 @@ and therefore $F_X^{-1}(U)$ has the same distribution as $X$.
 ## Inverse Transform Method, pt. 2 { .selectable }
 
 
-Steps:
+Algorithm:
 
-1. For target probability density function (*pdf*) $f(x)$, calculate the inverse of the CDF by setting $F(x) = U$, then solving for $X$, for which $U \sim Unif(0,1)$.
+1. For target probability density function (*pdf*) $f(X)$, calculate the inverse of the CDF by setting $F(X) = U$, then solving for $X$, for which $U \sim Unif(0,1)$.
 
-2. Generate N random numbers from $U \sim Unif(0,1)$
+2. Generate $n$ random numbers from $u \sim Unif(0,1)$
 
-3. Plug in $U$ observed values in $F^{-1}(U)$ to obtain $n$ $x$ values for which $X \sim f(x)$
+3. Plug in $u$ observed values in $F^{-1}(U = u)$ to obtain $n$ values for which $x \sim f(X)$
 
 
 
@@ -590,13 +588,13 @@ polygon(x, Unif2(x), lty = 2, lwd = 2)
 
 ## Transformation Methods { .selectable }
 
-- Distributions sometimes share relationships, and if the relationship is simple we can exploit it to generate random variables from a "simple to simulate" distribution and transform those random variables to generate samples from a "harder to simulate" distribution. I'll give some examples below. 
+- Distributions sometimes share relationships, and if the relationship is simple we can exploit it to generate random variables from a "simple to simulate" distribution and transform those random variables to generate samples from a "difficult to simulate" distribution. I'll give some examples below. 
 
 - First, see the following Wikipedia page for some relationships: [Relationships among probability distributions][4]
 
 Now that we've covered how to simulate random variables from an $Exp(\theta)$ distribution ("simple to simulate"), I'll cover how to generate some random variables from "harder to simulate" distributions.
 
-We'll cover the following:
+From a uniform distribution, $U \sim Unif(0,1)$ we can generate $X \sim Exp(1)$ to then generate the following:
 
 1. $Y = \sum^N_{i=1} X$ where $Y \sim \chi^2_{2N}$ ($2N$ degress of freedom). See: [Chi-Square distribution][5]
 
@@ -604,10 +602,12 @@ We'll cover the following:
 
 3. $Y = \frac{\sum^a_{i = 1} X}{\sum^{a + b}_{i = 1} X}$ where $Y \sim Beta(a, b)$. See: [Beta distribution][7]
 
-4. $Y = \sum_{i = 0}^{N} X_i$ where $X ~ Bernoulli(p)$ such that $Y \sim Bin(n,p)$
+Try these yourself!
 
 
 ## Example: Binomial trials { .selectable }
+
+Another use of generating samples $U \sim U(0,1)$ is to generate Bernoulli and Binomial samples. For example, let $Y = \sum_{i = 0}^{N} X_i$ where $X ~ Bernoulli(p)$ such that $Y \sim Bin(n,p)$
 
 ```{r}
 ## let's simulate 10,000 samples from bin(n=10, p = 0.3)
