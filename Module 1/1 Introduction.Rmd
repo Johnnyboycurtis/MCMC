@@ -266,10 +266,9 @@ Here is an example taken from [*OpenIntro Statistics*](https://www.openintro.org
 
 A simple random sample of 1,028 US adults in March 2013 found that 56% support nuclear arms reduction. Does this provide convincing evidence that a majority of Americans supported nuclear arms reduction at the 5% significance level?
 
-Using a Pearson-frequentist perspective, we might simply do the following:
+Using a Pearson-frequentist perspective, we might simply do the following: 
 
-meaning the observations are independent. In a one-proportion hypothesis test, the
-success-failure condition is checked using the null proportion, which is $H_0: p = 0.5$ and 
+In a one-proportion hypothesis test, the success-failure condition is checked using the null proportion, which is $H_0: p = 0.5$ and 
 $H_A: p > 0.5$.
 
 Under the null hypothesis $n \times p = n \times (1-p) = 1028 \times 0.5 = 514 > 10$. With these conditions verified,
