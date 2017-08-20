@@ -42,7 +42,7 @@ or indirectly from a target distribution(s).
 
 - MC methods also known as parametric Bootstrap
 
-Monte Carlo methods are a method of statistical simulation. Simulation can help us understand reality without needing to run multiple experiments or costly calculations.
+Monte Carlo methods are a method of statistical simulation. Simulation can help us understand reality without needing to run multiple experiments or costly calculations. Monte Carlo methods help us understand probabilities of extreme events.
 
 
 ## Simulation: Gambler's ruin | Example of Simulation  { .selectable }
