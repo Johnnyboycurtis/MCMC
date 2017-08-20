@@ -7,6 +7,7 @@ output:
     theme: simplex
     smaller: true
     wide: true
+    css: slides.css
     
 ---
 
@@ -22,7 +23,7 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
 
 
-## Introduction
+## Introduction { .selectable }
 
 Beyond being able to generate random variables, we should also be able to apply these simulation methods to solve more complex problems. We'll begin with Monte Carlo Integration methods.
 
@@ -37,7 +38,7 @@ Topics to be covered:
 
 
 
-## Monte Carlo Integration
+## Monte Carlo Integration { .selectable }
 
 Given a function $h(x)$ for which we wish to integrate over [a,b], $\int_a^b h(x) dx$, we can treat this deterministic problem as a stochastic one to find the solution. Treat $X$ as a random variable with density $f(x)$, then the mathimatical expecation of the random variable $h(X)$ is
 $$
@@ -51,7 +52,7 @@ $$
 $$
 
 
-## Monte Carlo Integration
+## Monte Carlo Integration { .selectable }
 
 Suppose we have a function $h(x) = 3x^2$ for which we wish to integrate over the interval [0, 2].
 
@@ -72,7 +73,7 @@ $$
 
 
 
-## Monte Carlo Integration
+## Monte Carlo Integration { .selectable }
 
 If we now simulate this, we will see we approximate the true solution $\int_0^2h(x) dx = 8$
 
@@ -87,7 +88,7 @@ integrate(f = h, lower = 0, upper = 2)
 
 
 
-## Monte Carlo Integration
+## Monte Carlo Integration { .selectable }
 
 
 Now, to generalize the method used. Given a function $h(x)$ whose integral is well defined, for which we wish to evaluate at interval $a$ to $b$. Then
@@ -110,7 +111,7 @@ The algorithm to calculate $\hat{\theta}$ is as follows:
 3. Compute $(b - a) \times \bar{g}_{n}$, where $\bar{g}_{n} = \frac{1}{n} \sum_{i = 1}^n h(x_i)$
 
 
-## Monte Carlo Integration, Variance Estimation
+## Monte Carlo Integration, Variance Estimation { .selectable }
 
 
 Now that we can calculate an estimate of statistic $\theta$, $\hat{\theta}$, we should also be able to calculate the standard error in order to build confidence intervals (CIs).
@@ -147,7 +148,7 @@ $$
 
 
 
-## Monte Carlo Integration, Variance Estimation
+## Monte Carlo Integration, Variance Estimation { .selectable }
 
 We can now calculate the standard error for the former example.
 
@@ -168,7 +169,7 @@ cumMean <- function(x, n){
 ```
 
 
-## Monte Carlo Integration, Variance Estimation
+## Monte Carlo Integration, Variance Estimation { .selectable }
 
 ```{r}
 cumSE <- function(x, n){
@@ -216,13 +217,13 @@ print(ci)
 ```
 
 
-## Strong Law of Large Numbers
+## Strong Law of Large Numbers { .selectable }
 
 Monte Carlo Integration relies on the Strong Law of Large Numbers (SLLN) to approximate $E_f[h(X)] = \int_{\mathcal{X}} h(x) f(x) dx$. The method is to generate a sample $\bf{X} = (x_1, ..., x_n)$ from pdf $f(x)$ and use the empirical average of $h(x)$ as an approximation. This Monte Carlo estimate *almost surely* converges to $E_f[h(X)]$ by the SLLN. 
 
 
 
-## Strong Law of Large Numbers
+## Strong Law of Large Numbers { .selectable }
 
 The SLLN says that for a given random sample $X_1, ..., X_n$ the empirical mean, $\bar{X}$, can be used as an estimator for $E[x] = \mu$, and given a **sufficiently** large sample, this estimate approximates the true expectation $\mu$ almost certainly with a probability value of 1. Or more formally, 
 
@@ -235,7 +236,7 @@ See reference: [Strong Law of Large Numbers][2]
 
 
 
-## Central Limit Theorem
+## Central Limit Theorem { .selectable }
 
 The CLT implies that for our Monte Carlo estimator $\hat{\theta}$,
 
@@ -251,7 +252,7 @@ as $n \to \infty$. See: [Central Limit Theorem](http://www.math.uah.edu/stat/sam
 
 
 
-##  Normal p-value estimate for unbounded region
+##  Normal p-value estimate for unbounded region  { .selectable }
 
 
 We will next explore how to generate $Normal(\mu, \sigma)$ p-values using a $Unif(0,x)$ distribution. 
@@ -267,7 +268,7 @@ $$
 $$
 
 
-##  Normal p-value estimate for unbounded region
+##  Normal p-value estimate for unbounded region  { .selectable }
 
 Our first problem is dealing with bounds $(-\infty, x)$. We cannot direcly apply our MC integration algorithm directly because the integral range $(-\infty, x)$, but a way around this issue is by breaking this problem into two sections exploiting the Normal distribution's symmetry around $\mu$. The two sections will be $(-\infty, 0)$ and $(0, x)$. With the given symmetry property, we know that any random variable from $N(\mu, \sigma)$ will have an equal probability of being on the positive end or negative. Thus, let's set $P(X < 0) = 1/2$. Now, all we need to concern ourselves with is the region $(0, x)$. 
 
@@ -281,7 +282,7 @@ $$
 $$
 
 
-##  Normal p-value estimate for unbounded region
+##  Normal p-value estimate for unbounded region  { .selectable }
 
 However, what if $x <  0$? Well, then, again exploiting the symmetry property of $N(\mu, \sigma)$, we esimate $\Phi(X \leq x)$ by $1 - \Phi(-x)$. I'll illustrate how this will be done.
 
@@ -301,7 +302,7 @@ polygon(x, out, col = "blue")
 
 
 
-##  Normal p-value estimate for unbounded region
+##  Normal p-value estimate for unbounded region  { .selectable }
 
 
 Suppose we'd like to calculate $\Phi(2.5) = P(X \leq 2.5)$
@@ -319,7 +320,7 @@ print(x = pnorm(q = 2.5, lower.tail = TRUE))
 
 
 
-##  Normal p-value estimate for unbounded region
+##  Normal p-value estimate for unbounded region  { .selectable }
 
 In the above example, we simulated from a $Unif(0,2.5)$ distribution. But if we'd like to maintain a general algorithm from which we are interested in generating all samples from $Unif(0,1)$ distribution, then we'd make a slight variable change. In order to calculate $P(X \leq x) = \theta$,
 $$
@@ -331,7 +332,7 @@ $$
 $$
 
 
-##  Normal p-value estimate for unbounded region
+##  Normal p-value estimate for unbounded region  { .selectable }
 
 and let $Y = t/x \to t = xY$ such that
 
@@ -345,7 +346,7 @@ $$
 for $x > 0$ and $x_i \sim Unif(0,1)$.
 
 
-##  Normal p-value estimate for unbounded region
+##  Normal p-value estimate for unbounded region  { .selectable }
 
 However, if $x < 0$ such as $x = -1$, then we would use the symmetry property of the Normal distribution to calculate $\Phi(-1)$ by $1 - \Phi(-(-1)) = 1 - \Phi(1)$
 
@@ -371,7 +372,7 @@ polygon(x, out, col = "red")
 
 
 
-## Calculating N(0,1) tail probabilities
+## Calculating N(0,1) tail probabilities  { .selectable }
 
 Suppose $Z \sim N(0,1)$, then $\Phi(x) = P(Z \leq x) = E[I_{Z \leq x}] \approx \frac{1}{N}\sum_{i=1}^N I_{z_i \leq x}$ where $I$ is an indicator function returning 1 if the condition is satisfied, else 0.
 
@@ -387,7 +388,7 @@ print(sum(Z > x)) ## few samples with Z > x
 
 
 
-## Importance Sampling
+## Importance Sampling  { .selectable }
 
 Our Monte Carlo integration algorithm looks like
 $$
@@ -409,7 +410,7 @@ $$
 
 
 
-##  Calculating tail probabilities
+##  Calculating tail probabilities  { .selectable }
 
 
 Given $x \sim N(0,1)$ with a sample of size $N$, the approximation of 
@@ -429,7 +430,7 @@ $$
 
 
 
-##  Calculating tail probabilities
+##  Calculating tail probabilities  { .selectable }
 
 ```{r, echo=FALSE}
 set.seed(9124555) ## won't show up
@@ -452,7 +453,7 @@ In the above example, with $N = 10,000$ samples, we saw only 1 observation with 
 
 
 
-##  Calculating tail probabilities
+##  Calculating tail probabilities  { .selectable }
 
 For an instrumental importance density, we will need to use a density with a long and heavy tail. Some examples of heavy-tailed distributions are Student's t, Chi-squared and exponential density. We will use the latter for its simplicity and memoryless property.
 
@@ -469,7 +470,7 @@ $$
 $$
 
 
-##  Calculating tail probabilities
+##  Calculating tail probabilities  { .selectable }
 
 
 $$
@@ -490,8 +491,8 @@ $$
 
 
 
-##  Calculating tail probabilities
-
+##  Calculating tail probabilities  { .selectable }
+ 
 ```{r}
 N = 10^4 
 t = 4
@@ -505,7 +506,7 @@ cumTheta = cumsum(w) / 1:N
 
 
 
-##  Calculating tail probabilities
+##  Calculating tail probabilities  { .selectable }
 
 ```{r, fig.height=3, fig.width=5}
 plot(cumTheta, type = "l", main = "N(0,1) tail probabilities",
@@ -522,7 +523,7 @@ abline(a = pnorm(t, lower.tail = FALSE), b = 0, col = "blue")
 
 
 
-##  Calculating tail probabilities
+##  Calculating tail probabilities  { .selectable }
 
 ```{r, fig.height=4, fig.width=6}
 
@@ -541,7 +542,7 @@ plot(density(X, weights=w/sum(w)), main = "Density of samples * weights",
 
 
 
-##  Calculating Expectation of Laplace Distribution
+##  Calculating Expectation of Laplace Distribution  { .selectable }
 
 Suppose we have a random variable $X \sim f(x | \mu, b)$, which is the Laplace or Double Exponential distribution.
 $$
@@ -558,7 +559,7 @@ E[X^2] & = \displaystyle \int_{-\infty}^{\infty} x^2 f(x) dx \\
 $$
 
 
-##  Calculating Expectation of Laplace Distribution
+##  Calculating Expectation of Laplace Distribution  { .selectable }
 
 Suppose (for whatever reason) we are unable to generate samples from an exponential distribution. But (for whatever reason) we are able to generate samples $x_i \sim N(0,\sigma)$. Then, we could use $N(0,\sigma)$ as our instrumental density to sample from and use the importance weights $w_i = f(x_i)/g(x_i)$ to improve the convergence to $f$. Let's try $\sigma = 4$
 
@@ -592,7 +593,7 @@ curve(expr = dnorm(x, sd = 4), from = -10, to = 10, type = "l",
 
 
 
-##  Calculating Expectation of Laplace Distribution
+##  Calculating Expectation of Laplace Distribution  { .selectable }
 
 
 ```{r, echo=TRUE, eval = FALSE}
@@ -622,7 +623,7 @@ curve(expr = dnorm(x, sd = 4), from = -10, to = 10, type = "l",
 ```
 
 
-##  Calculating Expectation of Laplace Distribution
+##  Calculating Expectation of Laplace Distribution  { .selectable }
 
 
 Since we need to have samples that cover the entire domain of the Laplace distribution, it makes sense to set $\sigma$ higher than 1. Otherwise, we would need  many, many samples to obtain a stable answer.
@@ -645,7 +646,7 @@ print(theta)
 
 
 
-##  Calculating Expectation of Laplace Distribution
+##  Calculating Expectation of Laplace Distribution  { .selectable }
 
 ```{r}
 
@@ -660,7 +661,7 @@ print(theta)
 
 
 
-##  Calculating Expectation of Laplace Distribution
+##  Calculating Expectation of Laplace Distribution  { .selectable }
 
 
 Now to compare this using samples generated from an $Exp(1)$ distribution. We generate a double exponential from an exponential distribution by generating $N$ random variables from $Exp(1)$ then splitting up the distribution (randomly & evenly in approximately half) between the left and right sides of $\mu = 0$. Our importance weights in this case would just be $w_i = 1$. See reference [Double Exponential](http://www.itl.nist.gov/div898/handbook/eda/section3/eda366c.htm)
@@ -693,7 +694,7 @@ print(paste("theta estimate: ", theta))
 
 
 
-##  Calculating Expectation of Laplace Distribution | Code
+##  Calculating Expectation of Laplace Distribution | Code  { .selectable }
 
 
 ```{r, echo=TRUE, eval=FALSE}
@@ -720,13 +721,13 @@ print(theta)
 
 
 
-## Importance Sampling Resampling
+## Importance Sampling Resampling  { .selectable }
 
 
 Sampling Importance Resampling (SIR) simulates random variables approximately from the target distribution. SIR is based upon the notion of importance sampling and nonparametric bootstrapping. Briefly, importance sampling proceeds by sampling from an importance sampling distribution $g$, where $g$ is the envelope or instrumental distribution. If needed, each point in the sample is weighted to correct the sampling porbabilities so that the weighted sample can be related to the target density $f$. As seen previously, the weighted sample can be used to estimate expectations under $f$.
 
 
-## Importance Sampling Resampling
+## Importance Sampling Resampling  { .selectable }
 
 For the target density $f$, the weights used to correct sampling probabilities are called the *standardized importance weights*. Since the initial weights $w_i = f(x_i)/g(x_i)$ to not sum to 1, we have to normalize them and thus we obtain
 $$
@@ -738,7 +739,7 @@ $$
 for a sample of random variables $x_1, ..., x_n \sim g(x)$.  
 
 
-## Importance Sampling Resampling
+## Importance Sampling Resampling  { .selectable }
 
 We may view importance sampling as approximating $f$ by the discrete distribution having mass $w_i$ on each observed sample point $x_i$. The SIR algorithm can be described as follows
 
@@ -751,11 +752,11 @@ We may view importance sampling as approximating $f$ by the discrete distributio
 A random variable $X$ drawn with the SIR algorithm has a distribution that converges to $f$ as $m \to \infty$. 
 
 
+This method introduces some bias to the estimate we are trying to calculate, but for large samples, it is usually negligible.
 
 
 
-
-## Tail Probabilities of a *t*-distribution
+## Tail Probabilities of a *t*-distribution  { .selectable }
 
 A good candidate for sampling from a tail distribution is the $Exp(\theta)$ distribution. We can generate random variables from a left truncated exponential distribution, $Y \sim Exp^+(\alpha, \theta)$, by simply shifting $X \sim Exp(\theta)$ values by $\alpha$. Thus, $Y = X + \alpha$
 
@@ -774,7 +775,7 @@ hist(y, probability = TRUE, xlim = c(0, 14))
 
 
 
-## Tail Probabilities of a *t*-distribution
+## Tail Probabilities of a *t*-distribution  { .selectable }
 
 Using the truncated exponential distribution, we can use $Exp^+(\alpha, \theta)$ as our importance function for calculating the tail probabilities 
 
@@ -795,7 +796,7 @@ print(pt(q = 10, df = 5, lower.tail = FALSE))
 ```
 
 
-## Tail Probabilities of a *t*-distribution
+## Tail Probabilities of a *t*-distribution  { .selectable }
 
 
 ```{r, fig.height=3.5}
@@ -816,7 +817,7 @@ lines(pvals - 1.96*sterr, col ="blue", lty = 3)
 
 
 
-## Normal-Cauchy Bayes estimator
+## Normal-Cauchy Bayes estimator  { .selectable }
 
 For a single Normal observation $x = 2.5$, where $x \sim N(\theta, 1)$ with a Cauchy prior on its mean, $\theta \sim C(0,1)$, estimate the posterior distribution and mean.
 
@@ -837,7 +838,7 @@ $$
 
 
 
-## Normal-Cauchy Bayes estimator
+## Normal-Cauchy Bayes estimator  { .selectable }
 
 
 Therefore,
@@ -860,7 +861,7 @@ where the first component of that integral is proportional to $N(x, 1)$. Therefo
 
 
 
-## Normal-Cauchy Bayes estimator
+## Normal-Cauchy Bayes estimator  { .selectable }
 
 $$
 \displaystyle
@@ -872,7 +873,7 @@ Note that the posterior can also be interpreted as a self-normalized importance 
 
 
 
-## Normal-Cauchy Bayes estimator
+## Normal-Cauchy Bayes estimator  { .selectable }
 
 
 ```{r, eval = FALSE, echo = TRUE}
@@ -915,7 +916,7 @@ hist(posteriorDist, probability = TRUE,
 
 
 
-## Normal-Cauchy Bayes estimator
+## Normal-Cauchy Bayes estimator  { .selectable }
 
 
 
@@ -932,7 +933,7 @@ $$
 \end{aligned}
 $$
 
-## Normal-Cauchy Bayes estimator
+## Normal-Cauchy Bayes estimator  { .selectable }
 
 
 Therefore the expectation of the mean of $\theta$ is given by
@@ -943,7 +944,7 @@ E(\theta | x) \approx \sum_{i=1}^n \frac{\theta_i}{(1 + \theta_i^2)} e^{-(x - \t
 $$
 
 
-## Normal-Cauchy Bayes estimator
+## Normal-Cauchy Bayes estimator  { .selectable }
 
 
 ```{r}
@@ -959,7 +960,7 @@ print(ESS)
 ```
 
 
-## Normal-Cauchy Bayes estimator
+## Normal-Cauchy Bayes estimator  { .selectable }
 
 ```{r}
 posteriorTheta = cumsum(thetas * weights) / cumsum(weights)
@@ -971,7 +972,7 @@ plot(posteriorTheta, type = "l", main = "posterior theta estimates",
 
 
 
-## Normal-Cauchy Bayes estimator
+## Normal-Cauchy Bayes estimator  { .selectable }
 
 
 ```{r}
@@ -996,7 +997,7 @@ polygon(x = c(1:N, N:1), y = c(confInts[1,], rev(confInts[2,])), border = "gray"
 ```
 
 
-## Normal-Cauchy Bayes estimator | Code
+## Normal-Cauchy Bayes estimator | Code  { .selectable }
 
 
 ```{r, eval=FALSE}
