@@ -2,8 +2,24 @@
 title: "Probability and Statistics Review"
 author: "Jonathan Navarrete"
 date: "August 19, 2017"
-output: pdf_document
+output: 
+  ioslides_presentation:
+    theme: simplex
+    smaller: true
+    wide: true
+    
 ---
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  CommonHTML: {
+    scale: 95
+  }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 
 
 
@@ -16,30 +32,41 @@ $$
 
 In most situations, we will omit the $X$ subscript and simply write $F(x)$ unless the support of $F$ is unclear. A random variable $X$ is continuous if $F_X$ is a continuous function. A random variable $X$ is discrete if $F_X$ is a step function. 
 
-Discrete distributions can be specified by a probability mass function (pmf) $p_X(x) = P(X = x)$. If X id discrete, the CDF of $X$ is
+## Distribution and Density functions | Discrete
+
+Discrete distributions can be specified by a probability mass function (pmf) $p_X(x) = P(X = x)$. If $X$ is discrete, the CDF of $X$ is
 $$
-F_X(x) = P(X \leq x_k) = \sum_{i=1}^{k} p( p(x_1) + ... + p(x_k)
+F_X(x) = P(X \leq x_k) = \sum_{i=1}^{k} p(x_1) + ... + p(x_k)
 $$
+For discrete distributions, $f(X = x) = p(X = x) = p(x)$.
 
 
-The continuous distributions do not have positive probability mass at any single point (theoretically). For continuous random variables $X$ the probability density function (pdf) or density of $X$ is $f_X(x) = \frac{d}{dx} F_X(x)$. Thus, the relationship between the pdf and CDF is
+## Distribution and Density functions | Continuous
+
+Unlike discrete distributions, continuous distributions do not have positive probability mass at any single point. For continuous random variables $X$ the probability density function (pdf) or density of $X$ is $f_X(x) = \frac{d}{dx} F_X(x)$. Thus, the relationship between the pdf and CDF is
 
 $$
 F_X(x) = P(X \leq x ) = \int_{- \infty}^x f_X(t) dt
 $$
 
 
+## Distribution and Density functions | Distribution families
+
 Some pdf/pmf's form a family of distributions. One of the most common distributions is the Normal distribution
 $$
 f(x) = \frac{1}{\sqrt{2 \pi}  \sigma} e^{- (x - \mu)^2 \big/ 2} \text{ , } -\infty < x < \infty 
 $$
 
-The Normal distribution is part of the [exponential family](http://www.cs.columbia.edu/~jebara/4771/tutorials/lecture12.pdf) of distributions.
+The Normal distribution is part of the [**exponential family**](http://www.cs.columbia.edu/~jebara/4771/tutorials/lecture12.pdf) of distributions.
 
 
-For more information, please see [Related Distributions](http://www.itl.nist.gov/div898/handbook/eda/section3/eda362.htm)
+For more information, please see [**Related Distributions**](http://www.itl.nist.gov/div898/handbook/eda/section3/eda362.htm)
 
 Also, see [**What is a Probability Distribution**](http://www.itl.nist.gov/div898/handbook/eda/section3/eda361.htm)
+
+
+
+
 
 
 ## Random Variables
@@ -102,10 +129,7 @@ Maximizing likelihood is a method of estimating unknown population parameters. G
 Other methods of parameter estimation include Method of Moments (MOM) and Bayesian Maximum A Posteriori (MAP).
 
 
-Reference: [**Maximum likelihood </span> estimation**](http://www.itl.nist.gov/div898/handbook/apr/section4/apr412.htm)
-
-
-
+Reference: [**Maximum likelihood estimation**](http://www.itl.nist.gov/div898/handbook/apr/section4/apr412.htm)
 
 
 
