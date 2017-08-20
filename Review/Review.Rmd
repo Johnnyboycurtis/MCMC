@@ -39,7 +39,7 @@ The Normal distribution is part of the [exponential family](http://www.cs.columb
 
 For more information, please see [Related Distributions](http://www.itl.nist.gov/div898/handbook/eda/section3/eda362.htm)
 
-
+Also, see [**What is a Probability Distribution**](http://www.itl.nist.gov/div898/handbook/eda/section3/eda361.htm)
 
 
 ## Random Variables
@@ -102,7 +102,7 @@ Maximizing likelihood is a method of estimating unknown population parameters. G
 Other methods of parameter estimation include Method of Moments (MOM) and Bayesian Maximum A Posteriori (MAP).
 
 
-
+Reference: [**Maximum likelihood </span> estimation**](http://www.itl.nist.gov/div898/handbook/apr/section4/apr412.htm)
 
 
 
