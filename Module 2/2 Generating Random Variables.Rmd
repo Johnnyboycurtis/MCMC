@@ -25,7 +25,7 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 
 
 
-## Introduction
+## Introduction  { .selectable }
 
 In this section we'll cover the following methods for generating random numbers from a target distribution.
 
@@ -38,7 +38,7 @@ In this section we'll cover the following methods for generating random numbers 
 4. Sums and Mixture distributions
 
 
-## Pseu-random numbers
+## Pseu-random numbers  { .selectable }
 
 One of the fundamental tools required in Monte Carlo methods is the ability to generate consistent *pseudo*-random variables from a specified probability distribution. One of the most fundamental number generation is the uniform random number generation
 
@@ -55,7 +55,7 @@ In R, we can control how random variables are generated. For example, we can spe
 - On StackOverflow: [Reasons for using the set.seed function](https://stackoverflow.com/questions/13605271/reasons-for-using-the-set-seed-function)
 
 
-## Generation uniform samples { .selectable }
+## Generation uniform samples { .selectable } 
 
 Random number generation for statistical purposes heavily relies on being able to obtain reliable samples from a Uniform distribution. There is a long history of work that has gone into this. Computers on their own can't generate *randomness*, but they can simulate what *random* may look like.
 
