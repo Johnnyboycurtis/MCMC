@@ -357,14 +357,14 @@ out = dnorm(x)
 out[x > -1] = 0
 
 par(mfrow = c(1,2))
-plot(x, dnorm(x), type = "l", main = "Phi(X)")
+plot(x, dnorm(x), type = "l", main = "Phi(X)", ylab = "density")
 polygon(x, out, col = "blue")
 
 
 out = dnorm(x)
 out[x < 1] = 0
 
-plot(x, dnorm(x), type = "l", main = "Phi(X) = 1 - Phi(-X)")
+plot(x, dnorm(x), type = "l", main = "Phi(X) = 1 - Phi(-X)", , ylab = "density")
 polygon(x, out, col = "red")
 
 ```
@@ -665,7 +665,38 @@ print(theta)
 
 Now to compare this using samples generated from an $Exp(1)$ distribution. We generate a double exponential from an exponential distribution by generating $N$ random variables from $Exp(1)$ then splitting up the distribution (randomly & evenly in approximately half) between the left and right sides of $\mu = 0$. Our importance weights in this case would just be $w_i = 1$. See reference [Double Exponential](http://www.itl.nist.gov/div898/handbook/eda/section3/eda366c.htm)
 
-```{r}
+
+
+```{r, eval=TRUE, echo=FALSE, fig.height=3.5}
+N = 10^4
+f <- function(x){
+  out = (1/2) * exp(x = -1 * abs(x))
+  return(out)
+}
+pos_neg <- sample(x = c(-1,1), size = N, replace = TRUE)
+x = rexp(n = N)
+double_exp = pos_neg * x 
+
+hist(double_exp, probability = TRUE, ylim = c(0,0.7),
+     main = "Double Exponential from Exp(1)",
+     xlab = "Double Exponential", ylab = "Density")
+lines(density(double_exp))
+curve(expr = f, from = -4, to = 4, add = TRUE, col = 4, lty = 4)
+
+
+theta = mean(double_exp^2)
+print(paste("theta estimate: ", theta))
+
+```
+
+
+
+
+
+##  Calculating Expectation of Laplace Distribution | Code
+
+
+```{r, echo=TRUE, eval=FALSE}
 N = 10^4
 f <- function(x){
   out = (1/2) * exp(x = -1 * abs(x))
@@ -692,7 +723,7 @@ print(theta)
 ## Importance Sampling Resampling
 
 
-Sampling Importance Resampling (SIR) simulates random variables approximately from target distribution. SIR is based upon the notion of importance sampling and nonparametric bootstrapping. Briefly, importance sampling proceeds by sampling from an importance sampling distribution $g$. $g$ will here be our envelope or instrumental importance function. Each point in the sample is weighted to correct the sampling porbabilities so that the weighted sample can be related to the target density $f$. As seen previously, the weighted sample can be used to estimate expectations under $f$.
+Sampling Importance Resampling (SIR) simulates random variables approximately from the target distribution. SIR is based upon the notion of importance sampling and nonparametric bootstrapping. Briefly, importance sampling proceeds by sampling from an importance sampling distribution $g$, where $g$ is the envelope or instrumental distribution. If needed, each point in the sample is weighted to correct the sampling porbabilities so that the weighted sample can be related to the target density $f$. As seen previously, the weighted sample can be used to estimate expectations under $f$.
 
 
 ## Importance Sampling Resampling
@@ -719,6 +750,66 @@ We may view importance sampling as approximating $f$ by the discrete distributio
 
 A random variable $X$ drawn with the SIR algorithm has a distribution that converges to $f$ as $m \to \infty$. 
 
+
+
+
+
+
+## Tail Probabilities of a *t*-distribution
+
+A good candidate for sampling from a tail distribution is the $Exp(\theta)$ distribution. We can generate random variables from a left truncated exponential distribution, $Y \sim Exp^+(\alpha, \theta)$, by simply shifting $X \sim Exp(\theta)$ values by $\alpha$. Thus, $Y = X + \alpha$
+
+```{r, fig.height=3}
+n = 10^4
+x = rexp(n = n, rate = 1)
+alpha = 4
+y = x + alpha
+par(mfrow = c(1,2), mar = c(4,4,2,2))
+
+hist(x, probability = TRUE, xlim = c(0, 14))
+hist(y, probability = TRUE, xlim = c(0, 14))
+
+
+```
+
+
+
+## Tail Probabilities of a *t*-distribution
+
+Using the truncated exponential distribution, we can use $Exp^+(\alpha, \theta)$ as our importance function for calculating the tail probabilities 
+
+
+```{r}
+
+x = rexp(n = n, rate = 1)
+alpha = 10
+y = x + alpha
+w = dt(x = y, df = 5)/dexp(x = (y-alpha), rate = 1)
+MC_p_val = mean(w)
+deterministic_p_val = integrate(f = function(x) dt(x, df = 5), alpha, Inf)
+
+print(MC_p_val)
+print(deterministic_p_val)
+print(pt(q = 10, df = 5, lower.tail = FALSE))
+
+```
+
+
+## Tail Probabilities of a *t*-distribution
+
+
+```{r, fig.height=3.5}
+pvals = cumsum(w/1:n)
+sterr = sqrt(cumsum((w - pvals)^2))/(1:10^4)
+
+par(mar = c(4,4,2,2))
+plot(x = 1:10^4, y = pvals, type = "l", lty = 2, 
+     xlab = "samples", ylab = "p-val estimates", ylim = c(0, 0.001))
+lines(pvals + 1.96*sterr, col = "blue", lty = 3)
+lines(pvals - 1.96*sterr, col ="blue", lty = 3)
+
+
+```
 
 
 
