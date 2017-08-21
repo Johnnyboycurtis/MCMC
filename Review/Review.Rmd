@@ -31,7 +31,11 @@ $$
 F_X(x) = P(X \leq x), \text{ where } x \in \mathbb{R}
 $$
 
-In most situations, we will omit the $X$ subscript and simply write $F(x)$ unless the support of $F$ is unclear. A random variable $X$ is continuous if $F_X$ is a continuous function. A random variable $X$ is discrete if $F_X$ is a step function. 
+In most situations, we will omit the $X$ subscript and simply write $F(x)$ unless the support of $F$ is unclear. 
+
+- A random variable $X$ is continuous if $F_X$ is a continuous function. 
+
+- A random variable $X$ is discrete if $F_X$ is a step function. 
 
 
 
@@ -89,7 +93,7 @@ A continuous random variable is one which takes an infinite number of possible v
 ## Expectation and Variance { .selectable }
 
 
-The mean of a random variable $X$ is the *expected value* or mathematical expectation of the random variable. If $X$ is continuous with density $f(x)$, then
+The mean of a random variable $X$ is the *expected value* is denoted by $E[x]$. If $X$ is continuous with density $f(x)$, then
 
 $$
 E[X] = \int_{- \infty}^{\infty} x \times f(x) dx
@@ -111,7 +115,7 @@ $$
 
 ## Likelihood  { .selectable }
 
-If there is a series of independent identically distributed (*iid*) random variables $\mathbf{x} = (x_1, ..., x_n)$, where $x_i \sim f(x | \theta)$, then the likelihood is given by
+Given a series of independent identically distributed (*iid*) random variables $\mathbf{x} = (x_1, ..., x_n)$, where $x_i \sim f(x | \theta)$, the likelihood is given by
 
 $$
 L(\theta | \mathbf{x}) = \prod_{i = 1}^n f(x_i) = f(x_1) \times f(x_2) \times ... \times f(x_n)

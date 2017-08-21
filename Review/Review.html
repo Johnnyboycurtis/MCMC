@@ -123,7 +123,12 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 F_X(x) = P(X \leq x), \text{ where } x \in \mathbb{R}
 \]</p>
 
-<p>In most situations, we will omit the \(X\) subscript and simply write \(F(x)\) unless the support of \(F\) is unclear. A random variable \(X\) is continuous if \(F_X\) is a continuous function. A random variable \(X\) is discrete if \(F_X\) is a step function.</p>
+<p>In most situations, we will omit the \(X\) subscript and simply write \(F(x)\) unless the support of \(F\) is unclear.</p>
+
+<ul>
+<li><p>A random variable \(X\) is continuous if \(F_X\) is a continuous function.</p></li>
+<li><p>A random variable \(X\) is discrete if \(F_X\) is a step function.</p></li>
+</ul>
 
 </article></slide><slide class=''><hgroup><h2>Distribution and Density functions </h2><h3> Discrete</h3></hgroup><article  id="distribution-and-density-functions-discrete" class="smaller selectable">
 
@@ -163,7 +168,7 @@ X \sim f_X(x)
 
 </article></slide><slide class=''><hgroup><h2>Expectation and Variance</h2></hgroup><article  id="expectation-and-variance" class="smaller selectable">
 
-<p>The mean of a random variable \(X\) is the <em>expected value</em> or mathematical expectation of the random variable. If \(X\) is continuous with density \(f(x)\), then</p>
+<p>The mean of a random variable \(X\) is the <em>expected value</em> is denoted by \(E[x]\). If \(X\) is continuous with density \(f(x)\), then</p>
 
 <p>\[
 E[X] = \int_{- \infty}^{\infty} x \times f(x) dx
@@ -183,7 +188,7 @@ Var(X) = E[(X - E[X])^2] = E[X^2] - E[X]^2
 
 </article></slide><slide class=''><hgroup><h2>Likelihood</h2></hgroup><article  id="likelihood" class="smaller selectable">
 
-<p>If there is a series of independent identically distributed (<em>iid</em>) random variables \(\mathbf{x} = (x_1, ..., x_n)\), where \(x_i \sim f(x | \theta)\), then the likelihood is given by</p>
+<p>Given a series of independent identically distributed (<em>iid</em>) random variables \(\mathbf{x} = (x_1, ..., x_n)\), where \(x_i \sim f(x | \theta)\), the likelihood is given by</p>
 
 <p>\[
 L(\theta | \mathbf{x}) = \prod_{i = 1}^n f(x_i) = f(x_1) \times f(x_2) \times ... \times f(x_n)
