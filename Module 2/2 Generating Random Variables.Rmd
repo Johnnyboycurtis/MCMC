@@ -802,6 +802,41 @@ curve(dbeta(x, a, b), from=0, to=1, add=TRUE, lty=3, lwd = 2)
 
 
 
+
+## A solution to Chisq transformation
+
+```{r, fig.height=3, fig.width=7}
+n = 10000
+x = rexp(n=n, rate = 1)
+mat = matrix(data = x, ncol = 4)
+chisqResults = rowSums(mat)
+par(mfrow = c(1, 3))
+hist(chisqResults)
+hist(rchisq(n, df = 2*4))
+qqplot(x = chisqResults, y = rchisq(n, 8))
+
+
+```
+
+
+
+## A solution go Gamma transformation
+
+```{r, fig.height=4, fig.width=4}
+b = 4
+a = 2
+n = 10000
+x = rexp(n, 1)
+mat = matrix(x, ncol = a)
+gammaResults = b*rowSums(mat)
+qqplot(x = gammaResults, y = rgamma(n,a,b))
+
+
+```
+
+
+
+
 [1]: https://stats.stackexchange.com/questions/184325/how-does-the-inverse-transform-method-work
 [2]: http://www.math.uah.edu/stat/special/Rayleigh.html
 [3]: http://www.math.uah.edu/stat/special/Pareto.html
