@@ -60,7 +60,7 @@ Suppose we have a function $h(x) = 3x^2$ for which we wish to integrate over the
 
 - or we could treat $x$ as a random variable from a $Unif(0,2)$ whose pdf is simply $f(x) = \frac{1}{2-0} = \frac{1}{2}$. 
 
-If we now generate some $N = 1000$ random values from $f(x)$ and evaluate them at $h(x)$, then take the mean, we'd be calculating the expected value of $h(x)$, 
+If we now generate some $n$ random values from $f(x)$ and evaluate them at $h(x)$, then take the mean, we'd be calculating the expected value of $h(x)$, 
 $$
 \begin{aligned}
 \ \theta &= \int_0^2 h(x) dx \\
@@ -78,9 +78,9 @@ $$
 If we now simulate this, we will see we approximate the true solution $\int_0^2h(x) dx = 8$
 
 ```{r}
-N = 10000 ## sample size
+n = 10000 ## sample size
 h <- function(x) { 3*x^2 } ## function of interest, h(x)
-X <- runif(n = N, min = 0, max = 2)  ## samples from f(x)
+X <- runif(n = n, min = 0, max = 2)  ## samples from f(x)
 v = 2 * mean(h(X)) ## 2 * E[h(x)]
 print(v) ## approximately 8
 integrate(f = h, lower = 0, upper = 2)
@@ -146,6 +146,11 @@ $$
 \end{aligned}
 $$
 
+which we can then use to construct 95% confidence intervals
+
+$$
+\hat{\theta} \pm 1.96 \times \frac{\sigma}{\sqrt{n}}
+$$
 
 
 ## Monte Carlo Integration, Variance Estimation { .selectable }
@@ -243,11 +248,14 @@ The CLT implies that for our Monte Carlo estimator $\hat{\theta}$,
 $$
 \frac{\hat{\theta} - E[\hat{\theta}]}{\sqrt{Var(\hat{\theta})}} \sim N(0,1)
 $$
-as $n \to \infty$. See: [Central Limit Theorem](http://www.math.uah.edu/stat/sample/CLT.html)
+and by the Strong Law of Large Numbers this happens almost surely as $n \to \infty$. See: [Central Limit Theorem](http://www.math.uah.edu/stat/sample/CLT.html)
 
+The Weak Law of Large Numbers then states that for any margine of error $\epsilon$, the average almost surely do not deviate further than $\epsilon$ away from the true $\theta$, 
+$$
+\lim_{n \to \infty} P(| \bar{X} - \theta | > \epsilon) = 0
+$$
 
-
-
+The SLLN speaks to convergence to the expected value, where the WLLN speaks to convergence in probability.
 
 
 
@@ -255,7 +263,7 @@ as $n \to \infty$. See: [Central Limit Theorem](http://www.math.uah.edu/stat/sam
 ##  Normal p-value estimate for unbounded region  { .selectable }
 
 
-We will next explore how to generate $Normal(\mu, \sigma)$ p-values using a $Unif(0,x)$ distribution. 
+We will next explore how to generate $N(\mu, \sigma)$ p-values using a $Unif(0,x)$ distribution. 
 
 $$
 \Phi(x) = P(X \leq x) = \int_{-\infty}^{x} \frac{1}{\sqrt{2 \pi} \sigma}\ e^{(t - \mu)^2/ 2 \sigma} dx
