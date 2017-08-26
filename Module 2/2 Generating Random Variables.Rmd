@@ -65,27 +65,24 @@ Random number generation for statistical purposes heavily relies on the assumpti
 
 
 ```{r, eval = FALSE}
-u = runif(2000)
+u = runif(2000) ## generate a sample of unif(0,1) samples
 
-hist(u, probability=TRUE)
-lines(density(u), xlim=c(0,1))
-
+hist(u, probability=TRUE, col = "gray", border = "white") ## plot histogram
 ## Q-Q plot for `runif` data against true theoretical distribution:
-qqplot(qunif(ppoints(500)), u,  main = expression("Q-Q plot for Unif(0,1)"))
-qqline(u, distribution = qunif, prob = c(0.1, 0.6), col = 2)
+qqplot(x = qunif(ppoints(500)), y = u,  main = expression("Q-Q plot for Unif(0,1)"))
+qqline(y = u, distribution = qunif, prob = c(0.1, 0.6), col = 2)
 
-acf(u, main = "autocorrelation of samples")  ## autocorrelation function
+acf(x = u, main = "autocorrelation of samples")  ## autocorrelation function
 
 ```
 
 
 
-```{r, fig.height=2.5, fig.width=7, echo=FALSE}
+```{r, fig.height=2.5, fig.width=8, echo=FALSE}
 u = runif(2000)
 
 par(pin = c(2,1), mfrow = c(1,3))
-hist(u, probability=TRUE)
-lines(density(u), xlim=c(0,1))
+hist(u, probability=TRUE, col = "gray", border = "white") ## plot histogram
 
 ## Q-Q plot for `runif` data against true theoretical distribution:
 qqplot(qunif(ppoints(500)), u,  main = expression("Q-Q plot for Unif(0,1)"))
@@ -95,6 +92,14 @@ qqline(u, distribution = qunif, prob = c(0.1, 0.6), col = 2)
 acf(u, main = "autocorrelation of samples")  ## autocorrelation function
 
 ```
+
+
+## Generation uniform samples | References { .selectable } 
+
+- [QQ Plot](http://www.itl.nist.gov/div898/handbook/eda/section3/qqplot.htm)
+
+- [Autocorrelation plot](http://www.itl.nist.gov/div898/handbook/eda/section3/autocopl.htm)
+
 
 
 ## Generation of uniform samples { .selectable }
@@ -129,20 +134,20 @@ Once we can simulate $u \sim Unif(0,1)$, we can begin generating samples from an
 
 ```{r, eval=FALSE}
 v = 10 * runif(1000, 0, 1) ## v ~ unif(0, 10)
-hist(v)
+hist(v, col = "gray", border = "white")
 w = runif(1000, 0, 10) ## unif(0, 10)
-hist(w)
+hist(w, col = "gray", border = "white")
 
 ```
 
 
-```{r, fig.height=3.2, fig.width=6, echo=FALSE}
+```{r, fig.height=3.2, fig.width=7, echo=FALSE}
 par(mfrow = c(1,2))
 v = 10 * runif(1000, 0, 1) ## v ~ unif(0, 10)
-hist(v)
+hist(v, col = "gray", border = "white")
 
 w = runif(1000, 0, 10) ## unif(0, 10)
-hist(w)
+hist(w, col = "gray", border = "white")
 
 
 ```
