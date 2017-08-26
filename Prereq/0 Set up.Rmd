@@ -1,7 +1,7 @@
 ---
 title: "Prerequisites"
 author: "Jonathan Navarrete"
-date: "August 13, 2017"
+date: ""
 output: 
   ioslides_presentation:
     theme: readable
@@ -13,26 +13,26 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Welcome | set up
+## Welcome | Setting Up
 
 Before getting started there are a few things you'll need in order to be successful in the course
 
-1. A recent version of [R](https://cran.r-project.org/)
+- A recent version of [R](https://cran.r-project.org/)
 
 I am currently using version 3.4.0 on Ubuntu
 
-2. A recent version of [RStudio](https://www.rstudio.com/products/rstudio/download/)
+- A recent version of [RStudio](https://www.rstudio.com/products/rstudio/download/)
 
 I am currently using version 1.0.143
 
-3. A web browser like Firefox (any OS), Chrome (any OS) or Microsoft Edge (Windows 10)
+- A web browser like Firefox (any OS), Chrome (any OS) or Microsoft Edge (Windows 10)
 
-4. (Optional) StackExchange [Cross Validated](https://stats.stackexchange.com/) account
+- (Optional) StackExchange [Cross Validated](https://stats.stackexchange.com/) account
 
 Feel free to ask lookup, ask and answer questions on Cross Validated
 
 
-## Optional | References
+## Optional References
 
 No textbook is necessary to follow with the course!
 

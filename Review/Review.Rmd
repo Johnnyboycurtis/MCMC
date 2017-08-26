@@ -1,7 +1,7 @@
 ---
 title: "Probability and Statistics Review"
 author: "Jonathan Navarrete"
-date: "August 19, 2017"
+date: " "
 output: 
   ioslides_presentation:
     theme: simplex
