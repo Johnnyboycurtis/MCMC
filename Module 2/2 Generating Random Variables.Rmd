@@ -378,15 +378,15 @@ $$
 
 
 ```{r}
-cdf = c(0.0, 0.1, 0.3, 0.5, 0.7, 1.0)
-results = numeric(length = 1000) ## creates a vector of zeros
-u = runif(1000)
+cdf = c(0.0, 0.1, 0.3, 0.5, 0.7, 1.0) ## cumulative probabilities
+results = numeric(length = 10000) ## creates a vector of zeros
+u = runif(10000)
 for(i in 2:6){
     ind = (cdf[i-1] < u) & (u <= cdf[i])
-    results[ind] <- (i-2)
+    results[ind] <- (i-2) ## returns an index for x vals
 }
 
-table(results) / 1000
+table(results) / 10000
 
 ```
 
@@ -394,11 +394,8 @@ table(results) / 1000
 ## Inverse Transform Discrete scenario, pt. 3 { .selectable }
 
 ```{r, fig.height=3, fig.width=5}
-
-hist(results, probability = TRUE,
-     main = "Inverse Transform Results",
-     ylim = c(0,1),
-     col = "gray", border = "white")
+z = table(results) / 10000
+barplot(z, border = "white", col = "lightblue", xlab = "x", ylab = "probability", ylim = c(0, 0.4))
 
 ```
 
