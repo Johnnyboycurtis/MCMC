@@ -1,7 +1,7 @@
 ---
 title: 'Introduction: Monte Carlo Methods'
 author: "Jonathan Navarrete"
-date: "July 30, 2017"
+date: " "
 output:
   ioslides_presentation: 
     df_print: tibble
@@ -26,112 +26,26 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 ## Introduction to Monte Carlo  { .selectable }
 
 Monte Carlo methods are methods for generating random variables directly 
-or indirectly from a target distribution(s). 
-
-- Applications of monte carlo methods are in hypothesis testing and Bayesian computation
-
-- Monte Carlo methods well known for their applications in Bayesian methods
+or indirectly from a target distribution(s). Applications of monte carlo methods are in hypothesis testing and Bayesian computation.
 
 - Monte Carlo is not strictly Bayesian
 
 - Monte Carlo is not strictly frequentist (Neyman-Pearson hypothesis testing)
 
-- Parametric sampling (target distribution part of a family of distributions)
+- Parametric sampling or parametric bootstrappin (target distribution part of a family of distributions)
 
-- Non-parametric sampling (functional form of target distribution not specified)
+- Monte Carlo methods are a method of statistical simulation. 
 
-- MC methods also known as parametric Bootstrap
+- Simulation can help us understand reality without needing to run multiple experiments or costly calculations. 
 
-Monte Carlo methods are a method of statistical simulation. Simulation can help us understand reality without needing to run multiple experiments or costly calculations. Monte Carlo methods help us understand probabilities of extreme events.
-
-
-## Simulation: Gambler's ruin | Example of Simulation  { .selectable }
-
-
-Consider two gamblers, persons A and B, who start to gamble in a zero-sum game with stakes \$$x$ and $\$(b-x)$, respectively.
-
-- At each round, each gambler puts up a stake of \$h. The probability that A wins a round is $p$, while the probability that B wins a round is $q = 1 - p$. We wish to compute the probability that A ultimately wins the game. 
-
-- Define $v(x,t)$ to the probability that A ultimately wins the game starting with capital \$$x$ on or before the $t$th round. 
-
-- Then, $u(x,t)$ is the probability that B wins the game with their stake of $b-x$ on or before the $t$th round. 
-
-- Each of three variables $v,u$, and $w$ is bounded below by zero and above by 1. 
-
-Moreover, $u$ and $v$ are nondecreasing in $t$. $w$ is nonincreasing in $t$. Thus we can take limits of each of these as t goes to infinity. We shall call these limits $v(x)$, $u(x)$, and $w(x)$, respectively.
-
-
-## Gambler's ruin, pt.2 { .selectable }
-
-
-
-Gambler's ruin (fallacy) is the belief that a certain event is $more$ likely to occur given the past history. In an experiment where there is a coin toss with probability of seeing heads as 0.5. Each flip of a coin has the same probability of landing on heads regardless of what the previous lands were. 
-
-Imagine a gambler on a roulete table. Say the gambler starts with \$10. In this game, the gambler "wins" when they earn a total of \$20 (that is they must play the game until they've earned $10 on top of their starting \$10). For each game, there is a probability of winning, p = 0.473. Then, can we  see how many turns until he/she wins (or loses)?
-
-
-
-
-
-## Gambler's ruin, pt.3 { .selectable }
-
-
-```{r, echo=TRUE, fig.width=5, fig.height=3, fig.align='center'}
-set.seed(678)
-N = 200
-income = 10
-games = 2*(runif(N)<0.473) - 1 ## generate 1s and -1s
-out = cumsum(games) + income
-
-par(mar = c(4,4,2,2))
-plot(1:N, out, type = "l", 
-     xlab = "games", ylab = "income",
-     lty = 3)
-abline(h = 0, lty = 2, col = "red")
-
-```
-
-
-
-## Gambler's ruin, pt.4 { .selectable }
-
-
-```{r, echo=FALSE}
-GamblersRuin = function(i){
-  income = 10
-  n = 0
-  while(!(income %in% c(0,20))){
-    n = n + 1 ## number of runs till ruin or success
-    x = runif(1)
-    if(x <= 0.473){
-      income = income + 1
-    } else{
-      income = income - 1
-    }
-  }
-  return(c(n,income))
-}
-
-GamblersRuin()
-
-out = lapply(X = 1:100, FUN = GamblersRuin)
-out = do.call(rbind, out)
-
-## percentage of success
-sum(out[,2] == 20 )
-
-
-
-```
-
+- Monte Carlo methods help us understand probabilities of extreme events.
 
 
 
 
 ## Simulation for p-values { .selectable }
 
-It has become commonplace in the statistical analysis to use Monte Carlo procedures to calculate
-empirical P values. The reasons for this include the following:
+Over the past few years, the use of Monte Carlo methods to calculate p-values has increased. The reasons for this include the following:
 
 1. many test statistics do not have a standard asymptotic distribution;
 
@@ -139,7 +53,7 @@ empirical P values. The reasons for this include the following:
 
 3.  calculation of the exact sampling distribution through exhaustive enumeration of all possible samples may be too computationally intensive to be feasible. 
 
-In contrast, Monte Carlo methods can be used to obtain an empirical $P$ value that approximates the exact $P$ value without relying on asymptotic distributional theory or exhaustive enumeration.
+In contrast, Monte Carlo methods can be used to obtain an empirical *p*-value that approximates the exact $p$ value without relying on asymptotic distributional theory or exhaustive enumeration.
 
 North BV, Curtis D, Sham PC. A Note on the Calculation of Empirical P Values from Monte Carlo Procedures. 
 *American Journal of Human Genetics*. 2002;71(2):439-441.
@@ -147,7 +61,7 @@ North BV, Curtis D, Sham PC. A Note on the Calculation of Empirical P Values fro
 
 ## Monte Carlo Hypothesis Testing { .selectable }
 
-The contingency table below is from a study (citation needed) where patients who underwent cancer treatment either saw their cancer controlled or not. The two treatments are surgery or radiation. The question we are interested in is if radiation treatment is associated with control of cancer.
+The contingency table below shows results of patients who underwent cancer treatment and either saw their cancer controlled or not. The two treatments are surgery and radiation. The question we are interested in is, is radiation treatment associated with control of cancer.
 
 
 ```{r}
@@ -172,15 +86,18 @@ There are two ways that the Chi-squared test is used:
 
 2. testing for *independence* between different factors (which, technically, is just a specific theoretical distribution, with some extra parameters that must be estimated from the data).
 
-To review the Chi-squared test, follow the [*link*](https://en.wikipedia.org/wiki/Pearson%27s_chi-squared_test#Assumptions)
+To review the Chi-squared test and its assumptions, follow the [*link*](https://en.wikipedia.org/wiki/Pearson%27s_chi-squared_test#Assumptions)
+
+
 
 ## Monte Carlo Hypothesis Testing, pt. 3
 
+A disadvantage of the Chi-squared test is that it requires a sufficient sample size in order for the chi-square approximation to be valid. When cell counts are low, say, below 5, asymptotic properties do not hold well. Therefore, a simple Chi-squred test may report an invalid *p*-value which would increase a [Type I error](http://support.minitab.com/en-us/minitab/17/topic-library/basic-statistics-and-graphs/hypothesis-tests/basics/type-i-and-type-ii-error/) rate. 
 
-However, a disadvantage of the chi-square test is that it requires a sufficient sample size in order for the chi-square approximation to be valid. When cell counts are low, say, below 5 asymptotic properties do not hold well. Therefore, a simple chi-squred test may report an invalid p-value which would increase a [Type I error](http://support.minitab.com/en-us/minitab/17/topic-library/basic-statistics-and-graphs/hypothesis-tests/basics/type-i-and-type-ii-error/) rate. 
+
+In order to use Monte Carlo methods to solve this problem, we'll first need to set up some functions in `R`. We'll set up some code to generate our Chi-squared statistic and Monte Carlo *p*-value.
 
 
-Set up some functions in order to generate our Chi-squared statistic and Monte Carlo p-value.
 
 ## Monte Carlo Hypothesis Testing, pt. 4 { .selectable }
 
@@ -254,7 +171,9 @@ print(results)
 
 ## Monte Carlo Hypothesis Testing, pt. 7 { .selectable }
 
-Though our ultimate decision to support the null hypothesis of dependence is not a surprise, our results show that the Monte Carlo p-value is greater than the raw p-value obtained from the calculated $\chi^2$ statistic indicating more support for the null hypothesis. Readers should compare these results against R's `chisq.test` function.
+Though our ultimate decision to support the null hypothesis of dependence is not a surprise, our results show that the Monte Carlo *p*-value is greater than the raw p-value obtained from the calculated $\chi^2$ statistic indicating more support for the null hypothesis. 
+
+You should compare these results against `R`'s `chisq.test` function.
 
 
 
