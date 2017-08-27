@@ -1,0 +1,261 @@
+---
+title: "Intro to Bootstrap"
+author: "Jonathan Navarrete"
+date: " "
+output: 
+  ioslides_presentation:
+    smaller: true
+    wide: true
+    css: slides.css
+    
+---
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  CommonHTML: {
+    scale: 95
+  }
+});
+</script>
+<script type="text/javascript" async
+src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+
+
+## Bootstrap { .selectable }
+
+Bootstrap methods in simple terms are methods of *resampling* observed data to estimate the empirical CDF from which the observed data is supposed to have originate from. Suppose we observe *independent* samples $x_1, ..., x_n$ from pdf/pmf $f$, and whose CDF $F$ is unobservable. Well, given that $X = (x_1, ..., x_n)^T$ originates from $F$, we can use $X$ to generate the empirical CDF $F_n$ which is itself an estimate of $F$. 
+
+If we sample (with replacement) another set of $n$ observations from $F_n$, we will have $X^* = (x_1^*, ..., x_n^*)^T$. This new sample $X^*$ can then generate another empirical CDF, $F^*_n$ which is another estimate of $F_n$. 
+
+That is, $F^*_n$ is a bootstrap estimator of $F$. We can continue this process of resampling with replacement to obtain samples $X^*_1,X^*_2, ..., X^*_B$ and $F^*_{n,1}, F^*_{n,2}, ..., F^*_{n,B}$.
+
+Bootstrap methods are a class of Monte Carlo methods known as nonparametric Monte Carlo.
+
+
+## Bootstrap { .selectable }
+
+In addition to estimating the theoretical CDF $F$, there may be a statistic of interest $\theta$ (e.g. mean). We can use bootstrap methods to calculate an empirical distribution of $\theta$. From our original sample $X$ we can calculate estimate $\hat{\theta}$. 
+
+Our bootstrap sample can also be used to calcualte an estimate, $\hat{\theta}^*_1, ..., \hat{\theta}^*_B$.
+
+We can also calculate Bias and make confidence intervals for our estimates.
+
+
+## Bootstrap Algorithm { .selectable }
+
+A simple bootstrap algorithm for *independent* samples $X = (x_1, ..., x_n)^T$ is:
+
+To generate *B* bootstrap samples, for *b* in 1, ..., *B* do
+
+1. Sample $x_1, ..., x_n$ with replacement; each sample has a probability of *1/n* of being in the new sample.
+
+2. Calculate $\hat{\theta}^*_b$
+
+We will then observe the empirical distribution of $\hat{\theta}$, $F_{\hat{\theta}}$.
+
+
+## Bootstrap Example { .selectable }
+
+
+We will use the `mtcars` data set to illustrate a simple implementation. 
+
+```{r, fig.height=3, fig.width=4}
+data("mtcars")
+mpg = mtcars$mpg
+n = length(mpg)
+hist(x = mpg, probability = TRUE, xlab = "MPG", main = "Histogram of MPG")
+
+```
+
+
+## Bootstrap Example { .selectable }
+
+```{r, fig.height=3, fig.width=4}
+B = 1000
+results = numeric(B)
+for(b in 1:B){
+  i = sample(x = 1:n, size = n, replace = TRUE)
+  bootSample = mpg[i]
+  thetaHat = mean(bootSample)
+  results[b] = thetaHat
+}
+
+hist(x = results, probability = TRUE, 
+     main = "Bootstrapped Samples of Mean_mpg",
+     xlab = "theta estimates")
+
+
+```
+
+
+
+
+## Bootstrap Example | Precaution { .selectable }
+
+Before enbarking on resampling methods we must ask what variables are *iid* in order to determine a correct bootstrapping approach. 
+
+Bootstrap methods are *not* a method of generating new data for, say, a regression setting when observed samples are low. 
+
+In the above example, it is assumed that each observation in the `mpg` data set is indpendent and identically distributed from an unknown distribution $f$. However, if there were to have existed some autocorrelation structure (as exist in time-series data) then we would need to adjust our resampling methodology. When dealing with time-series data, we will use a method called *block bootsrap*.
+
+
+## Paired Bootstrapping { .selectable }
+
+Let's continue to work with the `mtcars` data set. Say we wanted to make inferences about the linear regression parameters.
+
+```{r, message=FALSE}
+library(ggplot2, quietly = TRUE) ## for graphics
+mtcars$am <- as.factor(mtcars$am)
+fit = lm(formula = mpg ~ wt + am, data = mtcars)
+data.frame(coefficients = coefficients(fit), CI = confint(fit), check.names = FALSE)
+```
+
+
+## Paired Bootstrapping { .selectable }
+
+```{r, fig.height=4, fig.width=5}
+qplot(x = as.factor(am), y = mpg, data = mtcars, geom = "boxplot",
+      main = "Boxplot: MPG ~ AM", ylab = "MPG", xlab = "AM",
+      colour = am)
+```
+
+
+## Paired Bootstrapping { .selectable }
+
+```{r, fig.height=4, fig.width=5, message=FALSE}
+qplot(x = wt, y = mpg, data = mtcars, geom = c("point", "smooth"),
+      main = "Boxplot: MPG ~ Weight", ylab = "MPG", xlab = "Weight",
+      method = "lm", formula = y~x)
+
+```
+
+
+
+## Paired Bootstrapping { .selectable }
+
+```{r}
+
+## save coefficients
+beta_int = coefficients(fit)[1]
+beta_wt = coefficients(fit)[2]
+beta_am = coefficients(fit)[3]
+
+n = dim(mtcars)[1] ## number of obs in data
+B = 1000 ## number of bootstrap samples
+
+results = matrix(data = NA, nrow = B, ncol = 3, 
+                 dimnames = list(NULL, c("Intercept", "wt", "am")))
+
+## begin bootstrap for-loop
+for(b in 1:B){
+  i = sample(x = 1:n, size = n, replace = TRUE) ## sample indices
+  temp = mtcars[i,] ## temp data set
+  temp_model =  lm(formula = mpg ~ wt + am, data = temp) ## train model
+  coeff = matrix(data = coefficients(temp_model), ncol = 3) ## get coefficients
+  results[b,] = coeff ## save coefficients in matrix
+}
+
+```
+
+
+
+## Paired Bootstrapping { .selectable }
+
+
+```{r}
+
+results <- data.frame(results, check.names = FALSE)
+
+summary(results) ## take a look at the samples
+
+boot_int = results[,"Intercept"]
+boot_wt = results[,"wt"]
+boot_am = results[,"am"]
+
+```
+
+
+## Paired Bootstrapping { .selectable }
+
+
+```{r, echo=FALSE}
+par(mfrow = c(2,2))
+hist(boot_int, main = "Bootstrapped Coefficients for Intercept",
+     xlab = "Coefficients for Intercept", probability = TRUE)
+abline(v = coefficients(fit)[1], col = "black", lty=2)
+
+
+hist(boot_wt, main = "Bootstrapped Coefficients for Weight",
+     xlab = "Coefficients for Weight", probability = TRUE)
+abline(v = coefficients(fit)[2], col = "blue", lty=2)
+
+
+hist(boot_am, main = "Bootstrapped Coefficients for AM = 1",
+     xlab = "Coefficients for Automatic Transmission", probability = TRUE)
+abline(v = coefficients(fit)[3], col = "green", lty=2)
+
+
+
+```
+
+
+
+
+## Paired Bootstrapping { .selectable }
+
+
+Now we can estimate bias for each parameter estimate. Define Bias as $Bias(\theta) = E[\theta^*] - \theta$, where in our scenario we have $Bias(\hat\theta) = E[\hat\theta^*] - \hat\theta$. Our bootstrap bias corrected estimates are then $\hat\theta_{BC} = \hat\theta - Bias(\hat\theta)$.
+
+
+```{r}
+bias_int = mean(boot_int - beta_int)
+print(bias_int)
+
+bias_wt = mean(boot_wt - beta_wt)
+print(bias_wt)
+
+bias_am = mean(boot_am - beta_am)
+print(bias_am)
+```
+
+
+
+
+## Paired Bootstrapping { .selectable }
+
+
+```{r}
+## incorportate our bias into the coefficients
+## we now have bias corrected coefficients
+
+intercept = beta_int - bias_int
+print(intercept)
+
+wt = beta_wt - bias_wt
+print(wt)
+
+am = beta_am - bias_am
+print(am)
+
+
+
+```
+
+
+
+
+
+## Paired Bootstrapping { .selectable }
+
+
+
+Another method for applying the bootstrap approach to building an empirical distribution of $\hat\beta$ is to bootstrap the residuals. However, bootstrapping the cases is often more robust when there are doubts about a constant variance for the residuals, such as heteroskedasticity. Additionally, paired bootstrap more resembles the original data generation mechanisms.
+
+
+
+
+
+
