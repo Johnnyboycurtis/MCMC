@@ -1,7 +1,7 @@
 ---
 title: "Generating Random Variables"
 author: "Jonathan Navarrete"
-date: "August 5, 2017"
+date: " "
 output: 
   ioslides_presentation:
     theme: simple
@@ -42,15 +42,15 @@ In this section we'll cover the following methods for generating random numbers 
 
 
 
-## Pseudo-random numbers  { .selectable }
+## Pseudo-random samples  { .selectable }
 
-One of the fundamental tools required in Monte Carlo methods is the ability to generate consistent *pseudo*-random variables from a specified probability distribution. One of the most fundamental tools is a uniform random number generater
+One of the requirements for Monte Carlo methods is the ability to generate consistent *pseudo*-random samples from a specified probability distribution. One of the most fundamental tools is a uniform random number generater
 
-- Can sample from many distributions with transformations of of uniform random samples
+- Applying transformations to uniform samples, we can sample from many different distributions
 
 - Computers on their own can't generate *randomness*, but they can simulate what *random* may look like
 
-In R, we can control how random variables are generated. For example, we can specify seed for random number generation, see the function [`set.seed`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Random.html)
+In R, we can control how random samples are generated. For example, we can specify seed for random number generation, see the function [`set.seed`](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Random.html)
 
 - `set.seed` allows us to control the start and flow (*state*) of random number generation in a program
 
@@ -130,7 +130,7 @@ It is important to generate samples that are not correlated with each other!
 
 ## Generation of uniform samples, pt. 2 { .selectable }
 
-Once we can simulate $u \sim Unif(0,1)$, we can begin generating samples from another target distributions. How could we simulate $v \sim Unif(0,10)$? Well, we could simply include a multiplicative constant such that $v = 10 \times u$.
+Once we can simulate $u \sim Unif(0,1)$, we can begin generating samples from other target distributions. How could we simulate $v \sim Unif(0,10)$? Well, we could simply include a multiplicative constant such that $v = 10 \times u$.
 
 ```{r, eval=FALSE}
 v = 10 * runif(1000, 0, 1) ## v ~ unif(0, 10)
@@ -157,8 +157,8 @@ hist(w, col = "gray", border = "white")
 ## Transformation Methods { .selectable }
 
 - Distributions sometimes share direct relationships. 
-- If the relationship between the distributions is simple we can exploit it to generate random variables 
-- We can sample from a "easy to simulate" distribution and then transform those random variables to generate samples from a "difficult to simulate" distribution. 
+- If the relationship between the instrumental and target distribution is simple, then we can exploit it to generate random variables from the target distribution
+- We can sample from an "easy to simulate" distribution and then transform those random samples to generate samples from a "difficult to simulate" distribution. 
 
 To review some common relationships see the following: [Relationships among probability distributions][4]
 
@@ -179,8 +179,8 @@ $$
 
 ```{r}
 ## let's simulate 10,000 samples from bin(n=10, p = 0.3)
-N = 10000 ## number of Binomial samples
-n = 10 ## number of bernoulli trials for each binomail sample
+N = 10000 ## number of Unif and Binomial samples
+n = 10 ## number of bernoulli trials for each bernoulli sample
 p = 0.3 ## theoretical p
 u =  runif(n = (n*N))
 x = as.numeric(u <= p) ## convert bools to 1 and 0; Bernoulli samples
