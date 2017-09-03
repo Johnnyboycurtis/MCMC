@@ -272,10 +272,10 @@ outSamples = fInv(u)
 
 
 ```{r, eval=FALSE}
-hist(outSamples, probability = TRUE, main = "Inv Trans")
+hist(outSamples, probability = TRUE, main = "Inv Trans", col = "gray", border = "white")
 lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5), 
       col = "blue")
-hist(rexp(n = N, rate = 5), probability = TRUE, main = "rexp")
+hist(rexp(n = N, rate = 5), probability = TRUE, main = "rexp", border = "gray")
 lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5), 
       col = "blue")
 
@@ -286,10 +286,10 @@ lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5),
 ## not for show
 ## echo = FALSE
 par(mfrow = c(1,2), mar = c(3, 4, 1, 2))
-hist(outSamples, probability = TRUE, main = "Inv Trans")
+hist(outSamples, probability = TRUE, main = "Inv Trans", col = "gray", border = "white")
 lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5), 
       col = "blue")
-hist(rexp(n = N, rate = 5), probability = TRUE, main = "rexp")
+hist(rexp(n = N, rate = 5), probability = TRUE, main = "rexp", col = "gray", border = "white", xlim = c(0, 1.5))
 lines(x = ppoints(200), y = dexp(x = ppoints(200), rate = 5), 
       col = "blue")
 ```

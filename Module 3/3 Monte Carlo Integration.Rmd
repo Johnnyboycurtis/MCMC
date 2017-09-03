@@ -1,7 +1,7 @@
 ---
 title: "Monte Carlo Integration"
 author: "Jonathan Navarrete"
-date: "May 20, 2017"
+date: " "
 output:   
   ioslides_presentation:
     theme: simplex
@@ -25,7 +25,7 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 
 ## Introduction { .selectable }
 
-Beyond being able to generate random variables, we should also be able to apply these simulation methods to solve more complex problems. We'll begin with Monte Carlo Integration methods.
+In addition to being able to generate random variables, we should also be able to apply these simulation methods to solve more complex problems. We'll begin with Monte Carlo Integration methods.
 
 Topics to be covered:
 
@@ -40,7 +40,7 @@ Topics to be covered:
 
 ## Monte Carlo Integration { .selectable }
 
-Given a function $h(x)$ for which we wish to integrate over [a,b], $\int_a^b h(x) dx$, we can treat this deterministic problem as a stochastic one to find the solution. Treat $X$ as a random variable with density $f(x)$, then the mathimatical expecation of the random variable $h(X)$ is
+Given a function $h(x)$ for which we wish to integrate over region $[a,b]$, $\int_a^b h(x) dx$, we can solve this numerical problem by treating it a as a random variable we are trying to find the expectation for. Treat $X$ as a random variable with density $f(X=x)$, then the mathematical expecation of the random variable $h(X=x)$ is
 $$
 E[h(X)] = \int_{\mathcal{X}} h(x) f(x) dx = \theta
 $$
@@ -54,11 +54,11 @@ $$
 
 ## Monte Carlo Integration { .selectable }
 
-Suppose we have a function $h(x) = 3x^2$ for which we wish to integrate over the interval [0, 2].
+Suppose we have a function $h(x) = 3x^2$ for which we wish to integrate over the interval $[0, 2]$.
 
 - Can apply deterministic numerical approximation methods (see R's `integrate`) 
 
-- or we could treat $x$ as a random variable from a $Unif(0,2)$ whose pdf is simply $f(x) = \frac{1}{2-0} = \frac{1}{2}$. 
+- or we could treat $x$ as a random variable, $X = x$, from a $Unif(0,2)$ whose pdf is simply $f(x) = \frac{1}{2-0} = \frac{1}{2}$. 
 
 If we now generate some $n$ random values from $f(x)$ and evaluate them at $h(x)$, then take the mean, we'd be calculating the expected value of $h(x)$, 
 $$
@@ -78,7 +78,7 @@ $$
 If we now simulate this, we will see we approximate the true solution $\int_0^2h(x) dx = 8$
 
 ```{r}
-n = 10000 ## sample size
+n = 50000 ## sample size
 h <- function(x) { 3*x^2 } ## function of interest, h(x)
 X <- runif(n = n, min = 0, max = 2)  ## samples from f(x)
 v = 2 * mean(h(X)) ## 2 * E[h(x)]
@@ -91,7 +91,7 @@ integrate(f = h, lower = 0, upper = 2)
 ## Monte Carlo Integration { .selectable }
 
 
-Now, to generalize the method used. Given a function $h(x)$ whose integral is well defined, for which we wish to evaluate at interval $a$ to $b$. Then
+Now, to generalize the method used. Given a function $h(x)$ whose integral is well defined, where we wish to evaluate at interval $a$ to $b$. Then
 
 $$
 \begin{aligned}
@@ -104,11 +104,13 @@ where $f(x) = \frac{1}{b - a}$ is $Unif(a,b)$, and $x \sim Unif(a,b)$.
 
 The algorithm to calculate $\hat{\theta}$ is as follows:
 
-1. Find a density $f(x)$ from which we can sample $x$ from.
+1. Find a density $f(x)$ from which we can sample $x$ 
 
 2. Generate $x_1, ..., x_n \sim f(x)$
 
 3. Compute $(b - a) \times \bar{g}_{n}$, where $\bar{g}_{n} = \frac{1}{n} \sum_{i = 1}^n h(x_i)$
+
+
 
 
 ## Monte Carlo Integration, Variance Estimation { .selectable }
@@ -118,7 +120,7 @@ Now that we can calculate an estimate of statistic $\theta$, $\hat{\theta}$, we 
 
 The variance can be written as 
 $$
-Var(x) = \frac{1}{n} \displaystyle\sum_{i=1}^{n} (x_i - \mu)^2
+Var(x) = \frac{1}{n} \displaystyle\sum_{i=1}^{n} (x_i - \theta)^2
 $$
 
 We will use this form to calculate the variance of $\hat{\theta}$
@@ -137,6 +139,8 @@ $$
 \end{aligned}
 $$
 
+
+
 ## Monte Carlo Integration, Variance Estimation
 
 So, the standard error estimate is
@@ -153,6 +157,9 @@ $$
 $$
 
 
+
+
+
 ## Monte Carlo Integration, Variance Estimation { .selectable }
 
 We can now calculate the standard error for the former example.
@@ -165,8 +172,8 @@ X <- runif(n = N, min = 0, max = 2)  ## samples from f(x)
 h_values <- 2 * h(X)
 
 cumMean <- function(x, n){
-  num = cumsum(x)
-  denom = 1:n
+  num = cumsum(x)  ## numerator
+  denom = 1:n  ## denominator
   result = num/denom
   return(result)
 }
@@ -174,13 +181,16 @@ cumMean <- function(x, n){
 ```
 
 
+
+
+
 ## Monte Carlo Integration, Variance Estimation { .selectable }
 
 ```{r}
 cumSE <- function(x, n){
   m = mean(x)
-  num = sqrt(cumsum((x - m)^2))
-  denom = 1:n
+  num = sqrt(cumsum((x - m)^2)) ## numerator
+  denom = 1:n ## denominator
   result = num/denom ## cummulative mean of (x_i - theta)^2
   return(result)
 }
@@ -195,17 +205,19 @@ SE = cumSE(h_values, N)
 ## Monte Carlo Integration, Variance Estimation
 
 ```{r, fig.height=4, fig.width=6}
-plot(x = 1:N, y = thetas, type = "l", ylim = c(2, 10), xlab = "Number of Samples",
+plot(x = 1:N, y = thetas, type = "l", ylim = c(4, 12), xlab = "Number of Samples",
      ylab = "Estimate of theta",
      main = "Estimate of Theta with 95% CI")
-lines(x = 1:N, y = thetas + 1.96*SE, col = "red") ## CI
-lines(x = 1:N, y = thetas - 1.96*SE, col = "red") ## CI
+lines(x = 1:N, y = thetas + 1.96*SE, col = "gray") ## CI
+lines(x = 1:N, y = thetas - 1.96*SE, col = "gray") ## CI
 
 ```
+
 
 The plot shows how our parameter estimate (and CI) converges closer to the true value as N (sample size) increases. If we were to have had a small sample size, say, 100, our parameter esimate would have performed poorly. But at $N = 10,000$, our estimate $\hat{\theta}$ performs well.
 
 
+## Monte Carlo Integration, Variance Estimation
 
 
 ```{r}
@@ -214,23 +226,23 @@ thetaHat = mean(h_values)
 se <- sd(x = h_values)/sqrt(N)
 ci <- thetaHat + 1.96*c(-1,1) * se
 
-print("Theta estimate: ")
-print(thetaHat)
-print("Confidence Intervals")
-print(ci)
+print(thetaHat) ## theta estimate
+print(ci) ## 95% CI
 
 ```
 
 
-## Strong Law of Large Numbers { .selectable }
-
-Monte Carlo Integration relies on the Strong Law of Large Numbers (SLLN) to approximate $E_f[h(X)] = \int_{\mathcal{X}} h(x) f(x) dx$. The method is to generate a sample $\bf{X} = (x_1, ..., x_n)$ from pdf $f(x)$ and use the empirical average of $h(x)$ as an approximation. This Monte Carlo estimate *almost surely* converges to $E_f[h(X)]$ by the SLLN. 
-
 
 
 ## Strong Law of Large Numbers { .selectable }
 
-The SLLN says that for a given random sample $X_1, ..., X_n$ the empirical mean, $\bar{X}$, can be used as an estimator for $E[x] = \mu$, and given a **sufficiently** large sample, this estimate approximates the true expectation $\mu$ almost certainly with a probability value of 1. Or more formally, 
+Monte Carlo Integration relies on the Strong Law of Large Numbers (SLLN) to approximate $E_f[h(X)] = \int_{\mathcal{X}} h(x) f(x) dx$. The method is to generate a sample $\mathbf{X} = (x_1, ..., x_n)$ from pdf $f(x)$ and use the empirical average of $h(x)$ as an approximation. This Monte Carlo estimate *almost surely* converges to $E_f[h(X)]$ by the SLLN. 
+
+
+
+## Strong Law of Large Numbers { .selectable }
+
+The SLLN says that for a given random sample $X_1, ..., X_n$ the empirical mean, $\bar{X}$, can be used as an estimator for $E[x] = \mu$, and given a *sufficiently* large sample, this estimate approximates the true expectation $\mu$ almost certainly with a probability value of 1. Or more formally, 
 
 $$
 P(\lim_{n \to \infty} \bar{X} \to E[X]) = 1 
@@ -276,15 +288,23 @@ $$
 $$
 
 
+
+
 ##  Normal p-value estimate for unbounded region  { .selectable }
 
-Our first problem is dealing with bounds $(-\infty, x)$. We cannot direcly apply our MC integration algorithm directly because the integral range $(-\infty, x)$, but a way around this issue is by breaking this problem into two sections exploiting the Normal distribution's symmetry around $\mu$. The two sections will be $(-\infty, 0)$ and $(0, x)$. With the given symmetry property, we know that any random variable from $N(\mu, \sigma)$ will have an equal probability of being on the positive end or negative. Thus, let's set $P(X < 0) = 1/2$. Now, all we need to concern ourselves with is the region $(0, x)$. 
+Our first problem is dealing with bounds $(-\infty, x)$. We cannot direcly apply our MC integration algorithm directly because the integral range $(-\infty, x)$
+
+A solution around this issue is breaking up this problem into two sections exploiting the Normal distribution's symmetry around $\mu$. 
+
+The two sections will be $(-\infty, 0)$ and $(0, x)$. 
+
+With the given symmetry property, we know that any random variable from $N(\mu, \sigma)$ will have an equal probability of being on the positive end or negative. Thus, let's set $P(X \leq 0) = 1/2$. Now, all we need to concern ourselves with is the region $(0, x)$. 
 
 Now, assuming $x > 0$, then we use the Monte Carlo estimator as is 
 $$
 \begin{aligned}
 \Phi(x) &= P(X \leq x) \\
-\ & = P(X < 0) + \int_{0}^{x} \frac{1}{\sqrt{2 \pi}}\ e^{t^2/ 2} dx \\
+\ & = P(X \leq 0) + \int_{0}^{x} \frac{1}{\sqrt{2 \pi}}\ e^{t^2/ 2} dx \\
 \ & = \frac{1}{2} + \int_{0}^{x} \frac{1}{\sqrt{2 \pi}}\ e^{t^2/ 2} dx \\
 \end{aligned}
 $$
@@ -359,7 +379,7 @@ for $x > 0$ and $x_i \sim Unif(0,1)$.
 However, if $x < 0$ such as $x = -1$, then we would use the symmetry property of the Normal distribution to calculate $\Phi(-1)$ by $1 - \Phi(-(-1)) = 1 - \Phi(1)$
 
 
-```{r, echo=FALSE, fig.height=4, fig.width=6}
+```{r, echo=FALSE, fig.height=4, fig.width=8}
 x <- seq(from = -10, to = 10, by = 0.1)
 
 out = dnorm(x)
@@ -382,6 +402,7 @@ polygon(x, out, col = "red")
 
 ## Calculating N(0,1) tail probabilities  { .selectable }
 
+Calculating tail probabilities can be tricky. 
 Suppose $Z \sim N(0,1)$, then $\Phi(x) = P(Z \leq x) = E[I_{Z \leq x}] \approx \frac{1}{N}\sum_{i=1}^N I_{z_i \leq x}$ where $I$ is an indicator function returning 1 if the condition is satisfied, else 0.
 
 ```{r}
@@ -394,6 +415,8 @@ print(sum(Z > x)) ## few samples with Z > x
 ```
 
 
+Variance estimation will be problematic for rare events like these
+
 
 
 ## Importance Sampling  { .selectable }
@@ -404,7 +427,15 @@ $$
 E[h(x)] & = \int_{\mathcal{X}} h(x) f(x) dx = \theta
 \end{aligned}
 $$
-Where $f$ is generally a uniform density. However, this can be costly if we need to calculate the tail probabilities. For example, say $Z \sim N(0,1)$ and we wish to calculate $P(Z > 4.5)$. In order to obtain a stable result using a uniform distribution for $f$ we would need to simulate many, many samples. This can be time and computationally costly, and this process can be improved. Suppose that we wish to weight samples $x$ by density $g$ such that this would improve results for tail probabilities. 
+Where $f$ is generally a uniform density. However, this can be costly if we need to calculate the tail probabilities. For example, say $Z \sim N(0,1)$ and we wish to calculate $P(Z > 4.5)$. 
+
+In order to obtain a stable result using a uniform distribution for $f$ we would need to simulate many, many samples. This can be time and computationally costly, and this process can be improved. 
+
+Solution: we can weight samples $x$ by density $g$ such that this would improve results for tail probabilities. 
+
+
+
+## Importance Sampling  { .selectable }
 
 We can rewrite our previous result as 
 $$
@@ -493,7 +524,7 @@ Finally, we can now begin to generate samples from $g$, and use the arithmetic m
 
 $$
 \begin{aligned}
-\displaystyle E[\frac{h(x) f(x)}{g(x)}] & = \frac{1}{N} \times \frac{1}{\sqrt{2 \pi}} \sum_{i = 1}^N e^{-( x_i^2 / 2 \ + \ x_i - 4)} \\
+\displaystyle E \left[\frac{h(x) f(x)}{g(x)} \right] & = \frac{1}{N} \times \frac{1}{\sqrt{2 \pi}} \sum_{i = 1}^N e^{-( x_i^2 / 2 \ + \ x_i - 4)} \\
 \end{aligned}
 $$
 
@@ -557,7 +588,9 @@ $$
 f(x) = \frac{1}{2b} exp\{ - \ \frac{| x - a| }{b} \}, \ x \in (0, \infty)
 $$
 
-If we let $a = 0$ and $b = 1$, then $f(x) = \frac{1}{2} e^{-| x |}$ .If we would want to calculate $E[X^2]$, then we would need to solve the integral. 
+If we let $a = 0$ and $b = 1$, then $f(x) = \frac{1}{2} e^{-| x |}$.
+
+Then, if we would want to calculate $E[X^2]$, then we would need to solve the integral. 
 
 $$
 \begin{aligned}
@@ -595,6 +628,10 @@ curve(expr = dnorm(x, sd = 4), from = -10, to = 10, type = "l",
       lty = 4, col = 4,
       add = TRUE)
 
+legend(7, 0.4, c("sd = 1", "sd = 2", "sd = 4"), col = c(2, 3, 64),
+       text.col = "gray30", lty = c(2, 3, 4), pch = c(NA, NA, NA),
+       merge = TRUE)
+
 
 ```
 
@@ -627,6 +664,9 @@ curve(expr = dnorm(x, sd = 4), from = -10, to = 10, type = "l",
       lty = 4, col = 4,
       add = TRUE)
 
+legend(7, 0.4, c("sd = 1", "sd = 2", "sd = 4"), col = c(2, 3, 64),
+       text.col = "gray30", lty = c(2, 3, 4), pch = c(NA, NA, NA),
+       merge = TRUE)
 
 ```
 
@@ -732,7 +772,11 @@ print(theta)
 ## Importance Sampling Resampling  { .selectable }
 
 
-Sampling Importance Resampling (SIR) simulates random variables approximately from the target distribution. SIR is based upon the notion of importance sampling and nonparametric bootstrapping. Briefly, importance sampling proceeds by sampling from an importance sampling distribution $g$, where $g$ is the envelope or instrumental distribution. If needed, each point in the sample is weighted to correct the sampling porbabilities so that the weighted sample can be related to the target density $f$. As seen previously, the weighted sample can be used to estimate expectations under $f$.
+Sampling Importance Resampling (SIR) simulates random variables approximately from the target distribution. SIR is based upon the notion of importance sampling and nonparametric bootstrapping. 
+
+Briefly, importance sampling proceeds by sampling from an importance sampling distribution $g$, where $g$ is the envelope or instrumental distribution. If needed, each point in the sample is weighted to correct the sampling porbabilities so that the weighted sample can be related to the target density $f$. 
+
+As seen previously, the weighted sample can be used to estimate expectations under $f$.
 
 
 ## Importance Sampling Resampling  { .selectable }
@@ -769,14 +813,14 @@ This method introduces some bias to the estimate we are trying to calculate, but
 A good candidate for sampling from a tail distribution is the $Exp(\theta)$ distribution. We can generate random variables from a left truncated exponential distribution, $Y \sim Exp^+(\alpha, \theta)$, by simply shifting $X \sim Exp(\theta)$ values by $\alpha$. Thus, $Y = X + \alpha$
 
 ```{r, fig.height=3}
-n = 10^4
+n = 5*10^4
 x = rexp(n = n, rate = 1)
 alpha = 4
 y = x + alpha
 par(mfrow = c(1,2), mar = c(4,4,2,2))
 
-hist(x, probability = TRUE, xlim = c(0, 14))
-hist(y, probability = TRUE, xlim = c(0, 14))
+hist(x, probability = TRUE, xlim = c(0, 14), col = "gray", border = "white")
+hist(y, probability = TRUE, xlim = c(0, 14), col = "gray", border = "white")
 
 
 ```
@@ -809,10 +853,10 @@ print(pt(q = 10, df = 5, lower.tail = FALSE))
 
 ```{r, fig.height=3.5}
 pvals = cumsum(w/1:n)
-sterr = sqrt(cumsum((w - pvals)^2))/(1:10^4)
+sterr = sqrt(cumsum((w - pvals)^2))/(1:n)
 
 par(mar = c(4,4,2,2))
-plot(x = 1:10^4, y = pvals, type = "l", lty = 2, 
+plot(x = 1:n, y = pvals, type = "l", lty = 2, 
      xlab = "samples", ylab = "p-val estimates", ylim = c(0, 0.001))
 lines(pvals + 1.96*sterr, col = "blue", lty = 3)
 lines(pvals - 1.96*sterr, col ="blue", lty = 3)
@@ -941,6 +985,8 @@ $$
 \end{aligned}
 $$
 
+
+
 ## Normal-Cauchy Bayes estimator  { .selectable }
 
 
@@ -950,6 +996,8 @@ $$
 \displaystyle
 E(\theta | x) \approx \sum_{i=1}^n \frac{\theta_i}{(1 + \theta_i^2)} e^{-(x - \theta_i)^2 / 2} \big/ \sum_{i=1}^n \frac{1}{( 1 + \theta_i^2)} e^{ (x - \theta_i)^2) /2} 
 $$
+
+
 
 
 ## Normal-Cauchy Bayes estimator  { .selectable }
@@ -966,6 +1014,8 @@ ESS = 1 / sum( (weights / sumOfWeights)^2) ## Effective Sample Size
 print(ESS)
 
 ```
+
+
 
 
 ## Normal-Cauchy Bayes estimator  { .selectable }
@@ -1003,6 +1053,8 @@ confInts = apply(posteriorTheta, 1, quantile, c(0.025, 0.975))
 polygon(x = c(1:N, N:1), y = c(confInts[1,], rev(confInts[2,])), border = "gray")
 
 ```
+
+
 
 
 ## Normal-Cauchy Bayes estimator | Code  { .selectable }

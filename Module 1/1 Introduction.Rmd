@@ -32,7 +32,7 @@ or indirectly from a target distribution(s). Applications of monte carlo methods
 
 - Monte Carlo is not strictly frequentist (Neyman-Pearson hypothesis testing)
 
-- Parametric sampling or parametric bootstrappin (target distribution part of a family of distributions)
+- Parametric sampling or parametric bootstrapping (target distribution part of a family of distributions)
 
 - Monte Carlo methods are a method of statistical simulation. 
 
@@ -45,13 +45,12 @@ or indirectly from a target distribution(s). Applications of monte carlo methods
 
 ## Simulation for p-values { .selectable }
 
-Over the past few years, the use of Monte Carlo methods to calculate p-values has increased. The reasons for this include the following:
+The use of Monte Carlo methods to calculate p-values has become popular. The reasons for this include the following:
 
 1. many test statistics do not have a standard asymptotic distribution;
 
 2. even if a standard asymptotic distribution does exist, it may not be reliable in realistic sample sizes; and 
 
-3.  calculation of the exact sampling distribution through exhaustive enumeration of all possible samples may be too computationally intensive to be feasible. 
 
 In contrast, Monte Carlo methods can be used to obtain an empirical *p*-value that approximates the exact $p$ value without relying on asymptotic distributional theory or exhaustive enumeration.
 
@@ -82,9 +81,15 @@ A Chi-squared test would usually be used for this type of analyses.
 
 There are two ways that the Chi-squared test is used:
 
-1. comparing the observed distribution to some theoretical distribution pre-specified ahead of time: to test the *Goodness of fit* of the theoretical distribution to the observations;
+1. to test the *Goodness of fit* of the theoretical distribution to the observations
 
-2. testing for *independence* between different factors (which, technically, is just a specific theoretical distribution, with some extra parameters that must be estimated from the data).
+2. testing for *independence* between different factors
+
+
+$$
+\chi^2 = \sum (O - E)^2 \big/ E
+$$
+
 
 To review the Chi-squared test and its assumptions, follow the [*link*](https://en.wikipedia.org/wiki/Pearson%27s_chi-squared_test#Assumptions)
 
@@ -157,7 +162,7 @@ ChisqTest <- function(data, Simulations){
 We then generate our test statistics.
 
 ```{r}
-set.seed(123)
+#set.seed(123)
 
 results <- ChisqTest(study, 10000)
 
@@ -171,7 +176,7 @@ print(results)
 
 ## Monte Carlo Hypothesis Testing, pt. 7 { .selectable }
 
-Though our ultimate decision to support the null hypothesis of dependence is not a surprise, our results show that the Monte Carlo *p*-value is greater than the raw p-value obtained from the calculated $\chi^2$ statistic indicating more support for the null hypothesis. 
+Our conclusion for the analysis is to accept (or fail to reject) the null hypothesis. We can conclude that treatment and control of cancer has some dependence/correlation.  
 
 You should compare these results against `R`'s `chisq.test` function.
 
@@ -346,9 +351,9 @@ print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))
 
 ## Monte Carlo Simulation { .selectable }
 
-The previous example focused on direct simulation from a posterior distribution that was well-defined. However, there are some posteriors that will not be as easily identifiable. In general, Monte Carlo methods will prove useful for generating samples from *difficult to sample* target distributions.
+The previous example focused on direct simulation from a posterior distribution that was well-defined. However, there are some posteriors that will not be as easily identifiable. In general, Monte Carlo methods will helpful for generating samples from *difficult to sample* target distributions.
 
-The next section will delve into topics of random number generation from target distributions through direct methods and transformations.
+The next section will introduce topics of random number generation from target distributions through transformation methods.
 
 
 

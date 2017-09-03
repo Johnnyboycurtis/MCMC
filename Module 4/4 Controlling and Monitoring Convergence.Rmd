@@ -1,5 +1,5 @@
 ---
-title: "4 Controlling and Accelerating Convergence"
+title: "Controlling and Accelerating Convergence"
 author: "Jonathan Navarrete"
 date: "  "
 output:   
@@ -39,10 +39,9 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 As a toy example, consider the simple function $h(x) = [cos(50x) + sine(50x)]^2$. Using a simple MC algorithm, we can estimate $\theta = \int_0^1 h(x)$. Let us generate $n$ samples $x_1, ..., x_n \sim Unif(0,1)$, such that $\displaystyle \theta = E[h(x)] \approx \frac{1}{n} \sum^n h(x_i)$. 
 
 ```{r, fig.align='center', fig.height=3, fig.width=6}
-set.seed(5692)
+set.seed(123)
 n = 50000
 x = runif(n)
-
 h = function(x){
   v = (cos(50*x) + sin(50*x))^2
   return(v)
@@ -61,11 +60,10 @@ se = sqrt( cumsum((h(x) - theta_est)^2 ) / 1:n ) / sqrt(1:n)
 
 ```{r, fig.height=3.7}
 par(pin = c(5,3))
-plot(x = 1:n, y = theta_est, type = "l", lty=2, ylim = c(0.7, 1.2))
+plot(x = 1:n, y = theta_est, type = "l", lty=2, ylim = c(0.7, 1.2), xlim = c(0, 10000))
 lines(x = 1:n, y = theta_est - 1.96*se, col = "blue")
 lines(x = 1:n, y = theta_est + 1.96*se, col = "blue")
-legend(x = 6000, y = 0.85, 
-       legend = c(expression(hat(theta)), "CI"), 
+legend(x = 6000, y = 0.85, legend = c(expression(hat(theta)), "CI"), 
        border = "white", col = c("black", "blue"), lty = c(2, 1))
 
 ```
@@ -77,15 +75,14 @@ legend(x = 6000, y = 0.85,
 If we now add a new experiment, the new sample is not guaranteed to stay within the 95% CI.
 
 ```{r, fig.height=3.7, echo = FALSE}
-set.seed(5678)
 par(pin = c(5,3))
-plot(x = 1:n, y = theta_est, type = "l", lty=2, ylim = c(0.7, 1.2))
+plot(x = 1:n, y = theta_est, type = "l", lty=2, ylim = c(0.7, 1.2), xlim = c(0, 10000))
 lines(x = 1:n, y = theta_est - 1.96*se, col = "blue")
 lines(x = 1:n, y = theta_est + 1.96*se, col = "blue")
 z = runif(n) ## repeat the experiment
 lines(x = 1:n, y = cumsum(h(z))/1:n, col = "red", lty = 3)
 
-legend(x = 30000, y = 0.85, 
+legend(x = 6000, y = 0.85,
        legend = c(expression(hat(theta)), "CI", "New Experiment"), 
        border = "white", col = c("black", "blue", "red"), lty = c(2, 1, 3))
 
@@ -107,17 +104,32 @@ However, this may be computationally costly, and resource (e.g. hardware + time)
 While running, monitor your computer's resource manager
 
 ```{r}
-## bootstrap
+## parallel monte carlo samples
 M = 200L
 X = matrix(data = runif(n*M), nrow = n, ncol = M)
 h_samples = h(X)
 thetaEstimates = apply(X = h_samples, MARGIN = 2, FUN = function(v){ cumsum(v)/1:n } )
 
-CI = t(apply(X = thetaEstimates, MARGIN = 1, FUN = quantile, c(0.025, 0.50, .975)))
+parallelCI = t(apply(X = thetaEstimates, MARGIN = 1, FUN = quantile, c(0.025, 0.50, 0.975)))
 
-summary(CI)
+summary(parallelCI)
 
 integrate(f = h, lower = 0, upper = 1) ## comparison
+```
+
+
+## Monitoring Convergence | Parallel CI { .selectable }
+
+```{r, echo=FALSE}
+par(pin = c(5,3))
+plot(x = 1:n, y = theta_est, type = "l", lty=2, ylim = c(0.7, 1.2), xlim = c(0, 10000))
+polygon(x = c(1:n, rev(1:n)), y = c(parallelCI[,1], rev(parallelCI[,3])), lty = 4, border = "gray30", col = "gray90")
+lines(x = 1:n, y = cumsum(h(z))/1:n, col = "red", lty = 3)
+
+legend(x = 30000, y = 0.85, 
+       legend = c(expression(hat(theta)), "CI", "New Experiment"), 
+       border = "white", col = c("black", "blue", "red"), lty = c(2, 1, 3))
+
 ```
 
 
@@ -129,26 +141,23 @@ An approximate but cheaper version of this basic Monte Carlo estimate of the var
 ```{r}
 ## bootstrap
 M = 200L
-boot_samples = h(x[sample(x = 1:n, size = n*M, replace = TRUE)])
-boot_samples = matrix(data = boot_samples, nrow = n, ncol = M)
+ind = sample(x = 1:n, size = n*M, replace = TRUE) ## sample indices
+boot_samples = matrix(data = h(x[ind]), nrow = n, ncol = M) ## matrix of samples
+boot_est = apply(X = boot_samples, MARGIN = 2, FUN = cumsum) / 1:n ## matrix
 
-boot_est = apply(X = boot_samples, MARGIN = 2, FUN = cumsum) / 1:n
-
-CI = t(apply(X = boot_est, MARGIN = 1, FUN = quantile, c(0.025, 0.50, 0.975)))
-
-summary
+bootCI = t(apply(X = boot_est, MARGIN = 1, FUN = quantile, c(0.025, 0.50, 0.975)))
+summary(bootCI)
 ```
 
 
 
-## Monitoring Convergence  { .selectable }
+## Monitoring Convergence | Bootstrap CI  { .selectable }
 
 
 ```{r, fig.height=3.7, echo = FALSE}
-set.seed(5678)
 par(pin = c(5,3))
-plot(x = 1:n, y = theta_est, type = "l", lty=2, ylim = c(0.7, 1.2))
-polygon(x = c(1:n, rev(1:n)), y = c(CI[,1], rev(CI[,3])), lty = 4, border = "blue")
+plot(x = 1:n, y = theta_est, type = "l", lty=2, ylim = c(0.7, 1.2), xlim = c(0, 10000))
+polygon(x = c(1:n, rev(1:n)), y = c(bootCI[,1], rev(bootCI[,3])), lty = 4, border = "gray30", col = "gray80")
 lines(x = 1:n, y = cumsum(h(z))/1:n, col = "red", lty = 3)
 
 legend(x = 30000, y = 0.85, 
@@ -163,25 +172,42 @@ legend(x = 30000, y = 0.85,
 
 
 
-## Antithetic Variables
+## Antithetic Variables   { .selectable }
 
 In previous experiments, when we've worked to generate pseudo-random samples from distributions, we've worked with *iid* (independent and identically distributed) peuso-random samples from an instrumental distribution. 
 
-Generally, *iid* samples are always preferable, but not always cost efficient. As problems become more complicated, generating random samples from a target distribution will become more cumbersome and time/resource consuming. Therefore, in this section we will present methods in which we can double down on our generated samples to speed up convergence and utilize more of our available resources.
+Generally, *iid* samples are always preferable, but not always cost efficient. As problems become more complicated, generating random samples from a target distribution will become more cumbersome and time/resource consuming. 
 
-
-The method of antithetic variables is based on the idea that higher efficiency can be obtained through correlation. Given who samples $X = (x_1, ..., X_n)^T$ and $Y = (y_1, ..., y_n)^T$ from the distribution $f$ used in monte carlo integration.  
+Therefore, in this section we will present methods in which we can double down on our generated samples to speed up convergence and utilize more of our available resources.
 
 
 ## Antithetic Variables   { .selectable }
 
-The monte carlo integration estimator
+Suppose we are interested in estimating a parameter $\theta$ and we have two unbiased estimators $X$ and $Y$ with finite variances $\sigma^2_X = \sigma^2_Y = \sigma^2$. The average of the two unbiased estimators is also an unbiased estimator, $Z = (X + Y) / 2$. Given $X, Y$ and $Z$ are all unbiased, we can compare them using their variances and choose the smallest of the three. 
+
+The variance for $Z$ is given by 
+$$
+\begin{aligned}
+Var(Z) & =  Var(\frac{X + Y}{2})  = \left(\frac{1}{2} \right)^2 \times Var(X + Y) \\
+\ & = \frac{1}{4} \left(  Var(X) + Var(Y) + 2 Cov(X, Y) \right) \\
+\ & = \frac{1}{4} Var(X) + \frac{1}{4} Var(Y) + \frac{1}{2} Cov(X, Y) \\
+\ & = \frac{1}{4} \sigma^2 + \frac{1}{4} \sigma^2 + \frac{1}{2} Cov(X, Y) \\
+\ & = \frac{1}{2} (\sigma^2 +  Cov(X, Y))
+\end{aligned}
+$$
+
+If $Cov(X, Y) < 0$ (or $Cor(X, Y) < 0$), then $Var(Z) < \sigma^2$, therefore, $Z$ would perform better as an unbiased estimator. In this scenario, $X$ and $Y$ would be *antithetic* to each other; thus they are *antithetic variables*.
+
+
+## Antithetic Variables   { .selectable }
+
+The Monte Carlo integration estimator
 $$
 \begin{aligned}
 \theta & = \displaystyle \int_{- \infty}^{\infty} h(x) f(x) dx \\
 \end{aligned}
 $$
-If $X$ and $Y$ are negatively correlated, then the estimator $\hat{\theta}$ of $\theta$
+Let $X$ and $Y$ denote random samples, $x_1, ..., x_n$ and $y_1, ..., y_n$, respectively. If $X$ and $Y$ are negatively correlated, then the estimator $\hat{\theta}$ of $\theta$
 $$
 \begin{aligned}
 \hat{\theta} & = \displaystyle \frac{1}{2n} \sum_{i = 1}^{n} [h(x_i) + h(y_i)] \\
@@ -190,163 +216,49 @@ $$
 is more efficient than the estimator $\displaystyle \hat{\theta} = \frac{1}{2n} \sum_{i = 1}^{2n} h(x_i)$. The random variables $X$ and $Y$ are then called *antithetic variables*. 
 
 
+
+
 ## Antithetic Variables   { .selectable }
 
 Albeit useful, this method is not always possible. For arbitrary transformations $h(.)$, it is not always possible to generate negatively correlations $X$ and $Y$.
 
 As covered in the introduction, we can generate negatively correlated samples from a uniform distribution.
 
+Consider the following. Let $h(x) = e^x$, where we'd like to solve $\int_0^1 h(x) dx$.
+We can take this problem as
+
+$$
+\theta = \int_0^1 h(x) dx = \int_0^1 h(x) f(x) dx
+$$
+where $f(x) = 1$ for a $Unif(0,1)$ distribution. Then
+
+
+## Antithetic Variables   { .selectable }
+
 ```{r}
-U1 = runif(1000)
-U2 = (1 - U1)
+n = 50000
+u = runif(n)
 
-par(mfrow = c(1,2))
-hist(U1, probability = TRUE)
-hist(U2, probability = TRUE)
-par(mfrow = (c(1,1)))
+h = function(x){exp(x)}
 
-print(cor(U1, U2))
+thetaHat = mean(h(u))
+thetaHat
+integrate(f = h, lower = 0, upper = 1)
 ```
 
 
 
-
 ## Antithetic Variables   { .selectable }
-
-Compute $Cov(e^U, e^{1-U})$ and $Var(e^U, e^{1-U})$ where $U \sim Unif(0,1)$. What is the percent reduction in variance of $\hat{\theta}$ that can be acheived using antithetic variates?
-
-
-Covariance:
-$$
-\begin{aligned}
-Cov(e^U, e^{1-U}) & = E[e^U e^{1-U}] - E[e^U] E[e^{1-U}] \\
-\ & = E[e^1] - (e - 1) E[e^{1-U}] \\
-\ & = E[e^1] - (e - 1) E[e^1 e^{-U}] \\
-\ & = e - (e - 1) e^1 [\frac{e - 1}{e}] \\
-\ & = e - (e - 1)^2 = -0.23421 \\
-\end{aligned}
-$$
-
-
-## Antithetic Variables   { .selectable }
-
-And variance:
-$$
-\begin{aligned}
-Var(e^U + e^{1-U}) & = var(e^u) + var(e^{1-U}) + 2 Cov(e^U, e^{1-U}) \\
-\ &= E[e^{2U}] - E[e^U]^2 + E[e^{2-2U}] - E[e^{1-U}]^2 + 2 Cov(e^U, e^{1-U}) \\
-\ &= \frac{e^2 - 1}{2} - (e-1)^2 + E[e^2 e^{-2U}] - E[e^1 e^{-U}]^2 + 2 Cov(e^U, e^{1-U}) \\
-\ &= \frac{e^2 - 1}{2} - (e-1)^2 +  \frac{e^2 - 1}{2} - (e - 1)^2 + 2 Cov(e^U, e^{1-U}) \\
-\ &= -1 - 2 (e-1)^2 + e^2 + 2 Cov(e^U, e^{1-U}) \\
-\ &= -1 - 2 (e-1)^2 + e^2 + 2 (-0.23421) \\
-\ & = 0.0156512 \\
-\end{aligned}
-$$
-
-
-Therefore, the variance reduction is approximately 96%
-
-
-
-## Antithetic Variables   { .selectable }
-
-Refer to Exercise 5.6. Use a Monte Carlo simulation to estimate $\theta$ by the
-antithetic variate approach and by the simple Monte Carlo method. Compute
-an empirical estimate of the percent reduction in variance using the antithetic
-variate. Compare the result with the theoretical value from Exercise 5.6.
-
-For this example, $g(U) = e^U$. Simple Monte Carlo Method:
 
 ```{r}
-set.seed(6)
-m = 10000
-U = runif(m)
-g = exp(U) 
+u1 = runif(n/2)
+u2 = 1 - u1
+h = function(x){exp(x)}
 
-theta = mean(g) ## theta for simple MC
-theta
-var_theta1 = var(g)/m
+thetaHatAV = mean(c(h(u1), h(u2)))
+thetaHatAV
 
-```
-
-
-## Antithetic Variables   { .selectable }
-
-
-```{r}
-set.seed(6)
-m = 5000
-U = runif(m)
-T1 = exp(U)
-T2 = exp(1-U)
-
-cov(T1, T2)
-
-c = (1/2)
-
-anti_thetic = c*mean(T1) + (1-c)*mean(T2) ## Antithetic Control Variate
-anti_thetic
-
-```
-
-
-
-
-## Antithetic Variables   { .selectable }
-
-
-```{r}
-
-##variance of theta2
-var_theta2 = var(T2)/m + c**2 * var(T1 - T2)/m + 2*c*cov(T2, T1 - T2)/m
-
-(var_theta1 - var_theta2) / var_theta1
-
-```
-
-The true value of $\theta$ is 1.718282. The antithetic control variate estimator came closest to the true value, and has a extremely low variance, a 96.78% reduction.
-
-
-
-
-
-## Antithetic Variables   { .selectable }
-
-
-Let $U \sim Unif(0,1)$, $X = aU$, and $X' = a(1 - U)$, where a is a constant.
-Show that $\rho(X,X')$ = -1. 
-
-Note that, since $U \sim Unif(0,1)$ then $(1-U)$ is also $Unif(0,1)$ distributed.
-$E[U] = 1/2$ and $Var(U) = 1/12$
-
-$$
-\begin{aligned}
-Cov(X, X') & = a^2 Cov(U, 1-U) \to a^2 E[U(1-U)] - E[U] E[1-U] \\
-\ & = a^2 E[U - U^2] - (1/2)(1/2) \to a^2 (E[U] - E[U^2] - 1/4) \\
-\ & = a^2 (1/2 - E[U^2] - 1/4) \to a^2 (1/4 - E[U^2]) \\
-\ & = a^2 (1/4 - 4/12) \\
-\ & = a^2 (-1/12) \\
-\end{aligned}
-$$
-
-$$
-\begin{aligned}
-\rho & = \frac{Cov(X, X')}{\sqrt{Var(X)} \sqrt{Var(X')}} \\ 
-\ & = \frac{a^2 (-1/12)}{\sqrt{a^2 (1/12)}  \sqrt{a^2 (1/12)}} \\
-\ & \to \frac{a^2 (-1/12)}{a^2 (1/12)} = -1
-\end{aligned}
-$$
-
-
-## Antithetic Variables   { .selectable }
-
-Is $\rho(X,X')$ = -1 if U is a symmetric beta random
-variable? Yes, we can show this computationally.
-
-```{r}
-curve(expr = dbeta(x, 2, 2), from = 0, to = 1, main = "symmetric Beta(2,2)")
-U = rbeta(1000, 2, 2)
-cor(U, 1-U)
+cor(x = h(u1), y = h(u2)) ## correlation nearly -1
 ```
 
 
@@ -356,30 +268,34 @@ cor(U, 1-U)
 
 
 
-## Antithetic Variables   { .selectable }
+
+
+## Exercise   { .selectable }
 
 Suppose $X \sim N(0,1)$ and we wish to estimate $\theta = E[h(X)]$ where $h(X) = \frac{x}{(2^x - 1)}$. 
 
 By regular Monte Carlo estimation, we can estimate $\theta$ with $n = 10^6$ samples from $N(0,1)$. 
 
-By antithetic variable estimation we can estimate $\theta$ by m = n/2 = 50,000. The antithetic estimator can be constructed using the $X = (x_1, ..., x_m)$, and `c(X, -X)` as our antithetic sample, where X and -X are negatively correlated. 
-$\hat\theta_AS = \frac{1}{n} \sum_{i=1}^m h(x_i) + h(-x_i)$
+By antithetic variable estimation we can estimate $\theta$ by $m = n/2 = 50,000$. Construct an antithetic sample where $Cor(-X, X) = -1$. 
+
+Compare your results with regular MC estimation.
 
 
 
-## Antithetic Variables   { .selectable }
 
 
+# Appendix   { .selectable }
+
+
+
+## Solution to Exercise  { .selectable }
 
 ```{r}
 
 n = 10^6
 m = n/2
 
-h <- function(x){
-    out = x/(2^x - 1)
-    return(out)
-}
+h <- function(x){ x/(2^x - 1) }
 
 y = rnorm(n)
 theta_MC = mean(h(y))
@@ -393,7 +309,7 @@ print(theta_AS)
 
 
 
-## Antithetic Variables   { .selectable }
+## Solution to Exercise  { .selectable }
 
 
 ```{r}
@@ -405,22 +321,6 @@ print(rho)
 print(se.a)
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

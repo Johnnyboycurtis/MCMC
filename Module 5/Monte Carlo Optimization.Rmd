@@ -262,7 +262,7 @@ for(i in 1:N){
   X = rbind(Y,Z)
   new_theta = n/mean(apply(X,2, sum))
   #new_theta = n/mean(colSums(X))
-  M = M + 1
+  M = M + 5
   #print(new_theta)
 }
 
@@ -303,7 +303,7 @@ print(tail(results))
 
 plot(results, main = "EM Estimates of theta", type = "l",
      xlab = "samples", ylab = "theta estimate",
-     ylim = c(0, 3))
+     ylim = c(5, 20))
 abline(h = theta, col = "red")
 
 
