@@ -102,9 +102,9 @@ Below is the setup for the first exercise.
 
 There are two light bulb survival experiments. 
 
-In the first, there are $N$ bulbs whose exact lifetimes $y_i$ for $i \in \{1,...,N\}$ are recorded. The lifetimes have an exponential distribution, such that $y_i \sim Exp(\theta).$ 
+In the first, there are $N$ bulbs,  $y_1, ..., y_N$,  whose exact lifetimes are recorded. The lifetimes have an exponential distribution, such that $y_i \sim Exp(\theta).$ 
 
-In the second experiment, there are $M$ bulbs. After some time *t* > 0, a researcher walks into the room and only records how many lightbulbs are still burning out of $M$ bulbs. Depending on whether the lightbulbs are still burning or out, the results from the second experiment are right- or -left-censored. There are indicators $E_1, ..., E_M$ for each of the bulbs in the second experiment. If the bulb is still burning, $E_i = 1$, else $E_i = 0$.
+In the second experiment, there are $M$ bulbs, $x_1, ..., x_M$. After some time *t* > 0, a researcher walks into the room and only records how many lightbulbs are still burning out of $M$ bulbs. Depending on whether the lightbulbs are still burning or out, the results from the second experiment are right- or -left-censored. There are indicators $E_1, ..., E_M$ for each of the bulbs in the second experiment. If the bulb is still burning, $E_i = 1$, else $E_i = 0$.
 
 Given this information, our task is to solve for an MLE estimator for $\theta$.
 
@@ -273,7 +273,7 @@ $$
 > where 
 
 $$
-p^{(j)} = \frac{e^{-t/\theta^{(j)}}}{1 - e^{-t/\theta^{(j)}}}
+p^{(j-1)} = \frac{e^{-t/\theta^{(j-1)}}}{1 - e^{-t/\theta^{(j-1)}}}
 $$
 
 
@@ -285,10 +285,11 @@ Once we take the derivative of the log-likelihood and set it to zero, we will co
 
 $$
 \begin{aligned}
+\displaystyle
 \frac{\mathrm d}{\mathrm d x} ln(L(\theta)) & = 0 \\
-\ \displaystyle 0 & = -\frac{(N + M)}{\theta} + \frac{1}{\theta^2} \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big]  \\
-\ \displaystyle \frac{(N + M)}{\theta} & =  \frac{1}{\theta^2} \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big] \\
-\ \displaystyle \theta & =  \big[N \bar{Y} + Z ( t + \theta) + (M - Z) \big(\theta - t \times \frac{e^{- t / \theta}}{1 - e^{-t/\theta}} \big)\big] \ / \ (N+M) \\
+\ \displaystyle 0 & = -\frac{(N + M)}{\theta} + \frac{1}{\theta^2} \big[N \bar{Y} + Z ( t + \theta^{(j-1)}) + (M - Z) \big(\theta^{(j-1)} - t \times \frac{e^{- t / \theta^{(j-1)}}}{1 - e^{-t/\theta^{(j-1)}}} \big)\big]  \\
+\ \displaystyle \frac{(N + M)}{\theta} & =  \frac{1}{\theta^2} \big[N \bar{Y} + Z ( t + \theta^{(j-1)}) + (M - Z) \big(\theta^{(j-1)} - t \times \frac{e^{- t / \theta^{(j-1)}}}{1 - e^{-t/\theta^{(j-1)}}} \big) \big] \\
+\ \displaystyle \theta & =  \big[N \bar{Y} + Z ( t + \theta^{(j-1)}) + (M - Z) \big(\theta^{(j-1)} - t \times \frac{e^{- t / \theta^{(j-1)}}}{1 - e^{-t/\theta^{(j-1)}}} \big)\big] \ / \ (N+M) \\
 \end{aligned}
 $$
 
@@ -481,6 +482,13 @@ abline(h = mean(x), col = "blue", lty = 3)
 
 
 
+## Monte Carlo EM { .selectable }
+
+A MC flavor of the EM algorithm
+
+1. Draw missing data sets $\mathbf{Z_1, Z_2, ..., Z_m} \sim f_{Z|X}(z | x, \theta_i)$ where each $\mathbf{Z_i}$ is a vector of all missing values needed to complete the observed data set $( \mathbf{X, Z} )$.
+
+2. Calculate $\bar{Q}(\theta | \theta_{i-1}, X, \mathbf{Z_1, ..., Z_m}) = \frac{1}{m} \sum_{i=1}^m Q(\theta | \theta_{i-1}, X, \mathbf{Z_i} )$
 
 
 

@@ -378,28 +378,33 @@ $$
 
 
 ```{r}
-cdf = c(0.0, 0.1, 0.3, 0.5, 0.7, 1.0) ## cumulative probabilities
-results = numeric(length = 10000) ## creates a vector of zeros
-u = runif(10000)
-for(i in 2:6){
-    ind = (cdf[i-1] < u) & (u <= cdf[i])
-    results[ind] <- (i-2) ## returns an index for x vals
+n = 10000
+u = runif(n)
+
+fInv <- function(u){
+  if(u <= 0.1) x <- 0
+  if(u > 0.1 && u <= 0.3) x <- 1
+  if(u > 0.3 && u <= 0.5) x <- 2
+  if(u > 0.5 && u <= 0.7) x <- 3
+  if(u > 0.7 && u <= 1) x <- 4
+  return(x)
 }
 
-table(results) / 10000
-
+results = sapply(X = u, fInv)
+table(results) / n
 ```
 
 
 ## Inverse Transform Discrete scenario, pt. 3 { .selectable }
 
 ```{r, fig.height=3, fig.width=5}
-z = table(results) / 10000
+z = table(results) / n
 barplot(z, border = "white", col = "lightblue", xlab = "x", ylab = "probability", ylim = c(0, 0.4))
 
 ```
 
 
+$P(X = 0) = 0.1$, $P(X = 1) = 0.2$, $P(X = 2) = 0.2$, $P(X = 3) = 0.2$, and $P(X = 4) = 0.3$
 
 
 ## Accept-Reject  { .selectable }
@@ -777,7 +782,7 @@ hist(R_Out, col = "gray", border = "white")
 
 
 
-# Apendix
+# Appendix
 
 ## A Solution to Beta transformation
 

@@ -1,7 +1,7 @@
 ---
 title: "Metropolis Hastings"
 author: "Jonathan Navarrete"
-date: "September 2, 2017"
+date: " "
 output:   
   ioslides_presentation:
     theme: simplex
@@ -31,9 +31,11 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 
 ## General Metropolis-Hastings { .selectable }
 
-Given a target density *f*, we build a Markov kernel *K* with stationary distribution *f* and then generate a Markov chain $X_t$ using this kernel so that the limiting distribution of $X_t$ is *f* and integrals can be approximated according to the Ergodic Theorem.
+For a given target density *f* we wish to estimate, we build a Markov kernel *K* with stationary distribution *f* and then generate a Markov chain $X_t$ using this kernel so that the limiting distribution of the Markov chain is *f* and integrals can be approximated according to the *Ergodic Theorem*.
 
-The **Metropolis-Hastings algorithm** is a general purpose MCMC method for approximating a *f*. Given the target density *f* and a conditional density $q(y | x)$ that is easy to simulate from. In addition, $q$ can be almost arbitrary in that the only theoretical requirements are that the ration $\frac{f(y)}{q(y | x)}$ is known up to a constant *independent* of $x$ and that $q( \cdot | x )$ has enough dispertion to lead to an exploration of the entire support of *f*
+The **Metropolis-Hastings algorithm** is a general purpose MCMC method for approximating a target density *f*, using a conditional density $q(y | x)$ that is easy to simulate from. 
+
+In addition, $q$ can be almost arbitrary in that the only theoretical requirements are that the ratio $\frac{f(y)}{q(y | x)}$ is known up to a constant *independent* of $x$ and that $q( \cdot | x )$ has enough dispertion to lead to an exploration of the entire support of *f*
 
 We can rely on the feature of Metropolis-Hatings algorithm that for every given *q*, we can then construct a Metropolis-Hastings kernel such that *f* is its stationary distribution.
 
@@ -41,10 +43,12 @@ We can rely on the feature of Metropolis-Hatings algorithm that for every given 
 ## General Metropolis-Hastings { .selectable }
 
 The Metropolis-Hastings algorithm as described Robert & Casella goes as follows
+
 Given $x^{(t)}$
-\begin{enumerate}
-\item Generate $Y_t \sim q(y | x_t )$
-\item Take 
+
+`1. Generate` $Y_t \sim q(y | x_t )$
+
+`2. Take`
 $$
 X_{t+1} = 
   \begin{cases}
@@ -56,38 +60,69 @@ where
 $$
 \displaystyle \rho(x^{(t)}, Y_t) = \text{min} \left\{ \frac{f(Y_t)}{f(x^{(t)})} \frac{q(x^{(t)} | Y_t)}{q(Y_t | x^{(t)})} , 1 \right\}
 $$
-\end{enumerate}
+
+
 
 
 
 ## General Metropolis-Hastings { .selectable }
 
 In simpler terms, as we want to generate $X \sim f$, we first take an initial value $x^{(0)}$ (which can almost be any artibrary value in the support of $f$). 
-\begin{enumerate}
-\item We generate a value $Y_0 \sim q(y | x^{(0)})$. 
-\item We calculate $\rho(x^{(t)}, Y_t)$
-\item Generate a random value $U \sim Unif(0,1)$ 
-\item If $U < \rho(x^{(t)}, Y_t)$, then we accept $X^{(1)} = Y_t$;
-else we take $X^{(1)} = X^{(0)}$
-\item Repeate steps 1-4 until you've satisfied the number of samples needed
-\end{enumerate}
 
+1. We generate a value $Y_0 \sim q(y | x^{(0)})$. 
+2. We calculate $\rho(x^{(t)}, Y_t)$
+3. Generate a random value $U \sim Unif(0,1)$ 
+4. If $U < \rho(x^{(t)}, Y_t)$, then we accept $X^{(1)} = Y_t$;
+else we take $X^{(1)} = X^{(0)}$
+5. Repeate steps 1-4 until you've satisfied the number of samples needed
+
+
+
+
+## General Metropolis-Hastings { .selectable }
+
+You may notice the MH algorithm is not too dissimilar from the Accept-Reject algorithm.
+
+`1. Generate` $Y \sim g$, $U \sim Unif(0,1)$
+
+`2. Accept` $X = Y$ `if` $U \leq \frac{f(Y)}{M g(Y)}$ ;
+
+`3. Return to step 1 otherwise`
 
 
 
 ## Example Beta(2.7, 6.3) { .selectable }
 
-As of now, we've covered multiple ways of generating random samples from a target density. Let us compare the accept-reject algorithm once more with the Metropolis-Hastings algorithm. Generate *N* samples from $Beta(2.7, 6.3)$
+As of now, we've covered multiple ways of generating random samples from a target density. Let us compare the accept-reject algorithm once more with the Metropolis-Hastings algorithm. Generate $N$ samples from $Beta(2.7, 6.3)$
 
 
 In order to use the accept-reject algorithm, we need a candidate distribution to sample from. Below are a set of potential candidate distributions.
 
-```{r}
+```{r, echo=FALSE, fig.height=4, fig.align='center'}
+## potential instumential distributions
+par(pin = c(4.5,3.2))
+curve(expr = dbeta(x, 2.7, 6.3), from = 0, to = 2, xlab = "x", ylab = "density")
+curve(expr = dbeta(x, 3, 6), from = 0, to = 2, add = TRUE, col = 2, lty = 2)
+curve(expr = dexp(x, rate = 1), from = 0, to = 2, add = TRUE, col = 3, lty = 2)
+curve(expr = dgamma(x, shape = 2.5, rate = 5), from = 0, to = 2, add = TRUE, col = 6, lty = 2)
+legend(x = 1.2, y = 2.5, legend = c("Beta(2.7, 6.3)", "Beta(3, 6)", "Exp(1)", "N(0.25, 0.25)", "Gamma(2.5, 5)"), 
+       lty = c(1, 2, 2, 2, 2), col = c(1:4, 6), merge = TRUE)
+```
+
+
+
+## Example Beta(2.7, 6.3) { .selectable }
+
+```{r, echo=TRUE, eval=FALSE}
 ## potential instumential distributions
 curve(expr = dbeta(x, 2.7, 6.3), from = 0, to = 2)
 curve(expr = dbeta(x, 3, 6), from = 0, to = 2, add = TRUE, col = 2, lty = 2)
 curve(expr = dexp(x, rate = 3), from = 0, to = 2, add = TRUE, col = 3, lty = 2)
 curve(expr = dnorm(x, mean = 0.25, 0.25), from = -2, to = 2, add = TRUE, col = 4, lty = 2)
+curve(expr = dgamma(x, shape = 2.5, scale = 1/5), from = 0, to = 2, add = TRUE, col = 6, lty = 2)
+legend(x = 1.2, y = 2.5, legend = c("Beta(2.7, 6.3)", "Beta(3, 6)", "Exp(1)", "N(0.25, 0.25)", "Gamma(2.5, 5)"), 
+       lty = c(1, 2, 2, 2, 2), col = c(1:4, 6), merge = TRUE)
+
 ```
 
 
@@ -95,11 +130,9 @@ curve(expr = dnorm(x, mean = 0.25, 0.25), from = -2, to = 2, add = TRUE, col = 4
 
 
 ```{r}
-fg = function(x){
-  1.5*dbeta(x, 2.7, 6.3)/dexp(x, rate = 1)
-}
-
-curve(expr = fg, from = 0, to = 2)
+M = 3
+par(pin = c(4.5, 3))
+curve(expr = M*dgamma(x, shape = 2.5, scale = 1/5), from = 0, to = 2, ylab = "M*Gamma(2.5, 5)")
 curve(expr = dbeta(x, 2.7, 6.3), from = 0, to = 2, add = TRUE, lty = 3)
 
 ```
@@ -112,62 +145,49 @@ We will use $Exp(3)$ as our candidate distribution, $g$.
 ## Example Beta(2.7, 6.3) { .selectable }
 
 ```{r}
-N = 10000
-
+set.seed(1234)
+N = 500000
 ## For accept-reject, we need to find a value for M
-## we can use `optimize` to find the maximum of our target density
-maximum  = optimize(f = function(x){ dbeta(x, 2.7, 6.3) }, 
-                    interval = c(0, 2), maximum = TRUE ) ## obtain maximum
-
-## M here is basically random guess
-M = maximum$objective  ## something smaller like 1.5 works too!
-curve(expr = dbeta(x, 2.7, 6.3), 
-      from = 0, to = 2, col = "blue",
-      main = "Beta(2.7, 6.3)", xlab = "X", ylab = "Density")
-abline(h = M, lty = 2, lwd = 2, col = "red")
 
 f = function(x){
   dbeta(x, 2.7, 6.3)
 }
 
 g = function(x){
-  #dnorm(x, mean = maximum$maximum, sd = 0.25)
-  dexp(x, rate = 1)
+  dgamma(x, shape = 2.5, scale = 1/5)
 }
 ```
 
 
 
+
 ## Example Beta(2.7, 6.3) { .selectable }
 
+
 ```{r}
-#N = 100000
 X = numeric(N)
 i = 0
 while(i < N){
-  #Y = abs(rnorm(n = 1, mean = maximum$maximum, sd = 0.25))
-  Y = rexp(n = 1, rate = 1)
-  U = runif(1)
+  Y = rgamma(n = 1, shape = 2.5, scale = 1/5)
+  U = runif(n = 1)
   if(U*M <= f(Y)/g(Y)){
     i = i + 1
     X[i] = Y
   }
 }
 
-
-print("sample mean from direct samples")
-mean(rbeta(n = 1000, shape1 = 2.7, shape2 = 6.3))
-print("sample mean from Accept-Reject samples")
-mean(X)
+qbeta(p = c(0, 0.25, 0.5, 0.75, 1), shape1 = 2.7, shape2 = 6.3) ## quantiles from Beta(2.7, 6.3)
+quantile(X) ## sample mean from Accept-Reject samples
 ```
+
+
 
 ## Example Beta(2.7, 6.3) { .selectable }
 
-```{r}
+```{r, fig.height=3.5}
 ## see how samples from chain compare to Beta(2.7, 6.3) density
-hist(X, main = "Histogram of MCMC samples", prob = TRUE)
-curve(expr = dbeta(x, 2.7, 6.3), 
-      from = 0, to = 2, add = TRUE, col = "blue")
+hist(X, main = "Histogram of MCMC samples", prob = TRUE, ylim = c(0, 3))
+curve(expr = dbeta(x, 2.7, 6.3),  from = 0, to = 2, add = TRUE, col = "blue")
 
 ```
 
@@ -178,16 +198,12 @@ curve(expr = dbeta(x, 2.7, 6.3),
 Below is the Metropolis-Hastings implementation for this problem. 
 
 ```{r}
-## Metropolis Hastings
-## now compare results with Beta(2.7, 6.3)
-
-N = 10000
 X = numeric(N)
 X[1] = rbeta(n = 1, shape1 = 2.7, shape2 = 6.3) ## initial value
 for(i in 1:N){
-  Y = rexp(n = 1, rate = X[i])
-  rho = (dbeta(x = Y, 2.7, 6.3) * dexp(x = X[i], rate = Y)) / 
-    (dbeta(x = X[i], 2.7, 6.3) * dexp(x = Y, rate = X[i])) 
+  Y = rgamma(n = 1, shape = 2.5, scale = X[i])  #rexp(n = 1, rate = X[i])
+  rho = (dbeta(x = Y, 2.7, 6.3) * dgamma(x = X[i], shape = 2.5, scale = Y) ) / 
+    (dbeta(x = X[i], 2.7, 6.3) * dgamma(x = Y, shape = 2.5, scale = X[i])  )  
   
   if(runif(1) < rho){
     X[i+1] = Y
@@ -195,27 +211,22 @@ for(i in 1:N){
     X[i+1] = X[i]
   }
 }
+qbeta(p = c(0, 0.25, 0.5, 0.75, 1), shape1 = 2.7, shape2 = 6.3) ## quantiles from Beta(2.7, 6.3)
+quantile(X) ## sample mean from M-H samples
 ```
 
 
 ## Example Beta(2.7, 6.3) { .selectable }
 
-```{r}
-print("sample mean from direct samples")
-mean(rbeta(n = 1000, shape1 = 2.7, shape2 = 6.3))
-print("sample mean from M-H samples")
-mean(X)
-
-## see chain transitions
-plot(X, type = "o", main = "MCMC samples",
-     xlim = c(500,1000),
+```{r, fig.height=4}
+plot(X, type = "o", main = "MCMC Trace Plot", xlim = c(500,1000),
      xlab = "iterations", ylab = "X (samples obtained)")
 ```
 
 
 ## Example Beta(2.7, 6.3) { .selectable }
 
-```{r}
+```{r, fig.height=4}
 ## see how samples from chain compare to Beta(2.7, 6.3) density
 hist(X, main = "Histogram of MCMC samples", prob = TRUE)
 curve(expr = dbeta(x, 2.7, 6.3), 
@@ -232,17 +243,12 @@ curve(expr = dbeta(x, 2.7, 6.3),
 Here is a varition of the M-H algorithm used previously, except we do not let the candidate distribution depend on previous values of the chain. The candidate distribution depends only on present values of the chain, in effect $q(y | x) = q(y)$.
 
 ```{r}
-
-## Metropolis Hastings
-## now compare results with Beta(2.7, 6.3)
-
-N = 10000
 X = numeric(N)
 X[1] = rbeta(n = 1, shape1 = 2.7, shape2 = 6.3)
 for(i in 1:N){
-  Y = rexp(n = 1, rate = 1)
-  rho = (dbeta(x = Y, 2.7, 6.3) * dexp(x = X[i], rate = 1)) / 
-    (dbeta(x = X[i], 2.7, 6.3) * dexp(x = Y, rate = 1)) 
+  Y = rgamma(n = 1, shape = 2.5, scale = 1/5)
+  rho = (dbeta(x = Y, 2.7, 6.3) * dgamma(x = X[i], shape = 2.5, scale = 1/5) ) / 
+    (dbeta(x = X[i], 2.7, 6.3) * dgamma(x = Y, shape = 2.5, scale = 1/5) ) 
   
   if(runif(1) < rho){
     X[i+1] = Y
@@ -252,38 +258,27 @@ for(i in 1:N){
   
 }
 
-
-
-print("sample mean from direct samples")
-mean(rbeta(n = 1000, shape1 = 2.7, shape2 = 6.3))
-print("sample mean from M-H samples")
-mean(X)
+quantile(X) 
 ```
 
 
 ## Example Beta(2.7, 6.3) { .selectable }
 
-```{r}
+```{r, fig.height=3.7}
 ## see chain transitions
-plot(X, type = "o", main = "MCMC samples",
-     xlim = c(500,1000),
+plot(X, type = "o", main = "MCMC Trace Plot", xlim = c(500,1000),
      xlab = "iterations", ylab = "X (samples obtained)")
 ```
 
 
 ## Example Beta(2.7, 6.3) { .selectable }
 
-```{r}
+```{r, fig.height=3.7}
 ## see how samples from chain compare to Beta(2.7, 6.3) density
 hist(X, main = "Histogram of MCMC samples", prob = TRUE)
-curve(expr = dbeta(x, 2.7, 6.3), 
-      from = 0, to = 2, add = TRUE, col = "blue")
-
-
+curve(expr = dbeta(x, 2.7, 6.3), from = 0, to = 2, add = TRUE, col = "blue")
 
 ```
-
-
 
 
 
@@ -293,13 +288,19 @@ This version of the M-H algorithm is known as the **Independent Metropolis-Hasti
 
 
 
+
+
+
 ## Independent M-H { .selectable }
 
 The **Independent Metropolis-Hastings algorithm** as described Robert & Casella goes as follows
+
 Given $x^{(t)}$
-\begin{enumerate}
-\item Generate $Y_t \sim g(y)$
-\item Take 
+
+`1. Generate` $Y_t \sim g(y)$
+
+`2. Take`
+
 $$
 X_{t+1} = 
   \begin{cases}
@@ -311,21 +312,21 @@ where
 $$
 \displaystyle \rho(x^{(t)}, Y_t) = \text{min} \left\{ \frac{f(Y_t)}{f(x^{(t)})} \frac{g(x^{(t)})}{g(Y_t)}, 1 \right\}
 $$
-\end{enumerate}
+
 
 
 
 ## Independent M-H { .selectable }
 
 In simpler terms, as we want to generate $X \sim f$, we first take an initial value $x^{(0)}$ (which can almost be any artibrary value in the support of $f$). 
-\begin{enumerate}
-\item We generate a value $Y_0 \sim q(y | x^{(0)})$. 
-\item We calculate $\rho(x^{(t)}, Y_t)$
-\item Generate a random value $U \sim Unif(0,1)$ 
-\item If $U < \rho(x^{(t)}, Y_t)$, then we accept $X^{(1)} = Y_t$;
+
+1. We generate a value $Y_0 \sim q(y | x^{(0)})$. 
+2. We calculate $\rho(x^{(t)}, Y_t)$
+3. Generate a random value $U \sim Unif(0,1)$ 
+4. If $U < \rho(x^{(t)}, Y_t)$, then we accept $X^{(1)} = Y_t$;
 else we take $X^{(1)} = X^{(0)}$
-\item Repeate steps 1-4 until you've satisfied the number of samples needed
-\end{enumerate}
+5. Repeate steps 1-4 until you've satisfied the number of samples needed
+
 
 
 
@@ -340,20 +341,23 @@ else we take $X^{(1)} = X^{(0)}$
 Here we will compare again the Accept-Reject algorithm against the Metropolis-Hastings. Generate *N* random variables $X \sim Gamma(4.3, 6.2)$.
 
 
-```{r}
-N = 10000
-
+```{r, fig.height=3, fig.width=5}
 ## For accept-reject, we need to find a value for M
 ## we can use `optimize` to find the maximum of our target density
 maximum  = optimize(f = function(x){ dgamma(x = x, shape = 4.3, rate = 6.2)}, 
                     interval = c(0, 2), maximum = TRUE ) ## obtain maximum
 
 M = maximum$objective
-curve(expr = dgamma(x = x, shape = 4.3, rate = 6.2), 
-      from = 0, to = 2, col = "blue",
-      main = "Gamma(4.3, 6.2", xlab = "X", ylab = "Density")
+curve(expr = dgamma(x = x, shape = 4.3, rate = 6.2), from = 0, 
+      to = 2, col = "blue", main = "Gamma(4.3, 6.2)", xlab = "X", ylab = "Density")
 abline(h = M, lty = 3, lwd = 2, col = "red")
+```
 
+
+
+## Example: Gamma(4.3, 6.2) { .selectable }
+
+```{r}
 f = function(x){
   dgamma(x = x, shape = 4.3, rate = 6.2)
 }
@@ -361,12 +365,7 @@ f = function(x){
 g = function(x){
   dgamma(x = x, shape = 4, rate = 7)
 }
-```
 
-## Example: Gamma(4.3, 6.2) { .selectable }
-
-```{r}
-#N = 10
 X = numeric(N)
 i = 0
 while(i < N){
@@ -377,6 +376,13 @@ while(i < N){
     X[i] = Y
   }
 }
+```
+
+
+
+## Example: Gamma(4.3, 6.2) { .selectable }
+
+```{r}
 
 ## see how samples from chain compare to Gamma density
 hist(X, main = "Histogram of MCMC samples", prob = TRUE)
@@ -405,10 +411,9 @@ for(i in 1:N){
   } else{
     X[i+1] = X[i]
   }
-  
 }
-
-mean(X)
+#qgamma(p = c(0, 0.25, 0.5, 0.75, 1), shape = 4.3, rate = 6.2) #[1] 0.0000000 0.4488888 0.6405895 0.8808118       Inf
+quantile(X)  ## rgamma: 0.6979356
 
 ```
 
@@ -416,7 +421,7 @@ mean(X)
 
 ## Example: Gamma(4.3, 6.2) { .selectable }
 
-```{r}
+```{r, fig.height=3.5}
 ## see chain transitions
 par(mfrow = c(1,2))
 plot(X, type = "o", main = "MCMC samples",
@@ -426,9 +431,13 @@ plot(X, type = "o", main = "MCMC samples",
 plot(X, type = "o", main = "MCMC samples",
      xlim = c(N-200,N),
      xlab = "iterations", ylab = "X (samples obtained)")
-par(mfrow = c(1,1))
+```
 
 
+
+## Example: Gamma(4.3, 6.2) { .selectable }
+
+```{r, fig.height=3.5}
 ## see how samples from chain compare to Gamma density
 hist(X, main = "Histogram of MCMC samples", prob = TRUE)
 curve(expr = dgamma(x = x, shape = 4.3, rate = 6.2), 
@@ -439,45 +448,61 @@ curve(expr = dgamma(x = x, shape = 4.3, rate = 6.2),
 
 ## Example: Gamma(4.3, 6.2) { .selectable }
 
+
+
+```{r, echo=FALSE, fig.height=4, fig.align='center'}
+## potential instumential distributions
+par(pin = c(4.5,3.2))
+curve(expr = dgamma(x, shape = 4.3, 6.2), from = 0, to = 2, xlab = "x", ylab = "density", ylim = c(0, 1.5))
+curve(expr = df(x, 4, 6), from = 0, to = 2, add = TRUE, col = 2, lty = 2)
+curve(expr = dexp(x, rate = 1), from = 0, to = 2, add = TRUE, col = 3, lty = 2)
+curve(expr = dgamma(x, shape = 2.5, rate = 5), from = 0, to = 2, add = TRUE, col = 6, lty = 2)
+legend(x = 1.2, y = 1.5, legend = c("Gamma(4.3, 6.2)", "F(4, 6)", "Exp(1)", "N(0.25, 0.25)", "Gamma(2.5, 5)"), 
+       lty = c(1, 2, 2, 2, 2), col = c(1:4, 6), merge = TRUE)
+```
+
+
+## Example: Gamma(4.3, 6.2) { .selectable }
+
 ```{r}
-
 ## Metropolis Hastings
-## now compare results with Gamma(5,6)
-
-N = 10000
 X = numeric(N)
-X[1] = rgamma(n = 1, shape = 4.3, rate = 6.2)
+X[1] = 0.5
 for(i in 1:N){
-  Y = rgamma(n = 1, shape = 5, rate = 6)
-  rho = (dgamma(x = Y, shape = 4.3, rate = 6.2) * dgamma(x = X[i], shape = 5, rate = 6)) / 
-    (dgamma(x = X[i], shape = 4.3, rate = 6.2) * dgamma(x = Y, shape = 5, rate = 6)) 
+  Y = rf(n = 1, df1 = 4, df2 = 6)
+  rho = (dgamma(x = Y, shape = 4.3, rate = 6.2) * df(x = X[i], df1 = 4, df2 = 6)) / 
+    (dgamma(x = X[i], shape = 4.3, rate = 6.2) * df(x = Y, df1 = 4, df2 = 6)) 
   #X[i+1] = X[i] + (Y - X[i])*(runif(1) < rho) ## equivalent to if-else statement below
   if(runif(1) < rho){
     X[i+1] = Y
   } else{
     X[i+1] = X[i]
   }
-  
 }
-
-mean(X)
+qgamma(p = c(0, 0.25, 0.5, 0.75, 0.9), shape = 4.3, rate = 6.2)
+quantile(X, probs = c(0, 0.25, 0.5, 0.75, 0.9))
 ```
 
 
 ## Example: Gamma(4.3, 6.2) { .selectable }
 
-```{r}
+```{r, fig.height=3.5}
 ## see chain transitions
-plot(X, type = "o", main = "MCMC samples",
-     xlim = c(500,1000),
+plot(X, type = "o", main = "MCMC samples", xlim = c(500,1000), 
      xlab = "iterations", ylab = "X (samples obtained)")
 
+
+```
+
+
+
+## Example: Gamma(4.3, 6.2) { .selectable }
+
+
+```{r, fig.height=3.5}
 ## see how samples from chain compare to Gamma density
 hist(X, main = "Histogram of MCMC samples", prob = TRUE)
-curve(expr = dgamma(x = x, shape = 4.3, rate = 6.2), 
-      from = 0, to = 2, add = TRUE, col = "blue")
-
-
+curve(expr = dgamma(x = x, shape = 4.3, rate = 6.2), from = 0, to = 2, add = TRUE, col = "blue")
 
 ```
 
@@ -493,8 +518,19 @@ curve(expr = dgamma(x = x, shape = 4.3, rate = 6.2),
 
 # Bayesian Analysis
 
+
 ## O-ring Challenger Data { .selectable }
 
+[Bayesian Reanalysis of the Challenger O-Ring Data](http://www.calvin.edu/library/Remelts/orings.pdf)
+
+Bayesian logistic regression
+
+- Using a noninformative prior
+- let's us use regular logistic parameters with the benefits of Bayesian interpretation
+
+
+
+## O-ring Challenger Data { .selectable }
 
 The following is a well covered logistic regression example using the O-ring data set related to the 1986 space shuttle Challenger exploision. The output is modeled as the probability of failure (Y = 1) given the data.
 
@@ -511,7 +547,6 @@ $$
 ## O-ring Challenger Data { .selectable }
 
 ```{r}
-
 failure <- c(1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 
              0, 0, 0, 1, 0, 0, 0, 0, 0)
 temperature <- c(53, 57, 58, 63, 66, 67, 67, 67, 68, 
@@ -529,7 +564,7 @@ head(df)
 
 The frequentist logistic regression
 
-```{r}
+```{r, echo = FALSE}
 fit = glm(formula = failure ~ temperature, data = df, 
           family = binomial(link = "logit"))
 
@@ -563,7 +598,8 @@ The prior above is an exponential distribution with $Exp(\lambda)$, where $\lamb
 ## O-ring Challenger Data { .selectable }
 
 ```{r}
-# Preliminary output from ML estimation
+## Output from ML estimation from Logistic Regression
+## MLEs make great starting valules
 a.mle <- as.numeric(fit$coefficients[1])
 b.mle <- as.numeric(fit$coefficients[2])
 var.a.mle <- summary(fit)$cov.scaled[1, 1]
@@ -585,7 +621,7 @@ Let's set up the posterior and proposal distributions
 ## setting up functions
 
 # Posterior distribution
-dpost <- function(theta, y = failure, x = temperature){
+dPosterior <- function(theta, y = failure, x = temperature){
     ## density of Y is binomial/bernoulli
     a <- theta[1]
     b <- theta[2]
@@ -594,10 +630,15 @@ dpost <- function(theta, y = failure, x = temperature){
     dprior <- exp(a) * exp(-exp(a) / b.hyper) * 1/b.hyper ## density of prior
     return(lik * dprior)
 }
+```
 
 
+
+## O-ring Challenger Data { .selectable }
+
+```{r}
 # Proposal distribution (independent proposal, so "theta0" is not used)
-dprop <- function(theta){
+dProposal <- function(theta){
     ## ignore theta0
     a <- theta[1]
     b <- theta[2]
@@ -613,15 +654,13 @@ dprop <- function(theta){
 ## O-ring Challenger Data { .selectable }
 
 ```{r}
-rprop <- function(theta0){
+rProposal <- function(theta0){
     ## independent proposals for a and b
     #a <- log(rexp(1, 1 / b.hyper))
     a <- log(rexp(1, 1 / b.hyper)) ## log for computational purposes
     b <- rnorm(1, b.mle, sqrt(var.b.mle))
     return(c(a, b))
 }
-
-
 
 ```
 
@@ -632,38 +671,32 @@ Now we run the M-H algorithm
 
 ```{r}
 ## Metropolis-Hastings set up to run
-
-
 # Run Metropolis-Hastings
-N <- 10^4
-B <- 10^3
-#mh.out <- MH(c(a.mle, b.mle), dpost, dprop, rprop, N, B)
+N = 1000000
+BurnIn =  5000
 
 ```
 
 
 ## O-ring Challenger Data { .selectable }
 
-```{r}
-## x0: initializing values for MH algorithm
-## f: the pdf of posterior; target distribution
-## dprop: the pdf of the proposal distribution
-## rprop: the random number gen for proposal
-## N: Number of samples needed
-## B: Number of burn in samples
-## function generates N+B samples then drops B
-x0 <- c(a.mle, b.mle)
-x <- matrix(NA, nrow = N + B, ncol = length(x0)) 
-fx <- rep(NA, N + B)
+Code not shown here. Provided in seperate document.
+
+Uses regular Metropolis Hastings algorithm
+
+```{r, echo=FALSE}
+x0 <- c(a.mle, b.mle) ## x0: initializing values for MH algorithm
+x <- matrix(NA, nrow = N + BurnIn, ncol = length(x0)) ## empty matrix
+fx <- rep(NA, N + BurnIn)
 x[1,] <- x0 ## add the initializing values
-fx[1] <- dpost(x0) ## initiate the M-H algorithm
+fx[1] <- dPosterior(x0) ## initiate the M-H algorithm
 accept <- 0 ## counter for acceptance
 
-for(i in 2:(N + B)){
-    u <- rprop(x[i-1,])
-    fu <- dpost(u)
+for(i in 2:(N + BurnIn)){
+    u <- rProposal(x[i-1,])
+    fu <- dPosterior(u)
     ## use log values for computational purposes
-    r <- log(fu) + log(dprop(x[i-1,])) - log(fx[i-1]) - log(dprop(u))
+    r <- log(fu) + log(dProposal(x[i-1,])) - log(fx[i-1]) - log(dProposal(u))
     Rho <- min(exp(r), 1)
     if(runif(1) <= Rho){
         accept <- accept + 1 ## update counter
@@ -681,11 +714,11 @@ for(i in 2:(N + B)){
 
 ```{r}
 print("acceptance rate: ")
-print(accept/(N+B))
+print(accept/(N+BurnIn))
 
-mh.out <- x[-(1:B), ]
-alpha.mh <- mh.out[,1]
-beta.mh <- mh.out[,2]
+MH.Results <- x[-(1:BurnIn), ]
+alphaMH <- MH.Results[,1]
+betaMH <- MH.Results[,2]
 
 
 ```
@@ -697,28 +730,27 @@ beta.mh <- mh.out[,2]
 
 
 ```{r}
-
-summary(mh.out) ## summary of parameters
+summary(MH.Results) ## summary of parameters
 ```
 
 
 ## O-ring Challenger Data { .selectable }
 
-```{r}
+```{r, echo=FALSE}
 par(mfrow = c(1,2))
-hist(alpha.mh, freq=FALSE, col="gray", border="white", xlab=expression(alpha), main = "")
-plot(alpha.mh, type="l", col="gray", xlab="Iteration", ylab=expression(alpha), main = "")
-lines(1:N, cumsum(alpha.mh) / (1:N))
+hist(alphaMH, freq=FALSE, col="gray", border="white", xlab=expression(alpha), main = "")
+plot(alphaMH, type="l", col="gray", xlab="Iteration", ylab=expression(alpha), main = "")
+lines(1:N, cumsum(alphaMH) / (1:N))
 ```
 
 
 ## O-ring Challenger Data { .selectable }
 
-```{r}
+```{r, echo=FALSE}
 par(mfrow = c(1,2))
-hist(beta.mh, freq=FALSE, col="gray", border="white", xlab=expression(beta), main = "")
-plot(beta.mh, type="l", col="gray", xlab="Iteration", ylab=expression(beta), main = "")
-lines(1:N, cumsum(beta.mh)/(1:N))
+hist(betaMH, freq=FALSE, col="gray", border="white", xlab=expression(beta), main = "")
+plot(betaMH, type="l", col="gray", xlab="Iteration", ylab=expression(beta), main = "")
+lines(1:N, cumsum(betaMH)/(1:N))
 
 ```
 
@@ -762,6 +794,12 @@ for(i in 1:N){
 
 }
 
+```
+
+
+## Solution to Student's t density with v degrees of freedom
+
+```{r}
 plot(density(X), type = "l", 
         lty = 2, main = "M-H with N(0,1) candidate")
 curve(dt(x, df = 4), add = TRUE, col = 4)

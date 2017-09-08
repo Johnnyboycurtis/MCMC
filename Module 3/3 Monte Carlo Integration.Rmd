@@ -33,8 +33,6 @@ Topics to be covered:
 
 2. Importance Sampling
 
-3. Importance Sampling Resampling
-
 
 
 
@@ -239,10 +237,7 @@ print(ci) ## 95% CI
 Monte Carlo Integration relies on the Strong Law of Large Numbers (SLLN) to approximate $E_f[h(X)] = \int_{\mathcal{X}} h(x) f(x) dx$. The method is to generate a sample $\mathbf{X} = (x_1, ..., x_n)$ from pdf $f(x)$ and use the empirical average of $h(x)$ as an approximation. This Monte Carlo estimate *almost surely* converges to $E_f[h(X)]$ by the SLLN. 
 
 
-
-## Strong Law of Large Numbers { .selectable }
-
-The SLLN says that for a given random sample $X_1, ..., X_n$ the empirical mean, $\bar{X}$, can be used as an estimator for $E[x] = \mu$, and given a *sufficiently* large sample, this estimate approximates the true expectation $\mu$ almost certainly with a probability value of 1. Or more formally, 
+For a given random sample $X_1, ..., X_n$ the empirical mean, $\bar{X}$, can be used as an estimator for $E[x] = \mu$, and given a *sufficiently* large sample, this estimate approximates the true expectation $\mu$ almost certainly with a probability value of 1. Or more formally, 
 
 $$
 P(\lim_{n \to \infty} \bar{X} \to E[X]) = 1 
@@ -262,9 +257,13 @@ $$
 $$
 and by the Strong Law of Large Numbers this happens almost surely as $n \to \infty$. See: [Central Limit Theorem](http://www.math.uah.edu/stat/sample/CLT.html)
 
+$$
+\hat{\theta} \sim N(\theta, \sigma^2)
+$$
+
 The Weak Law of Large Numbers then states that for any margine of error $\epsilon$, the average almost surely do not deviate further than $\epsilon$ away from the true $\theta$, 
 $$
-\lim_{n \to \infty} P(| \bar{X} - \theta | > \epsilon) = 0
+\lim_{n \to \infty} P(| \hat{\theta} - \theta | > \epsilon) = 0
 $$
 
 The SLLN speaks to convergence to the expected value, where the WLLN speaks to convergence in probability.
@@ -281,7 +280,7 @@ $$
 \Phi(x) = P(X \leq x) = \int_{-\infty}^{x} \frac{1}{\sqrt{2 \pi} \sigma}\ e^{(t - \mu)^2/ 2 \sigma} dx
 $$
 
-Now, suppose that $\mu = 1$ and $\sigma = 1$, such that we are only dealing with the standard Normal CDF. We are interested in calculating a Monte Carlo estimate for $\Phi(x)$
+Now, suppose that $\mu = 0$ and $\sigma = 1$, such that we are only dealing with the standard Normal CDF. We are interested in calculating a Monte Carlo estimate for $\Phi(x)$
 
 $$
 \Phi(x) = P(X \leq x) = \int_{-\infty}^{x} \frac{1}{\sqrt{2 \pi}}\ e^{t^2/ 2} dx
@@ -312,9 +311,33 @@ $$
 
 ##  Normal p-value estimate for unbounded region  { .selectable }
 
-However, what if $x <  0$? Well, then, again exploiting the symmetry property of $N(\mu, \sigma)$, we esimate $\Phi(X \leq x)$ by $1 - \Phi(-x)$. I'll illustrate how this will be done.
+However, if $x < 0$ such as $x = -1$, then we would use the symmetry property of the Normal distribution to calculate $\Phi(-1)$ by $1 - \Phi(-(-1)) = 1 - \Phi(1)$
 
-For example, if $x = 2$, then we would calculate a MC estimate for $\Phi(X \leq 2)$.
+
+```{r, echo=FALSE, fig.height=4, fig.width=8}
+x <- seq(from = -10, to = 10, by = 0.1)
+
+out = dnorm(x)
+out[x > -1] = 0
+
+par(mfrow = c(1,2))
+plot(x, dnorm(x), type = "l", main = "Phi(X)", ylab = "density")
+polygon(x, out, col = "blue")
+
+
+out = dnorm(x)
+out[x < 1] = 0
+
+plot(x, dnorm(x), type = "l", main = "Phi(X) = 1 - Phi(-X)", , ylab = "density")
+polygon(x, out, col = "red")
+
+```
+
+
+
+##  Normal p-value estimate for unbounded region  { .selectable }
+
+For example, if $x = 2.5$, then we would calculate a MC estimate for $\Phi(X \leq 2)$.
 
 ```{r, echo=FALSE, fig.height=4, fig.width=6}
 x <- seq(from = -10, to = 10, by = 0.1)
@@ -374,42 +397,20 @@ $$
 for $x > 0$ and $x_i \sim Unif(0,1)$.
 
 
-##  Normal p-value estimate for unbounded region  { .selectable }
 
-However, if $x < 0$ such as $x = -1$, then we would use the symmetry property of the Normal distribution to calculate $\Phi(-1)$ by $1 - \Phi(-(-1)) = 1 - \Phi(1)$
-
-
-```{r, echo=FALSE, fig.height=4, fig.width=8}
-x <- seq(from = -10, to = 10, by = 0.1)
-
-out = dnorm(x)
-out[x > -1] = 0
-
-par(mfrow = c(1,2))
-plot(x, dnorm(x), type = "l", main = "Phi(X)", ylab = "density")
-polygon(x, out, col = "blue")
-
-
-out = dnorm(x)
-out[x < 1] = 0
-
-plot(x, dnorm(x), type = "l", main = "Phi(X) = 1 - Phi(-X)", , ylab = "density")
-polygon(x, out, col = "red")
-
-```
 
 
 
 ## Calculating N(0,1) tail probabilities  { .selectable }
 
 Calculating tail probabilities can be tricky. 
-Suppose $Z \sim N(0,1)$, then $\Phi(x) = P(Z \leq x) = E[I_{Z \leq x}] \approx \frac{1}{N}\sum_{i=1}^N I_{z_i \leq x}$ where $I$ is an indicator function returning 1 if the condition is satisfied, else 0.
+Suppose $Z \sim N(0,1)$, then $\Phi(x) = P(Z \geq x) = E[I_{Z \geq x}] \approx \frac{1}{N}\sum_{i=1}^N I_{z_i \geq x}$ where $I$ is an indicator function returning 1 if the condition is satisfied, else 0.
 
 ```{r}
 N = 10000
 x = 3.2
 Z = rnorm(N)
-p_val = mean(Z <= x)
+p_val = mean(Z >= x)
 print(p_val)
 print(sum(Z > x)) ## few samples with Z > x
 ```
@@ -458,7 +459,7 @@ $$
 \Phi(x) = \displaystyle \int^{\infty}_x \frac{1}{\sqrt{2 \pi}} e^{-t^2/2}  dt
 \end{aligned}
 $$
-By Monte Carlo integration we approximate $P(X \leq x)$ by 
+By Monte Carlo integration we approximate $P(X \geq x)$ by 
 $$
 \begin{aligned}
 \Phi(x) = \displaystyle \frac{1}{N} \sum_{i = 1}^N I_{\{t_i \geq x\}}
@@ -679,13 +680,13 @@ Since we need to have samples that cover the entire domain of the Laplace distri
 ```{r}
 N = 10000
 x = rnorm(N)
-w = f(x)/dnorm(x) 
+w = f(x)/dnorm(x, sd = 1) 
 theta <- mean(x = x^2 * w)
 print(theta)
 
 
 x = rnorm(N, sd = 2)
-w = f(x)/dnorm(x) 
+w = f(x)/dnorm(x, sd = 2) 
 theta <- mean(x = x^2 * w)
 print(theta)
 

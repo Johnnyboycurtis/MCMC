@@ -1,5 +1,5 @@
 ---
-title: "Controlling and Accelerating Convergence"
+title: "Monitoring and Accelerating Convergence"
 author: "Jonathan Navarrete"
 date: "  "
 output:   
@@ -27,7 +27,7 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 
 
 
-1. Monitoring Convergence
+1. Monitoring Convergence using multiple MC experiments
 
 2. Antithetic Variables
 
@@ -39,8 +39,8 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 As a toy example, consider the simple function $h(x) = [cos(50x) + sine(50x)]^2$. Using a simple MC algorithm, we can estimate $\theta = \int_0^1 h(x)$. Let us generate $n$ samples $x_1, ..., x_n \sim Unif(0,1)$, such that $\displaystyle \theta = E[h(x)] \approx \frac{1}{n} \sum^n h(x_i)$. 
 
 ```{r, fig.align='center', fig.height=3, fig.width=6}
-set.seed(123)
-n = 50000
+set.seed(3456)
+n = 80000
 x = runif(n)
 h = function(x){
   v = (cos(50*x) + sin(50*x))^2
@@ -97,6 +97,10 @@ legend(x = 6000, y = 0.85,
 Monitoring convergence of Monte Carlo samples is important to assessing the quality of estimators. For some MC estimate $\theta_{MC}$, it is possible to run many parallel processes and graphically monitor how they converge, and from those samples obtain a confidence band. 
 
 However, this may be computationally costly, and resource (e.g. hardware + time) intensive.
+
+To understand how much memory our experiments are using, we can use the library [`profmem`](https://cran.r-project.org/web/packages/profmem/vignettes/profmem.html). Many programming langugages have libraries for profiling code, and monitoring bottlenecks and resource consumption.
+
+- To install: `install.packages("profmem")`
 
 
 ## Monitoring Convergence  { .selectable }
