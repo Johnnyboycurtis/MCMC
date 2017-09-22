@@ -86,7 +86,7 @@
 
   </style>
 
-  <link href="data:text/css;charset=utf-8,%0A%2Eselectable%20%7B%0A%2Dwebkit%2Dtouch%2Dcallout%3A%20text%3B%0A%2Dwebkit%2Duser%2Dselect%3A%20text%3B%0A%2Dkhtml%2Duser%2Dselect%3A%20text%3B%0A%2Dmoz%2Duser%2Dselect%3A%20text%3B%0A%2Dms%2Duser%2Dselect%3A%20text%3B%0Auser%2Dselect%3A%20text%3B%0A%7D%0A%2Eslick%2Dslider%20%7B%0A%2Dwebkit%2Duser%2Dselect%3A%20text%3B%0A%2Dkhtml%2Duser%2Dselect%3A%20text%3B%0A%2Dmoz%2Duser%2Dselect%3A%20text%3B%0A%2Dms%2Duser%2Dselect%3A%20text%3B%0Auser%2Dselect%3A%20text%3B%0A%7D%0A%2Eslick%2Dlist%2Edraggable%20%7B%0A%2Dwebkit%2Duser%2Dselect%3A%20none%3B%0A%2Dkhtml%2Duser%2Dselect%3A%20none%3B%0A%2Dmoz%2Duser%2Dselect%3A%20none%3B%0A%2Dms%2Duser%2Dselect%3A%20none%3B%0Auser%2Dselect%3A%20none%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+  <link href="data:text/css;charset=utf-8,%2EMathJax%20%7B%0Afont%2Dsize%3A%200%2E5em%20%21important%3B%0A%7D%0A%2Eselectable%20%7B%0A%2Dwebkit%2Dtouch%2Dcallout%3A%20text%3B%0A%2Dwebkit%2Duser%2Dselect%3A%20text%3B%0A%2Dkhtml%2Duser%2Dselect%3A%20text%3B%0A%2Dmoz%2Duser%2Dselect%3A%20text%3B%0A%2Dms%2Duser%2Dselect%3A%20text%3B%0Auser%2Dselect%3A%20text%3B%0A%7D%0A%2Eslick%2Dslider%20%7B%0A%2Dwebkit%2Duser%2Dselect%3A%20text%3B%0A%2Dkhtml%2Duser%2Dselect%3A%20text%3B%0A%2Dmoz%2Duser%2Dselect%3A%20text%3B%0A%2Dms%2Duser%2Dselect%3A%20text%3B%0Auser%2Dselect%3A%20text%3B%0A%7D%0A%2Eslick%2Dlist%2Edraggable%20%7B%0A%2Dwebkit%2Duser%2Dselect%3A%20none%3B%0A%2Dkhtml%2Duser%2Dselect%3A%20none%3B%0A%2Dmoz%2Duser%2Dselect%3A%20none%3B%0A%2Dms%2Duser%2Dselect%3A%20none%3B%0Auser%2Dselect%3A%20none%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
 
 </head>
 
@@ -102,18 +102,6 @@
       <p data-config-presenter><!-- populated from slide_config.json --></p>
           </hgroup>
   </slide>
-
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  CommonHTML: {
-    scale: 95
-  }
-});
-</script>
-
-<script type="text/javascript" async
-src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
 
 <slide class=''><hgroup><h2>Introduction to Monte Carlo</h2></hgroup><article  id="introduction-to-monte-carlo" class="smaller selectable">
 
@@ -143,7 +131,9 @@ src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 
 </article></slide><slide class=''><hgroup><h2>Monte Carlo Hypothesis Testing</h2></hgroup><article  id="monte-carlo-hypothesis-testing" class="smaller selectable">
 
-<p>The contingency table below shows results of patients who underwent cancer treatment and either saw their cancer controlled or not. The two treatments are surgery and radiation. The question we are interested in is, is radiation treatment associated with control of cancer.</p>
+<p>The contingency table below shows results of patients who underwent cancer treatment and either saw their cancer controlled or not. The two treatments are surgery and radiation. The question we are interested in is <em>is there a difference between treatment and controll of cancer</em>?</p>
+
+<p>\(H_0\): In the population, the two categorical variables are independent. \(H_A\): In the population, two categorical variables are dependent.</p>
 
 <pre class = 'prettyprint lang-r'>study = matrix(data = c(21, 2,
                         15, 3), nrow = 2, ncol = 2, byrow = TRUE,
@@ -189,7 +179,7 @@ simulateChisq &lt;- function(B, E, sr, sc){
     results = numeric(B)
     for(i in 1:B){
       ## review r2dtable documentation
-        dat = unlist(r2dtable(1, sr, sc))
+        dat = unlist(r2dtable(1, sr, sc)) ## simulated contingency table
         M = matrix(dat, ncol = length(sc), nrow = length(sr))
         val = sum( sort( (M - E)^2 / E, decreasing = TRUE))
         results[i] = val
@@ -205,16 +195,16 @@ simulateChisq &lt;- function(B, E, sr, sc){
 </article></slide><slide class=''><hgroup><h2>Monte Carlo Hypothesis Testing, pt. 5</h2></hgroup><article  id="monte-carlo-hypothesis-testing-pt.-5" class="smaller selectable">
 
 <pre class = 'prettyprint lang-r'>ChisqTest &lt;- function(data, Simulations){
-    x = data
-    B = Simulations
-    n &lt;- sum(x)
-    sr &lt;- rowSums(x)
-    sc &lt;- colSums(x)
+    x = data ## data
+    B = Simulations ## number of simulations to generate
+    n &lt;- sum(x) ## total number of observations
+    sr &lt;- rowSums(x) ## sum of rows
+    sc &lt;- colSums(x) ## sum of cols
     E &lt;- outer(sr, sc, &quot;*&quot;)/n ## ORDER MATTERS
     dimnames(E) &lt;- dimnames(study)
-    tmp &lt;- simulateChisq(B, E, sr, sc)
-    Stat &lt;- sum(sort((x - E)^2/E, decreasing = TRUE))
-    pval &lt;- (1 + sum(tmp &gt;=  Stat))/(B + 1)
+    tmp &lt;- simulateChisq(B, E, sr, sc) ## simulated data
+    Stat &lt;- sum(sort((x - E)^2/E, decreasing = TRUE)) ## chi^2 statistic
+    pval &lt;- (1 + sum(tmp &gt;=  Stat))/(B + 1) ## MC pvalue
     rawPVal = pchisq(q = Stat, df = 2, lower.tail = FALSE)
     out = list(PearsonStat = Stat, 
                MonteCarloPVal = pval, 
@@ -236,7 +226,7 @@ print(results)</pre>
 ## [1] 0.5991546
 ## 
 ## $MonteCarloPVal
-## [1] 0.640036
+## [1] 0.6432357
 ## 
 ## $rawPVal
 ## [1] 0.7411314</pre>
@@ -382,7 +372,7 @@ print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))</pre>
 
 </article></slide><slide class=''><hgroup><h2>Monte Carlo Simulation</h2></hgroup><article  id="monte-carlo-simulation" class="smaller selectable">
 
-<p>The previous example focused on direct simulation from a posterior distribution that was well-defined. However, there are some posteriors that will not be as easily identifiable. In general, Monte Carlo methods will helpful for generating samples from <em>difficult to sample</em> target distributions.</p>
+<p>The previous example focused on direct simulation from a posterior distribution that was well-defined. However, there are some posteriors that will not be as easily identifiable. In general, Monte Carlo methods will be helpful for generating samples from <em>difficult to sample</em> target distributions.</p>
 
 <p>The next section will introduce topics of random number generation from target distributions through transformation methods.</p></article></slide>
 

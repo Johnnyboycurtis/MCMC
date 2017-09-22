@@ -100,7 +100,7 @@
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   CommonHTML: {
-    scale: 100
+    scale: 110
   }
 });
 </script>
@@ -286,7 +286,9 @@ P(x &lt; X_i &lt; t) &amp; = \int_x^t \frac{1}{\theta} e^{- x_i / \theta} dx \\
 \end{aligned}
 \]</p>
 
-<p>In order to calculate EM esimates for \(\theta\), we will plug in the expected values</p>
+</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-9" class="smaller selectable">
+
+<p>In order to calculate EM esimates for \(\theta\), we will plug in the expected values into the log-likelihood</p>
 
 <p>\[
 E[X_i | \mathcal{Y}] = E[X_i | E_i] = 
@@ -294,9 +296,9 @@ E[X_i | \mathcal{Y}] = E[X_i | E_i] =
     t + \theta       &amp; \quad \text{if } E_i = 1\\
     \theta - t \frac{e^{-t/\theta}}{1 - e^{-t/\theta}}  &amp; \quad \text{if } E_i = 0\\
   \end{cases} 
-\] into the log-likelihood</p>
+\]</p>
 
-</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-9" class="smaller selectable">
+</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-10" class="smaller selectable">
 
 <p>\[
 \begin{aligned}
@@ -308,7 +310,7 @@ E[X_i | \mathcal{Y}] = E[X_i | E_i] =
 \end{aligned}
 \]</p>
 
-</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-10" class="smaller selectable">
+</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-11" class="smaller selectable">
 
 <p>As we iterate through estimates of \(\theta\), we will use conditioned estimates of \(\theta\) given previous estimates of \(\theta\). Such that the \(j\)th step consists of replacing \(X_i\) in (1) by its expected value (2), using the current numerical parameter value \(\theta^{(j-1)}\).</p>
 
@@ -324,7 +326,7 @@ E[X_i | \mathcal{Y}] = E[X_i | E_i] =
 p^{(j-1)} = \frac{e^{-t/\theta^{(j-1)}}}{1 - e^{-t/\theta^{(j-1)}}}
 \]</p>
 
-</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-11" class="smaller selectable">
+</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-12" class="smaller selectable">
 
 <p>Once we take the derivative of the log-likelihood and set it to zero, we will come up with an estimate for \(\theta\)</p>
 
@@ -338,7 +340,7 @@ p^{(j-1)} = \frac{e^{-t/\theta^{(j-1)}}}{1 - e^{-t/\theta^{(j-1)}}}
 \end{aligned}
 \]</p>
 
-</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-12" class="smaller selectable">
+</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-13" class="smaller selectable">
 
 <p>Thus, for each <em>j</em>th M-step, we will calculate</p>
 
@@ -349,7 +351,7 @@ p^{(j-1)} = \frac{e^{-t/\theta^{(j-1)}}}{1 - e^{-t/\theta^{(j-1)}}}
 \end{aligned}
 \]</p>
 
-</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-13" class="smaller selectable">
+</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-14" class="smaller selectable">
 
 <pre class = 'prettyprint lang-r'>set.seed(5678)
 theta = 5 ## theta
@@ -368,7 +370,7 @@ ybar = mean(y)
 Z = sum(E)
 t = 5</pre>
 
-</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-14" class="smaller selectable">
+</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-15" class="smaller selectable">
 
 <pre class = 'prettyprint lang-r'>theta.j = 0.1
 theta.jp1 = 0.5
@@ -390,7 +392,7 @@ for(i in 1:10){
 ## [1] 5.45417
 ## [1] 5.45417</pre>
 
-</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-15" class="smaller selectable">
+</article></slide><slide class=''><hgroup><h2>The First Exercise</h2></hgroup><article  id="the-first-exercise-16" class="smaller selectable">
 
 <pre class = 'prettyprint lang-r'>## compare results
 print(theta.jp1) ## EM theta estimate</pre>

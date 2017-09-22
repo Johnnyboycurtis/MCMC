@@ -13,7 +13,7 @@ output:
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   CommonHTML: {
-    scale: 100
+    scale: 110
   }
 });
 </script>
@@ -234,7 +234,10 @@ $$
 \end{aligned}
 $$
 
-In order to calculate EM esimates for $\theta$, we will plug in the expected values 
+
+## The First Exercise  { .selectable }
+
+In order to calculate EM esimates for $\theta$, we will plug in the expected values into the log-likelihood
 
 $$
 E[X_i | \mathcal{Y}] = E[X_i | E_i] = 
@@ -243,7 +246,6 @@ E[X_i | \mathcal{Y}] = E[X_i | E_i] =
     \theta - t \frac{e^{-t/\theta}}{1 - e^{-t/\theta}}  & \quad \text{if } E_i = 0\\
   \end{cases} 
 $$
-into the log-likelihood
 
 
 ## The First Exercise  { .selectable }

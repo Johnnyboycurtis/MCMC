@@ -13,7 +13,7 @@ output:
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   CommonHTML: {
-    scale: 95
+    scale: 115
   }
 });
 </script>
@@ -415,7 +415,13 @@ For notes on the Accept-Rejection algorithm see [Accept-Reject](http://www.colum
 Suppose that $X$ and $Y$ are random variables with density (or pmf) $f$ and $g$ respectively, and there exists a constant $M$ such that
 
 $$
-\frac{f(t)}{g(t)} \leq M
+M \geq \frac{f(t)}{g(t)}
+$$
+
+or
+
+$$
+M \times g(t) \geq f(t)
 $$
 for all t such that $f(t) > 0$. If we'd like to simulate from the target density $f(t)$, then the following algorithm can be applied to generate the random variable $X$.
 

@@ -12,16 +12,7 @@ output:
     theme: simplex
 ---
 
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  CommonHTML: {
-    scale: 95
-  }
-});
-</script>
-<script type="text/javascript" async
-src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
+
 
 ## Introduction to Monte Carlo  { .selectable }
 
@@ -60,7 +51,10 @@ North BV, Curtis D, Sham PC. A Note on the Calculation of Empirical P Values fro
 
 ## Monte Carlo Hypothesis Testing { .selectable }
 
-The contingency table below shows results of patients who underwent cancer treatment and either saw their cancer controlled or not. The two treatments are surgery and radiation. The question we are interested in is, is radiation treatment associated with control of cancer.
+The contingency table below shows results of patients who underwent cancer treatment and either saw their cancer controlled or not. The two treatments are surgery and radiation. The question we are interested in is *is there a difference between treatment and controll of cancer*?
+
+$H_0$: In the population, the two categorical variables are independent.
+$H_A$: In the population, two categorical variables are dependent.
 
 
 ```{r}
@@ -73,8 +67,6 @@ print(study)
 ```
 
 A Chi-squared test would usually be used for this type of analyses.
-
-
 
 
 ## Monte Carlo Hypothesis Testing, pt. 2 { .selectable }
@@ -116,7 +108,7 @@ simulateChisq <- function(B, E, sr, sc){
     results = numeric(B)
     for(i in 1:B){
       ## review r2dtable documentation
-        dat = unlist(r2dtable(1, sr, sc))
+        dat = unlist(r2dtable(1, sr, sc)) ## simulated contingency table
         M = matrix(dat, ncol = length(sc), nrow = length(sr))
         val = sum( sort( (M - E)^2 / E, decreasing = TRUE))
         results[i] = val
@@ -136,16 +128,16 @@ simulateChisq <- function(B, E, sr, sc){
 
 ```{r, echo=TRUE}
 ChisqTest <- function(data, Simulations){
-    x = data
-    B = Simulations
-    n <- sum(x)
-    sr <- rowSums(x)
-    sc <- colSums(x)
+    x = data ## data
+    B = Simulations ## number of simulations to generate
+    n <- sum(x) ## total number of observations
+    sr <- rowSums(x) ## sum of rows
+    sc <- colSums(x) ## sum of cols
     E <- outer(sr, sc, "*")/n ## ORDER MATTERS
     dimnames(E) <- dimnames(study)
-    tmp <- simulateChisq(B, E, sr, sc)
-    Stat <- sum(sort((x - E)^2/E, decreasing = TRUE))
-    pval <- (1 + sum(tmp >=  Stat))/(B + 1)
+    tmp <- simulateChisq(B, E, sr, sc) ## simulated data
+    Stat <- sum(sort((x - E)^2/E, decreasing = TRUE)) ## chi^2 statistic
+    pval <- (1 + sum(tmp >=  Stat))/(B + 1) ## MC pvalue
     rawPVal = pchisq(q = Stat, df = 2, lower.tail = FALSE)
     out = list(PearsonStat = Stat, 
                MonteCarloPVal = pval, 
@@ -351,7 +343,7 @@ print(quantile(x = x, probs = c(0.025, 0.5, 0.975)))
 
 ## Monte Carlo Simulation { .selectable }
 
-The previous example focused on direct simulation from a posterior distribution that was well-defined. However, there are some posteriors that will not be as easily identifiable. In general, Monte Carlo methods will helpful for generating samples from *difficult to sample* target distributions.
+The previous example focused on direct simulation from a posterior distribution that was well-defined. However, there are some posteriors that will not be as easily identifiable. In general, Monte Carlo methods will be helpful for generating samples from *difficult to sample* target distributions.
 
 The next section will introduce topics of random number generation from target distributions through transformation methods.
 

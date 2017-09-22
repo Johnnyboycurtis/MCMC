@@ -1,4 +1,6 @@
-
+.MathJax {
+    font-size: 0.5em !important;
+}
 
 .selectable {
     -webkit-touch-callout: text;

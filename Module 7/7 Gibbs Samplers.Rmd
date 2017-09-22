@@ -13,7 +13,7 @@ output:
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   CommonHTML: {
-    scale: 95
+    scale: 110
   }
 });
 </script>
@@ -91,6 +91,11 @@ $\rho$ is the correlation between $X$ and $Y$, and $(1 - \rho^2) \sigma_X^2$ is 
 
 
 ```{r}
+library(MASS, quietly = TRUE) ## for kernel density estimation
+library(RColorBrewer, quietly = TRUE) ## some pretty colors
+k <- 11
+my.cols <- rev(brewer.pal(k, "RdYlBu"))
+
 N = 100000
 rho = 0.9
 mu_x = 1
@@ -135,11 +140,13 @@ cor(MVN)
 
 ## Bivariate Normal Example { .selectable }
 
-```{r}
-plot(MVN, type = "p", col = 8, 
-     main = "MVN samples")
 
+```{r}
+z = kde2d(x = MVN[,1], y = MVN[,2], n = 50) ## kernel density estimation
+plot(MVN, xlab="X", ylab="Y", pch = 18, col = 8, cex=.4, main = "MVN Samples")
+contour(z, drawlabels=FALSE, nlevels=k, col=my.cols, add=TRUE) ## add contours to plot
 ```
+
 
 
 
@@ -201,8 +208,8 @@ quantile(thetas)
 ```{r}
 
 par(mfrow = c(1,2))
-hist(X, main = "Marginal Dist: X", probability = TRUE)
-hist(thetas, main = paste("Marginal Dist:", expression(theta)), probability = TRUE)
+hist(X, main = "Marginal Dist: X", probability = TRUE, border = "white", col = "gray")
+hist(thetas, main = paste("Marginal Dist:", expression(theta)), probability = TRUE, border = "white", col = "gray")
 
 ```
 
