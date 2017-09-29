@@ -2,9 +2,15 @@
 
 
 import numpy as np
+from scipy import stats
 import matplotlib.pyplot as plt
 
-message = "now importing numpy and matplotlib"
+message = """now importing: 
+1. numpy as np 
+2. matplotlib.pyplot as plt
+3. from scipy stats
+"""
+
 print(message)
 
 ## set style
