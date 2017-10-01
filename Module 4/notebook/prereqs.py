@@ -40,12 +40,14 @@ def table(data, prob=False):
     return out
 
 
-def plot(x, y, linestyle='-', title="", xlabel="x", ylabel="y", show=True):
+def plot(x, y, linestyle='-', title="", xlabel="x", ylabel="y", ylim = None, xlim = None, show=True):
     """Basic line plots"""
     tmp = plt.plot(x, y, linestyle=linestyle)
     plt.title(title)
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
+    plt.ylim(ylim)
+    plt.xlim(xlim)
     if show:
         plt.show()
     else:
