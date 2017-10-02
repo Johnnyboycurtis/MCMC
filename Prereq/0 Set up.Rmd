@@ -13,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Welcome | Setting Up
+## Welcome | Setting Up R
 
 Before getting started there are a few things you'll need in order to be successful in the course
 
@@ -24,6 +24,52 @@ I am currently using version 3.4.0 on Ubuntu
 - A recent version of [RStudio](https://www.rstudio.com/products/rstudio/download/)
 
 I am currently using version 1.0.143
+
+
+## Welcome | Setting Up Python
+
+A recent version of Python 3
+
+- [Anaconda](https://conda.io/miniconda.html)
+
+- [Enthought Canopy](https://store.enthought.com/downloads/)
+
+- [Python](https://www.python.org/)
+
+Jupyter Notebook environment
+
+- [IPython notebooks](https://nbviewer.jupyter.org/github/ipython/ipython/blob/4.0.x/examples/IPython%20Kernel/Index.ipynb)
+
+- `pip install jupyter`
+
+- `conda install jupyter`
+
+- `conda install ipython`
+
+
+
+
+## Welcome | Setting Up Python pt. 2
+
+Scientific python stack
+
+- `conda install numpy` (easiest)
+
+- `pip install numpy` (may be problematic on Windows)
+
+Enthought Canopy has it's owns package manager as well. Point and click.
+
+Spyder IDE
+
+- `conda install spyder`
+
+Enthought Canopy comes with an IDE that allows you to open up IPython Notebooks.
+
+[Using Jupyter (IPython) Notebooks in Canopy](https://support.enthought.com/hc/en-us/articles/204469580-Using-Jupyter-IPython-Notebooks-in-Canopy)
+
+
+
+## Welcome | Setting Up 
 
 - A web browser like Firefox (any OS), Chrome (any OS) or Microsoft Edge (Windows 10)
 
