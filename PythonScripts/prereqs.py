@@ -28,7 +28,7 @@ def summary(data, quantiles = [0, 25, 50, 75, 100], axis = 0):
                       q=quantiles, 
                       axis = axis), 4)
     out = dict(zip(titles, percentiles))
-    mean = np.round(np.mean(a = data, axis = axis), 2 )
+    mean = np.round(np.mean(a = data, axis = axis), 4)
     out.update({" Mean:" : mean})
     for k, val in out.items():
         print(k, val)
@@ -56,7 +56,7 @@ def _getcolor(val):
 def plot(x, y, linestyle='-', color = "#348ABD", title="", xlabel="x", ylabel="y", ylim = None, xlim = None, show=True):
     """Basic line plots"""
     color_choice = _getcolor(color)
-    tmp = plt.plot(x, y, linestyle=linestyle, color=color_choice)
+    tmp, = plt.plot(x, y, linestyle=linestyle, color=color_choice)
     plt.xticks(fontsize = 12)
     plt.yticks(fontsize = 12)
     plt.title(title, fontsize = 14)
@@ -66,6 +66,7 @@ def plot(x, y, linestyle='-', color = "#348ABD", title="", xlabel="x", ylabel="y
     plt.xlim(xlim)
     if show:
         plt.show()
+        return tmp
     else:
         return tmp
     
